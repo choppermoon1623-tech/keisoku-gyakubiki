@@ -283,5 +283,56 @@ console.log("=== 先生にわたす文（AIおたずね箱ほうしき） ===");
   ok("候補なしでも文は作れる", g2("g-prompt").value.indexOf("候補】なし") >= 0);
 }
 
+/* 2026-09-19 に実在を確認した、研究室サイトのページ名 */
+const OK_PAGES = ["光センサ", "照度センサ", "カラーセンサ", "人感センサ", "ボタンセンサ", "タッチセンサ", "非接触温度センサ", "接触型温度センサ", "湿度センサ", "土壌水分センサ", "降雨水位センサ", "気圧センサ", "炎センサ", "アルコールセンサ", "光距離センサ", "リミットセンサ", "段差障害物センサ", "重さセンサ", "磁気スイッチセンサ", "レバースイッチセンサ", "年月日時刻", "パソコンカメラをaiセンサに", "音声認識で判別", "qrコードで判別", "振動モータ", "サーボモータ角度指定モータ", "dcモータギアドモータ水中ポンプ", "暖房装置", "冷却装置", "oledディスプレイ", "音声発生装置", "マイクロビットを使う", "計測制御問題解決", "センサアクション装置の使い方", "はんだ付けで実習基板を作る", "スマート農業", "マイクロビットで無線ロボットカーを作る"];
+
+console.log("=== リンクのhrefを実際に見る ===");
+{
+  /* 2026-09-19 の不具合：var LAB の代入が②を描くコードより後ろにあり、
+     巻き上げで undefined のまま連結されて、②のリンクだけ 404 になっていた。
+     「aタグがある」ではなく「hrefが正しい」を見ないと捕まらない。 */
+  const dm = new JSDOM(HTML, { url: "http://localhost/keisoku-gyakubiki/", runScripts: "dangerously",
+    pretendToBeVisual: true, beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const ww = dm.window, dd = ww.document, g = id => dd.getElementById(id);
+
+  /* ⑤も描かせて、全タブぶんのリンクをそろえる */
+  const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new ww.Event("input")); };
+  set("g-theme", "植物の水やりを忘れる");
+  set("g-mine", "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う");
+  set("g-stuck", "境目が決められない");
+  dd.querySelector(SEL_COND).click();
+  g("g-go").click();
+
+  const all = [...dd.querySelectorAll("a[href]")];
+  const bad = all.filter(a => a.getAttribute("href").indexOf("undefined") >= 0);
+  ok("hrefに undefined が混ざっていない", bad.length === 0,
+     bad.map(a => a.getAttribute("href")).join(" / "));
+
+  const rel = all.filter(a => {
+    const h = a.getAttribute("href");
+    return h.indexOf("http") !== 0 && h.indexOf("#") !== 0;
+  });
+  ok("リンクはすべて絶対URL", rel.length === 0, rel.map(a => a.getAttribute("href")).join(" / "));
+
+  /* ②授業の例：7件すべてが研究室サイトの実在ページを指しているか */
+  const ex = [...dd.querySelectorAll("#exlist .files a")];
+  ok("②の配布資料リンクが7件ある", ex.length === 7, ex.length);
+  ok("②のリンクはすべて研究室サイト",
+     ex.every(a => a.href.indexOf("https://sites.google.com/s.hokkyodai.ac.jp/tech/") === 0),
+     ex.map(a => a.getAttribute("href")).join(" / "));
+  const exPages = ex.map(a => decodeURIComponent(a.href.split("/tech/")[1]));
+  ok("②のリンク先は、確認済みのページ名だけ",
+     exPages.every(x => OK_PAGES.indexOf(x) >= 0), exPages.join(" / "));
+
+  /* ①のカードと⑤の候補も同じように見る */
+  const refs = [...dd.querySelectorAll(".ref")];
+  ok("資料リンクがすべて絶対URL",
+     refs.every(a => a.getAttribute("href").indexOf("https://sites.google.com/") === 0));
+  const refPages = [...new Set(refs.map(a => decodeURIComponent(a.href.split("/tech/")[1])))];
+  ok("資料リンク先も、確認済みのページ名だけ",
+     refPages.every(x => OK_PAGES.indexOf(x) >= 0),
+     refPages.filter(x => OK_PAGES.indexOf(x) < 0).join(" / "));
+}
+
 console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
 process.exit(fail ? 1 : 0);
