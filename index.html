@@ -148,6 +148,27 @@ a.linkbtn:hover{background:#f2f5f9}
 .ghead:first-child{margin-top:2px}
 .ghead span{font-weight:400;color:var(--sub);font-size:12px;margin-left:6px}
 .ghead + .grid{margin-bottom:6px}
+.tbox{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);overflow:hidden}
+.tbox>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:700;color:#4a3a86;
+  background:#f1eefc;list-style:none}
+.tbox>summary::-webkit-details-marker{display:none}
+.tbox>summary::before{content:'▸ ';color:#7a5af0}
+.tbox[open]>summary::before{content:'▾ '}
+.tin{padding:14px}
+.tin label,.tin .glb{display:block;font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 4px}
+.tin input,.tin select,.tin textarea{width:100%;padding:10px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:15px}
+.tin textarea{line-height:1.6;resize:vertical}
+#t-set{margin-top:14px;border:1px dashed var(--line);border-radius:10px}
+#t-set>summary{cursor:pointer;padding:9px 12px;font-size:13px;color:var(--sub)}
+.warnbox{font-size:12px;color:#a13b12;background:#fdefe4;border-radius:8px;padding:9px 11px;margin:6px 0 0}
+@media print{
+  .tbox>summary,#t-set,#t-src,.tbox .note-bar,.tbox .gnudge,#t-pol,#t-polds{display:none!important}
+  .tbox{border:0;box-shadow:none}
+  .tin{padding:0}
+  #t-ans{border:1px solid #bbb;color:#000}
+}
 .refbox{margin:0 0 8px}
 .ref{display:inline-block;font-size:12px;color:var(--sensor);text-decoration:none;
   background:var(--sensor-bg);border-radius:8px;padding:6px 10px;line-height:1.4;
@@ -299,6 +320,64 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     </div>
   </div>
   <div id="g-out"></div>
+
+  <details id="t-box" class="tbox">
+    <summary>先生用 ―― この文をAIにかける</summary>
+    <div class="tin">
+      <p class="note-bar"><b>生徒は使いません。</b>上で組み立てた文を、先生がAIにかけるところです。
+      答えは<b>先生が読んで直してから</b>生徒に渡します。<br>
+      いつもの使い方は「文をコピー」してClaudeやChatGPTに貼るだけ。お金もかかりません。
+      下の設定にAPIキーを入れたときだけ、この画面から直接聞けるようになります。</p>
+
+      <p class="glb">答え方の方針<span class="req">1件ごとに変えられます</span></p>
+      <div class="chips" id="t-pol"></div>
+      <p class="gate" id="t-polds"></p>
+
+      <label for="t-src">AIに渡す文</label>
+      <textarea id="t-src" class="gpr" rows="7" placeholder="上で「ヒントを出す」を押すと、ここに入ります。ほかの生徒から受け取った文を貼ってもかまいません。"></textarea>
+      <div class="btnrow">
+        <button class="main" id="t-ask" hidden>🤖 AIに聞く</button>
+        <button class="sub" id="t-copy">文をコピー</button>
+      </div>
+      <p class="gate" id="t-msg" role="status" aria-live="polite"></p>
+
+      <label for="t-ans">AIの答え（そのまま渡さず、直してから渡してください）</label>
+      <textarea id="t-ans" rows="10"></textarea>
+      <div class="btnrow">
+        <button class="sub" id="t-anscopy">答えをコピー</button>
+        <button class="sub" id="t-print">答えを印刷</button>
+        <button class="sub" id="t-clear">消す</button>
+      </div>
+
+      <details id="t-set">
+        <summary>設定（APIキー・モデル）</summary>
+        <div class="tin">
+          <label for="t-key">Anthropic APIキー（任意）</label>
+          <input id="t-key" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+          <p class="warnbox"><b>生徒が使う端末には入れないでください。</b>
+          既定では<b>このタブを閉じると消えます</b>。教室の共用パソコンでは、この既定のままで使ってください。</p>
+          <p class="glb">キーの置き場所</p>
+          <div class="chips" id="t-store"></div>
+          <label for="t-model">使うモデル</label>
+          <select id="t-model">
+            <option value="claude-opus-5">Claude Opus 5（いちばん賢い・既定）</option>
+            <option value="claude-sonnet-5">Claude Sonnet 5（速くて安い）</option>
+            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5（いちばん安い）</option>
+          </select>
+          <div class="btnrow">
+            <button class="main" id="t-save">保存</button>
+            <button class="sub" id="t-forget">キーを消す</button>
+          </div>
+          <p class="gate" id="t-setmsg" role="status" aria-live="polite"></p>
+        </div>
+      </details>
+
+      <p class="gnudge"><b>渡す前にかならず読んでください。</b>
+      AIには「学校にある51種の装置の中からだけ提案する」「つなぎ方・コネクタ番号・しきい値の数値は書かない」
+      「そのまま提出できる完成品は書かない」と指示してありますが、守られているかは先生が確かめます。<br>
+      答えが的外れなときは、方針を変えるか、生徒の書いた欄を一緒に書き直してから、もう一度かけてみてください。</p>
+    </div>
+  </details>
 </section>
 </main>
 
@@ -1075,6 +1154,8 @@ function gSync(){
   $('g-gate').textContent = miss.length
     ? 'あと'+miss.length+'つ ―― '+miss.join(' ／ ')+' を書くと、ボタンが押せます。'
     : '書けました。「ヒントを出す」が押せます。';
+  /* 「いま困っていること」が変わると、先生用の方針の既定も変わる */
+  if(typeof tRenderPol==='function') tRenderPol();
   gSave();
 }
 
@@ -1206,6 +1287,24 @@ function gHintHtml(o,cls){
    これが無いと、AIは学校に無い部品を平気ですすめてくる。
    ========================================================= */
 var OTAZUNE = 'https://choppermoon1623-tech.github.io/ai-otazune/';
+
+/* 答え方の方針。AIおたずね箱と同じ3つ。1件ごとに先生が切りかえる */
+var TPOL = {
+check:{nm:'事実と確かめ方',
+  ds:'確かなことと、はっきりしないことを分けて示し、どこで確かめられるかを書きます。装置えらび・資料さがし向き。',
+  rule:'事実を述べてよい。ただし、確かなことと、はっきりしないこと・機種によって変わることを必ず分けて書く。生徒が自分で確かめられる場所（どの配布資料を見るか、何と何を比べるか、だれに聞くか）を具体的に示す。'},
+hint:{nm:'ヒント中心（答えは出さない）',
+  ds:'考える道すじと着目点だけを示します。最後は生徒が自分でたどりつきます。しきい値決め・不具合さがし向き。',
+  rule:'答えそのものは書かない。考える道すじ、着目すべき点、試してみる手順だけを示し、結論は生徒が自分で出せるようにする。生徒の設計をこちらで作り直して返してはいけない。どこが気になるかを指し示すにとどめる。'},
+teach:{nm:'しっかり説明する',
+  ds:'内容をきちんと説明します。知識や選択肢をはっきり渡したい場面向き。テーマ決め向き。',
+  rule:'内容をきちんと説明してよい。用語も定義から説明する。ただし、生徒が提出物としてそのまま出せる完成品（レポート本文、設計のすべて、答案）は絶対に書かない。'}
+};
+var TPOL_ORDER = ['check','hint','teach'];
+/* 困っていることに合わせた既定 */
+var KIND_POL = {idea:'teach', dev:'check', cond:'hint', prog:'check', ng:'hint'};
+var tpol = '';
+function curPol(){ return tpol || KIND_POL[gkind] || 'teach'; }
 function gDevList(t){
   return DEV.filter(function(v){ return v.t===t; }).map(function(v){ return v.n; }).join('／');
 }
@@ -1217,6 +1316,8 @@ function gPrompt(sens,acts){
   L.push('');
   L.push('【読み手】中学生');
   L.push('【単元】技術科「計測・制御による問題解決」。micro:bit とジョイント基板を使います。');
+  L.push('【今回の方針】' + TPOL[curPol()].nm);
+  L.push(TPOL[curPol()].rule);
   L.push('');
   L.push('【いちばん大事な条件】');
   L.push('・提案してよいのは、下の「この学校で使える装置」にあるものだけです。');
@@ -1317,6 +1418,8 @@ $('g-go').onclick=function(){
     b.onclick=function(){ pick(b.dataset.id); };
   });
   $('g-prompt').value = gPrompt(sens,acts);
+  GLAST = {sens:sens, acts:acts};
+  tFill();
   $('g-copy').onclick = function(){
     var ta=$('g-prompt');
     /* 学校のパソコンでは clipboard が使えないことがある。
@@ -1340,6 +1443,206 @@ $('g-clear').onclick=function(){
   gkind=''; $('g-out').innerHTML=''; gRender(); gSync();
   $('g-theme').focus();
 };
+/* =========================================================
+   先生用 ―― この文をAIにかける
+   生徒はここを使わない。既定はコピー方式で、APIキーを入れたときだけ
+   この画面から直接聞ける。答えは先生が直してから生徒に渡す。
+   ========================================================= */
+var GLAST = null;      /* 直前に出した候補 */
+var TSRC_AUTO = '';    /* 自動で入れた文。先生が書きかえたら上書きしない */
+
+function tFill(){
+  if(!GLAST) return;
+  var t = gPrompt(GLAST.sens, GLAST.acts);
+  var ta = $('t-src');
+  if(!ta.value.trim() || ta.value === TSRC_AUTO){ ta.value = t; TSRC_AUTO = t; }
+}
+
+function tRenderPol(){
+  var cur = curPol();
+  $('t-pol').innerHTML = TPOL_ORDER.map(function(k){
+    return '<button type="button" class="chip" data-p="'+k+'" aria-pressed="'+(cur===k)+'">'
+      + esc(TPOL[k].nm) + '</button>';
+  }).join('');
+  Array.prototype.forEach.call($('t-pol').querySelectorAll('.chip'), function(b){
+    b.onclick = function(){ tpol = b.dataset.p; tRenderPol(); tFill(); };
+  });
+  $('t-polds').textContent = TPOL[cur].ds
+    + (tpol ? '' : '（「いま困っていること」に合わせた既定です）');
+}
+
+/* 設定。キーの置き場所は「このタブだけ」を既定にする。
+   教室の共用パソコンに置きっぱなしにしないため */
+var TKEY = 'keisoku-gyakubiki-ai';
+function tGet(){
+  var d = {key:'', model:'claude-opus-5', store:'session'};
+  try{ var a = sessionStorage.getItem(TKEY); if(a) return JSON.parse(a); }catch(e){}
+  try{ var b = localStorage.getItem(TKEY); if(b) return JSON.parse(b); }catch(e){}
+  return d;
+}
+function tPut(o){
+  try{ sessionStorage.removeItem(TKEY); }catch(e){}
+  try{ localStorage.removeItem(TKEY); }catch(e){}
+  try{
+    (o.store === 'local' ? localStorage : sessionStorage).setItem(TKEY, JSON.stringify(o));
+  }catch(e){}
+}
+var TSTORE = [['session','このタブだけ（閉じると消える・おすすめ）'],
+              ['local','この端末に保存（自分専用のパソコンだけ）']];
+function tRenderStore(){
+  var cur = tGet().store || 'session';
+  $('t-store').innerHTML = TSTORE.map(function(x){
+    return '<button type="button" class="chip" data-s="'+x[0]+'" aria-pressed="'+(cur===x[0])+'">'
+      + esc(x[1]) + '</button>';
+  }).join('');
+  Array.prototype.forEach.call($('t-store').querySelectorAll('.chip'), function(b){
+    b.onclick = function(){
+      var o = tGet(); o.store = b.dataset.s; tPut(o); tRenderStore();
+    };
+  });
+}
+function tSyncKey(){
+  var o = tGet();
+  $('t-key').value = o.key || '';
+  $('t-model').value = o.model || 'claude-opus-5';
+  $('t-ask').hidden = !o.key;
+  tRenderStore();
+}
+
+$('t-save').onclick = function(){
+  var o = tGet();
+  o.key = $('t-key').value.trim();
+  o.model = $('t-model').value;
+  tPut(o); tSyncKey();
+  $('t-setmsg').className = 'gate ok';
+  $('t-setmsg').textContent = o.key
+    ? ('保存しました（' + (o.store === 'local' ? 'この端末' : 'このタブだけ') + '）。「🤖 AIに聞く」が使えます。')
+    : 'キーを空にしました。コピー方式だけになります。';
+};
+$('t-forget').onclick = function(){
+  try{ sessionStorage.removeItem(TKEY); }catch(e){}
+  try{ localStorage.removeItem(TKEY); }catch(e){}
+  tSyncKey();
+  $('t-setmsg').className = 'gate ok';
+  $('t-setmsg').textContent = 'キーを消しました。';
+};
+
+/* Anthropic Messages API をブラウザから直接。キーはこの端末から出ない */
+async function askClaude(prompt, onDelta){
+  var set = tGet();
+  var model = set.model || 'claude-opus-5';
+  var headers = {
+    'content-type':'application/json',
+    'x-api-key': set.key,
+    'anthropic-version':'2023-06-01',
+    'anthropic-dangerous-direct-browser-access':'true'
+  };
+  var body = { model:model, max_tokens:8000, stream:true,
+               messages:[{role:'user', content:prompt}] };
+  /* Haiku 4.5 は adaptive thinking に対応していないので、そのときだけ外す */
+  if(model.indexOf('haiku') < 0){
+    body.thinking = { type:'adaptive' };
+    body.output_config = { effort:'medium' };   /* 400〜600字に全力は要らない */
+  }
+  /* 安全分類でことわられたとき、サーバー側で別モデルに回してもらう */
+  if(model === 'claude-opus-5'){
+    headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+    body.fallbacks = 'default';
+  }
+
+  var res = await fetch('https://api.anthropic.com/v1/messages',
+    { method:'POST', headers:headers, body:JSON.stringify(body) });
+  if(!res.ok){
+    var detail = '';
+    try{ var j = await res.json(); detail = (j && j.error && j.error.message) || ''; }
+    catch(e){ try{ detail = await res.text(); }catch(e2){} }
+    if(res.status === 401) throw new Error('APIキーが違うようです（401）');
+    if(res.status === 429) throw new Error('混み合っています。少し待ってからもう一度（429）');
+    throw new Error('HTTP ' + res.status + (detail ? '：' + detail.slice(0,200) : ''));
+  }
+
+  var reader = res.body.getReader(), dec = new TextDecoder();
+  var buf = '', out = '', refused = false;
+  while(true){
+    var r = await reader.read();
+    if(r.done) break;
+    buf += dec.decode(r.value, {stream:true});
+    var i;
+    while((i = buf.indexOf('\n')) >= 0){
+      var line = buf.slice(0,i).trim();
+      buf = buf.slice(i+1);
+      if(line.indexOf('data:') !== 0) continue;
+      var js = line.slice(5).trim();
+      if(!js || js === '[DONE]') continue;
+      var ev; try{ ev = JSON.parse(js); }catch(e){ continue; }
+      if(ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta'){
+        out += ev.delta.text; onDelta(out);
+      }else if(ev.type === 'message_delta' && ev.delta && ev.delta.stop_reason === 'refusal'){
+        refused = true;
+      }else if(ev.type === 'error'){
+        throw new Error((ev.error && ev.error.message) || 'ストリームのエラー');
+      }
+    }
+  }
+  if(refused && !out.trim()) throw new Error('AIがこの依頼に答えることを断りました。内容を確かめてください。');
+  return out;
+}
+
+$('t-ask').onclick = async function(){
+  var src = $('t-src').value.trim();
+  if(!src){ $('t-msg').className='gate'; $('t-msg').textContent='AIに渡す文が空です。'; return; }
+  var btn = $('t-ask'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = '聞いています…';
+  $('t-msg').className = 'gate'; $('t-msg').textContent = '';
+  $('t-ans').value = '';
+  try{
+    await askClaude(src, function(txt){ $('t-ans').value = txt; });
+    $('t-msg').className = 'gate ok';
+    $('t-msg').textContent = '答えが出ました。読んで、直してから生徒に渡してください。';
+  }catch(e){
+    $('t-msg').className = 'gate';
+    $('t-msg').textContent = '聞けませんでした ―― ' + (e && e.message ? e.message : e);
+  }finally{
+    btn.disabled = false; btn.textContent = old;
+  }
+};
+
+/* コピー。学校のパソコンでは clipboard が使えないことがあるので、
+   そのときは選択状態にして手でコピーしてもらう */
+function tCopy(id, msgEl, okMsg){
+  var ta = $(id);
+  function pick(){
+    var ro = ta.hasAttribute('readonly');
+    if(ro) ta.removeAttribute('readonly');
+    ta.focus(); ta.select();
+    if(ro) ta.setAttribute('readonly','readonly');
+    $(msgEl).className = 'gate ok';
+    $(msgEl).textContent = '文を選びました。Ctrl+C（⌘C）でコピーしてください。';
+  }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(function(){
+        $(msgEl).className = 'gate ok';
+        $(msgEl).textContent = okMsg;
+      }, pick);
+      return;
+    }
+  }catch(e){}
+  pick();
+}
+$('t-copy').onclick = function(){
+  tCopy('t-src','t-msg','コピーしました。ClaudeやChatGPTに貼り付けてください。');
+};
+$('t-anscopy').onclick = function(){
+  tCopy('t-ans','t-msg','答えをコピーしました。');
+};
+$('t-print').onclick = function(){ window.print(); };
+$('t-clear').onclick = function(){
+  if(!confirm('AIに渡す文と答えを消しますか？')) return;
+  $('t-src').value=''; $('t-ans').value=''; TSRC_AUTO='';
+  $('t-msg').textContent='';
+};
+
 function gSelect(){
   var ta=$('g-prompt');
   ta.removeAttribute('readonly'); ta.focus(); ta.select();
@@ -1365,7 +1668,7 @@ $('q').addEventListener('input',function(){ state.q=this.value; renderList(); })
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
-gLoad(); gRender(); gSync();
+gLoad(); gRender(); gSync(); tRenderPol(); tSyncKey();
 </script>
 </body>
 </html>

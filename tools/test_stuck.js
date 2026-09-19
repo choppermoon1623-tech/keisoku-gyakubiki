@@ -398,5 +398,157 @@ console.log("=== 検索の索引と並べ方 ===");
      [...dd.querySelectorAll("#list .card")].length);
 }
 
-console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
-process.exit(fail ? 1 : 0);
+const SEL_STORE_SESSION = '#t-store .chip[data-s="session"]';
+const SEL_POL_TEACH = '#t-pol .chip[data-p="teach"]';
+
+console.log("=== 先生用：この文をAIにかける ===");
+{
+  /* jsdom には TextDecoder / fetch が無いので入れてやる。
+     fetch は偽物にして、送っている中身まで検査する。 */
+  function mkWin(reply) {
+    const sent = {};
+    const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously",
+      pretendToBeVisual: true,
+      beforeParse(win) {
+        win.HTMLElement.prototype.scrollIntoView = function () {};
+        win.TextDecoder = TextDecoder;
+        win.fetch = function (url, opt) {
+          sent.url = url;
+          sent.headers = opt.headers;
+          sent.body = JSON.parse(opt.body);
+          return Promise.resolve(reply(sent));
+        };
+      } });
+    return { win: dm.window, doc: dm.window.document, sent };
+  }
+  /* SSE をそのまま返す偽レスポンス */
+  function sse(lines, status) {
+    const chunks = lines.map(x => new TextEncoder().encode(x));
+    let i = 0;
+    return {
+      ok: (status || 200) < 400, status: status || 200,
+      json: () => Promise.resolve({ error: { message: "だめでした" } }),
+      text: () => Promise.resolve("だめでした"),
+      body: { getReader: () => ({ read: () => Promise.resolve(
+        i < chunks.length ? { done: false, value: chunks[i++] } : { done: true }) }) },
+    };
+  }
+  const OK_SSE = [
+    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"土がかわいた"}}\n',
+    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"かどうかを"}}\n',
+    'data: [DONE]\n',
+  ];
+
+  const A = mkWin(() => sse(OK_SSE));
+  const g = id => A.doc.getElementById(id);
+  ok("先生用パネルがある", !!g("t-box"));
+  ok("はじめは畳まれている", !g("t-box").open);
+  ok("キーが無いうちは「AIに聞く」が出ない", g("t-ask").hidden === true);
+  ok("方針の選択肢が3つ", A.doc.querySelectorAll("#t-pol .chip").length === 3);
+  ok("キーの置き場所は「このタブだけ」が既定",
+     A.doc.querySelector(SEL_STORE_SESSION).getAttribute("aria-pressed") === "true");
+
+  /* 生徒が書いて「ヒントを出す」を押すと、先生用にも文が入る */
+  const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new A.win.Event("input")); };
+  set("g-theme", "植物の水やりを忘れる");
+  set("g-mine", "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う");
+  set("g-stuck", "何の値で水を出すか、境目が決められない");
+  A.doc.querySelector(SEL_COND).click();
+  g("g-go").click();
+  ok("先生用の入力欄に文が入る", g("t-src").value.indexOf("植物の水やりを忘れる") >= 0);
+  ok("困っていることに合った方針が既定になる（しきい値→ヒント中心）",
+     g("t-src").value.indexOf("【今回の方針】ヒント中心") >= 0, g("t-src").value.slice(0, 300));
+
+  /* 方針を変えると、渡す文も変わる */
+  A.doc.querySelector(SEL_POL_TEACH).click();
+  ok("方針を変えると渡す文も変わる",
+     g("t-src").value.indexOf("【今回の方針】しっかり説明する") >= 0);
+  ok("方針の説明が出る", g("t-polds").textContent.length > 10);
+
+  /* キーを入れるとボタンが出る */
+  g("t-key").value = "sk-ant-test";
+  g("t-save").click();
+  ok("キーを入れると「AIに聞く」が出る", g("t-ask").hidden === false);
+  ok("キーはこのタブだけに置かれる",
+     !!A.win.sessionStorage.getItem("keisoku-gyakubiki-ai") &&
+     !A.win.localStorage.getItem("keisoku-gyakubiki-ai"));
+
+  return (async () => {
+    /* 送っている中身と、ストリームの解釈 */
+    await g("t-ask").onclick();
+    ok("Anthropic のエンドポイントに送っている",
+       A.sent.url === "https://api.anthropic.com/v1/messages", A.sent.url);
+    ok("ブラウザから直接たたくヘッダがある",
+       A.sent.headers["anthropic-dangerous-direct-browser-access"] === "true");
+    ok("APIキーを送っている", A.sent.headers["x-api-key"] === "sk-ant-test");
+    ok("バージョンを送っている", A.sent.headers["anthropic-version"] === "2023-06-01");
+    ok("既定は Opus 5", A.sent.body.model === "claude-opus-5", A.sent.body.model);
+    ok("Opus では安全分類のフォールバックを使う",
+       A.sent.body.fallbacks === "default" &&
+       A.sent.headers["anthropic-beta"] === "server-side-fallback-2026-07-01");
+    ok("adaptive thinking を使う", A.sent.body.thinking.type === "adaptive");
+    ok("effort は medium", A.sent.body.output_config.effort === "medium");
+    ok("ストリームで受け取る", A.sent.body.stream === true);
+    ok("装置一覧を積んだ文を送っている",
+       A.sent.body.messages[0].content.indexOf("この学校で使える装置") >= 0);
+    ok("答えがつながって入る", g("t-ans").value === "土がかわいたかどうかを", g("t-ans").value);
+    ok("読んでから渡すよう知らせる", /直してから生徒に渡/.test(g("t-msg").textContent),
+       g("t-msg").textContent);
+
+    /* Haiku のときは thinking と fallbacks を外す */
+    const B = mkWin(() => sse(OK_SSE));
+    const gb = id => B.doc.getElementById(id);
+    gb("t-key").value = "sk-ant-x";
+    gb("t-model").value = "claude-haiku-4-5-20251001";
+    gb("t-save").click();
+    gb("t-src").value = "てすと";
+    await gb("t-ask").onclick();
+    ok("Haiku では adaptive thinking を外す", B.sent.body.thinking === undefined,
+       JSON.stringify(B.sent.body.thinking));
+    ok("Haiku では fallbacks を外す", B.sent.body.fallbacks === undefined);
+
+    /* エラーのときの言い方 */
+    const C = mkWin(() => sse([], 401));
+    const gc = id => C.doc.getElementById(id);
+    gc("t-key").value = "sk-ant-bad";
+    gc("t-save").click();
+    gc("t-src").value = "てすと";
+    await gc("t-ask").onclick();
+    ok("401 はキーが違うと伝える", /401/.test(gc("t-msg").textContent) &&
+       /キー/.test(gc("t-msg").textContent), gc("t-msg").textContent);
+
+    const D = mkWin(() => sse([], 429));
+    const gd = id => D.doc.getElementById(id);
+    gd("t-key").value = "sk-ant-x"; gd("t-save").click();
+    gd("t-src").value = "てすと";
+    await gd("t-ask").onclick();
+    ok("429 は待つよう伝える", /待って/.test(gd("t-msg").textContent), gd("t-msg").textContent);
+
+    /* AIが断ったとき */
+    const E = mkWin(() => sse([
+      'data: {"type":"message_delta","delta":{"stop_reason":"refusal"}}\n'], 200));
+    const ge = id => E.doc.getElementById(id);
+    ge("t-key").value = "sk-ant-x"; ge("t-save").click();
+    ge("t-src").value = "てすと";
+    await ge("t-ask").onclick();
+    ok("断られたらそう伝える", /断り/.test(ge("t-msg").textContent), ge("t-msg").textContent);
+
+    /* 空のまま押したとき */
+    const F = mkWin(() => sse(OK_SSE));
+    const gf = id => F.doc.getElementById(id);
+    gf("t-key").value = "sk-ant-x"; gf("t-save").click();
+    gf("t-src").value = "";
+    await gf("t-ask").onclick();
+    ok("空なら聞きに行かない", F.sent.url === undefined && /空です/.test(gf("t-msg").textContent));
+
+    /* キーを消せる */
+    gf("t-forget").click();
+    ok("キーを消すとボタンが消える", gf("t-ask").hidden === true);
+    ok("消すと保存先にも残らない",
+       !F.win.sessionStorage.getItem("keisoku-gyakubiki-ai") &&
+       !F.win.localStorage.getItem("keisoku-gyakubiki-ai"));
+
+    console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
+    process.exit(fail ? 1 : 0);
+  })();
+}
