@@ -111,7 +111,15 @@ function makeFbq(be, anonUid){
     stopAll(){ ["rooms","reqs","mine"].forEach(k => { if(un[k]){ un[k](); un[k] = null; } }); },
     stopReqs(){ if(un.reqs){ un.reqs(); un.reqs = null; } },
     stopMine(){ if(un.mine){ un.mine(); un.mine = null; } },
-    getRoom(code){ return Promise.resolve(be.getRoom(code)); },
+    /* 打ちかえの競合を試すため、受付コードごとに応答を遅らせられるようにする。
+       api.__delay[コード] = ミリ秒 */
+    __delay: {},
+    getRoom(code){
+      const room = be.getRoom(code);
+      const d = api.__delay[code] || 0;
+      if(!d) return Promise.resolve(room);
+      return new Promise(res => setTimeout(() => res(room), d));
+    },
     saveRoom(code, data){ try{ be.saveRoom(code, data, api.uid()); return Promise.resolve(); }catch(e){ return Promise.reject(e); } },
     watchRooms(uid, cb){
       if(un.rooms) un.rooms();
@@ -265,7 +273,10 @@ function typeIn(w, id, v){
   console.log("=== AIに送る文 ===");
   ok("AIに送る文ができている", src.length > 400, String(src.length));
   ok("生徒が書いた内容が入る", src.indexOf("祖父") >= 0);
-  ok("学校にある装置の一覧が同梱される", /この学校で使える装置/.test(src));
+  /* もとは「この学校で使える装置」。実物があるか確かめていないので言い方を変えた */
+  ok("装置の一覧が同梱される", /この教材で扱う装置/.test(src));
+  ok("学校にあると断定していない", src.indexOf("この学校で使える装置") < 0);
+  ok("実物の有無は教師が確認すると書いてある", /実物があるとはかぎりません/.test(src));
   ok("一覧に無い部品をすすめるなと書いてある", /そこに無い部品/.test(src));
   ok("つなぎ方や数値は書くなと指示がある", /コネクタ番号/.test(src) && /しきい値の具体的な数値/.test(src));
   ok("石川研究室の資料を見よと書いてある", /石川研究室/.test(src));
@@ -357,6 +368,82 @@ function typeIn(w, id, v){
   ok("ログインの案内にもどる", t("k-signin").hidden === false);
   ok("受付の一覧が消える", /まだ受付がありません/.test(t("k-rooms").textContent));
   ok("届いた相談も消える", /受付をひらくと/.test(t("k-cloudlist").textContent));
+
+  /* ================================================================
+     ⑤ 古い応答を捨て、入力中のコードと送信先を必ず一致させる
+
+     もとの形は「確認中なら新しい入力を無視する」だったので、
+     1つめを確かめている最中に打ちかえると、2つめは調べられないまま、
+     画面には2つめが見えているのに、つながっているのは1つめになった。
+     遅い応答が後から返って上書きすることもありえた。
+     ================================================================ */
+  console.log("=== ⑤ 打ちかえたときに、古い応答を捨てる ===");
+  /* 先生をもう一度ログインさせて、受付を2つ用意する */
+  t("k-login").click();
+  await settle();
+  const CODE_A = CODE;                       /* さきほどの受付（いまは閉じている） */
+  await be.saveRoom(CODE_A, { open:true }, "teacher1");
+  typeIn(tw, "k-newtitle", "2年B組 計測・制御");
+  t("k-newroom").click();
+  await settle();
+  const CODE_B = [...be.rooms.keys()].filter(c => c !== CODE_A)[0];
+  ok("受付が2つある", !!CODE_B && CODE_B !== CODE_A, CODE_A + " / " + CODE_B);
+
+  const S4 = makeWindow(be, "stuD"), s4w = S4.window, s4d = S4.window.document, s4 = id => s4d.getElementById(id);
+  s4("t-stuck").click();
+  typeIn(s4w, "g-theme", "ベランダの植木がかれる");
+  typeIn(s4w, "g-mine",  "土のかわきで水をやりたい");
+  typeIn(s4w, "g-stuck", "いつやればいいか決まらない");
+  s4d.querySelector('#g-kinds .chip[data-k="cond"]').click();
+
+  /* Aの応答をわざと遅らせ、Aを入れたすぐあとにBへ打ちかえる */
+  s4w.fbq.__delay[CODE_A] = 60;
+  typeIn(s4w, "g-code", CODE_A);
+  await tick();                              /* Aの確認が飛んだ直後 */
+  s4w.fbq.__delay[CODE_B] = 0;
+  typeIn(s4w, "g-code", CODE_B);             /* すぐ打ちかえる */
+  await settle();
+  ok("打ちかえた直後はBにつながる", s4w.eval("ccode") === CODE_B, s4w.eval("ccode"));
+
+  await new Promise(r => setTimeout(r, 120)); /* 遅れていたAの応答が返ってくる */
+  await settle();
+  ok("遅れて返ってきたAで上書きされない", s4w.eval("ccode") === CODE_B, s4w.eval("ccode"));
+  ok("画面の案内もBのまま", /2年B組/.test(s4("g-roommsg").textContent), s4("g-roommsg").textContent);
+  ok("入力欄とつながり先が一致している",
+     s4("g-code").value === s4w.eval("ccode"), s4("g-code").value + " / " + s4w.eval("ccode"));
+  ok("覚えているコードもBになっている",
+     (s4w.localStorage.getItem("keisoku-gyakubiki-code") || "").indexOf(CODE_B) >= 0,
+     s4w.localStorage.getItem("keisoku-gyakubiki-code"));
+
+  /* 確認中に打ちかえても、2つめがちゃんと調べられる
+     （もとは cChecking で丸ごと無視していたので、ここが Aのままになっていた） */
+  ok("2つめのコードも調べられている", s4w.eval("croom") && s4w.eval("croom").id === CODE_B,
+     JSON.stringify(s4w.eval("croom") && s4w.eval("croom").id));
+
+  /* 送るとBに入る */
+  s4("g-send").click();
+  await settle();
+  ok("送り先はBの受付", (be.reqs.get(CODE_B) || new Map()).size === 1,
+     String((be.reqs.get(CODE_B) || new Map()).size));
+  ok("Aの受付には入っていない", (be.reqs.get(CODE_A) || new Map()).size === 2,
+     String((be.reqs.get(CODE_A) || new Map()).size));
+
+  console.log("=== ⑤-b 入力中のコードとずれていたら送らせない ===");
+  /* 入力欄だけ書きかえて（確認が終わる前に）押した状態を作る */
+  s4w.fbq.__delay[CODE_A] = 60;
+  typeIn(s4w, "g-code", CODE_A);             /* まだ確認中。ccode は B のまま */
+  ok("確認が終わるまでは押せない", s4("g-send").disabled === true);
+  s4w.eval("$('g-send').disabled=false;");   /* 無理に押せる状態にして確かめる */
+  s4("g-send").click();
+  await settle();
+  ok("ずれていたら送らない", (be.reqs.get(CODE_B) || new Map()).size === 1,
+     String((be.reqs.get(CODE_B) || new Map()).size));
+  ok("ずれている理由を知らせる", /受付コードが変わりました/.test(s4("g-sendmsg").textContent),
+     s4("g-sendmsg").textContent);
+  await new Promise(r => setTimeout(r, 120));
+  await settle();
+  ok("待てばAにつながる", s4w.eval("ccode") === CODE_A, s4w.eval("ccode"));
+  ok("つながれば送れるようになる", s4("g-send").disabled === false);
 
   console.log("=== エラー ===");
   ok("実行時エラーは出ていない", errs.length === 0, errs.join(" / "));

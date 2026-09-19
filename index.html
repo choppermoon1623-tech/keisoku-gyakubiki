@@ -59,6 +59,10 @@ h2:first-child{margin-top:4px}
   background:var(--sensor-bg);color:var(--sensor)}
 .card.act .badge{background:var(--action-bg);color:var(--action)}
 .badge.built{background:var(--accent-bg);color:var(--accent);margin-left:4px}
+/* 実測できないもの（模擬実験の枠）は、ひと目で分かるようにする */
+.badge.sim{background:#fdefe4;color:#a13b12;margin-left:4px}
+.simnote{margin:6px 0 0;font-size:12px;color:#a13b12;background:#fdefe4;
+  border-radius:8px;padding:7px 10px;line-height:1.6;font-weight:600}
 .card h3{margin:8px 0 4px;font-size:16px}
 .card .cat{font-size:11px;color:var(--sub)}
 .card .desc{margin:6px 0 8px;font-size:14px}
@@ -262,11 +266,11 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <h1>計測・制御 逆引きシステム</h1>
     <p class="lead">「やりたいこと」から、使うセンサとアクション装置を探そう（中学校技術科・問題解決）</p>
   </div>
-  <div class="searchbar">
+  <div class="searchbar" id="searchbar">
     <input id="q" aria-label="やりたいことや装置名で検索" type="search" placeholder="やりたいことを入力（例：暗くなったら／人が来たら／土が乾いたら）" autocomplete="off">
     <button class="clr" id="clr" title="消す">×</button>
   </div>
-  <p class="hint">こんな言葉でさがせます → <b>くらい</b> / <b>ひとがくる</b> / <b>あつい</b> / <b>みず</b> / <b>おと</b> / <b>ドアがあいた</b> / <b>火事</b> / <b>知らせたい</b> / <b>回したい</b></p>
+  <p class="hint" id="searchhint">こんな言葉でさがせます → <b>くらい</b> / <b>ひとがくる</b> / <b>あつい</b> / <b>みず</b> / <b>おと</b> / <b>ドアがあいた</b> / <b>火事</b> / <b>知らせたい</b> / <b>回したい</b></p>
 </header>
 
 <nav class="tabs">
@@ -330,6 +334,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <p id="save-status" role="status" aria-live="polite"></p>
     <div class="btnrow">
       <button class="main" id="save">この設計を保存する</button>
+      <button class="sub" id="save-new" hidden>別案として保存する</button>
       <button class="sub" id="reset">入力をクリア</button>
       <button class="sub" id="print">印刷する</button>
     </div>
@@ -479,7 +484,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
       </div>
       <p class="gate" id="c-msg" role="status" aria-live="polite"></p>
       <p class="gnudge"><b>渡す前にかならず読んでください。</b>
-      AIには「学校にある51種の装置の中からだけ提案する」「つなぎ方・コネクタ番号・しきい値の数値は書かない」
+      AIには「この教材で扱う51種の装置の中からだけ提案する（実物の有無は先生が確認）」「つなぎ方・コネクタ番号・しきい値の数値は書かない」
       「そのまま提出できる完成品は書かない」と指示してありますが、守られているかは先生が確かめます。</p>
     </div>
   </div>
@@ -738,24 +743,26 @@ var DEV = [
  k:['火災','火事','防災','消火','かさい','けいほう','ひなん','ほのお','ひ','かじ','もえる','ひばな','しょうか','ぼうさい','火','燃える','ろうそく','らいたー','火がついた'],
  u:"火災を知らせる仕組みを模型で考える。",
  w:"実際の火災警報器の代わりにはしない。動作確認の方法は先生と決める。"},
-{id:'s-co2',t:'s',c:'空気・におい・危険',n:'CO2センサ',
- d:"二酸化炭素の濃度を調べ、換気を考える手がかりにする。",
+{id:'s-co2',t:'s',c:'空気・におい・危険',n:'CO2センサ（模擬）',
+ sim:'二酸化炭素の濃度は測れない。別の入力に置きかえて、知らせる流れだけを試す',
+ d:"二酸化炭素の濃度を測るセンサは、石川研究室の資料にはない。「空気がよごれたら知らせる」という判断の流れを、アルコールセンサなど別の入力に置きかえて試すための枠。",
  y:['換気したい','空気がわるい','人が多くて息苦しい','まどを開けるタイミング'],
  k:['換気','密','教室','空気','みつ','かんきょう','きょうしつ','しーおーつー','にさんかたんそ','かんき','くうき','まど','みつ','二酸化炭素','co2','息苦しい','いきぐるしい'],
- u:'教室の換気を知らせるシステム。',
- w:"アルコールセンサでCO2濃度は測れない。別の入力で判断の流れを試す場合は「模擬実験」と明記する。"},
-{id:'s-kemuri',t:'s',c:'空気・におい・危険',n:'煙・異臭センサ',
- d:"特定の気体や煙への反応を調べる。検知できる対象は機種による。",
+ u:'「空気がよごれたら窓を開けるよう知らせる」流れを、模擬実験で確かめる。',
+ w:"CO2の濃度は測っていない。測れているのは置きかえた入力（アルコールなど）だけなので、レポートには必ず「模擬実験」と書き、何を測れていないかを説明する。本当にCO2を測りたいときは、CO2センサがあるか先生に確認する。"},
+{id:'s-kemuri',t:'s',c:'空気・におい・危険',n:'煙・異臭センサ（模擬）',
+ sim:'煙やガスの濃度は測れない。アルコールの気体に置きかえて、知らせる流れだけを試す',
+ d:"煙やガスの濃度を測るセンサは、石川研究室の資料にはない。「においがしたら知らせる」という判断の流れを、アルコールセンサの反応に置きかえて試すための枠。",
  y:['煙が出たら','こげくさい','においがしたら','ガスもれ'],
  k:['けむり','におい','いしゅう','こげる','がす','くさい','煙','匂い','こげくさい','がすもれ'],
- u:'火事の前ぶれや、ガスもれを知らせるしくみ。',
- w:"教材の模擬実験用。実際の火災・ガス漏れを知らせる警報器の代わりにはしない。"},
+ u:'「においに気づいたら知らせる」流れを、模擬実験で確かめる。',
+ w:"煙やガスの濃度は測っていない。測れているのはアルコールの気体への反応だけ。実際の火災警報器・ガス警報器の代わりには絶対にしない。レポートには必ず「模擬実験」と書く。"},
 {id:'s-alcohol',t:'s',c:'空気・におい・危険',n:'アルコールセンサ',
- d:"アルコールの気体への反応を調べる。",
+ d:"アルコールの気体への反応を調べる。これは実際に測れる。",
  y:["気体を検知したい", "センサの反応を試したい", "模擬実験をしたい"],
  k:['あるこーる','きたい','だいよう','かわり','しゅき','いんしゅ','消毒','しょうどく'],
  u:"入力が変わると出力が変わる、というプログラムの流れを試す。",
- w:"CO2や煙の濃度を測る代用品ではない。別のセンサを想定した模型では、測れていないものを説明しよう。"},
+ w:"このセンサで実際に測れるのは、アルコールの気体への反応だけ。CO2や煙の濃度を測る代用品ではない。CO2・煙のカードから来た場合は、知らせる流れを試すための「模擬実験の入力役」という位置づけになる。"},
 
 /* ---------- センサ：きょり・通過・障害物 ---------- */
 {id:'s-tsuuka',t:'s',c:'きょり・通過・障害物',n:'通過センサ（レーザ）',
@@ -1023,8 +1030,8 @@ var REF = {
 's-kouu'     :{p:'降雨水位センサ',f:'水センサ（降雨センサ）の使い方.pptx',n:'水位センサと同じページです'},
 's-kiatsu'   :{p:'気圧センサ',f:'気圧センサBMP180の使い方.pptx'},
 's-honoo'    :{p:'炎センサ',f:'炎センサの使い方.pptx'},
-'s-co2'      :{p:'アルコールセンサ',f:'アルコールセンサの使い方.pptx',n:'CO2そのもののセンサは無く、アルコールセンサで代用します'},
-'s-kemuri'   :{p:'アルコールセンサ',f:'アルコールセンサの使い方.pptx',n:'煙・異臭もアルコールセンサで代用します'},
+'s-co2'      :{p:'アルコールセンサ',f:'アルコールセンサの使い方.pptx',n:'CO2を測るセンサの資料はありません。これはアルコールセンサの資料で、模擬実験の入力に使います'},
+'s-kemuri'   :{p:'アルコールセンサ',f:'アルコールセンサの使い方.pptx',n:'煙を測るセンサの資料はありません。これはアルコールセンサの資料で、模擬実験の入力に使います'},
 's-alcohol'  :{p:'アルコールセンサ',f:'アルコールセンサの使い方.pptx'},
 's-tsuuka'   :null,
 's-kyori'    :{p:'光距離センサ',f:'光距離センサ（ToF距離センサ）の使い方.pptx'},
@@ -1085,8 +1092,13 @@ function norm(s){
 DEV.forEach(function(v){
   v.nm  = norm(v.n);
   v.ct  = norm(v.c);
-  v.hi  = norm(v.n + (v.y||[]).join('') + (v.k||[]).join(''));
-  v.all = v.hi + norm(v.d + (v.u||'') + (v.w||''));
+  /* ★ 区切りなしで連結すると、語と語の境目に、どこにも書いていない2文字ができる。
+     「息苦しい」＋「いきぐるしい」の境目に「いい」、
+     「まどを開けるタイミング」の中の「みん」が「みんなの意見」に当たる、など。
+     装置の話でない相談にまで候補が出る原因になるので、区切り文字を入れる。
+     '|' は norm() が消さないので、2文字が境目をまたげない。 */
+  v.hi  = norm(v.n) + '|' + (v.y||[]).map(norm).join('|') + '|' + (v.k||[]).map(norm).join('|');
+  v.all = v.hi + '|' + norm(v.d) + '|' + norm(v.u||'') + '|' + norm(v.w||'');
   /* 「火事」「土がかわいたら」のような言い回しが、入力文の中にまるごと入っていたら強く加点する */
   v.ph  = [];
   [v.n].concat(v.y||[],v.k||[]).map(norm).forEach(function(x){
@@ -1252,10 +1264,12 @@ function cardHtml(v){
   var h='<div class="card'+(v.t==='a'?' act':'')+'">';
   h+='<span class="badge">'+(v.t==='s'?'計測（センサ）':'制御（アクション）')+'</span>';
   if(v.b) h+='<span class="badge built">'+(v.id==='s-mic'||v.id==='a-ongaku-b'?'micro:bit V2内蔵':'micro:bit内蔵')+'</span>';
+  if(v.sim) h+='<span class="badge sim">模擬実験</span>';
   h+='<h3>'+esc(v.n)+'</h3><div class="cat">'+esc(v.c)+'</div>';
   h+='<p class="desc">'+esc(v.d)+'</p>';
   if(v.y&&v.y.length) h+='<div class="yy">'+v.y.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>';
   if(v.u) h+='<div class="use">💡 '+esc(v.u)+'</div>';
+  if(v.sim) h+='<p class="simnote">この装置では'+esc(v.sim)+'。</p>';
   if(v.w) h+='<div class="warn">⚠ '+esc(v.w)+'</div>';
   h+='<div class="refbox">'+refHtml(v.id)+'</div>';
   h+='<button class="pick" data-id="'+v.id+'">これを使う</button>';
@@ -1317,30 +1331,106 @@ function renderSentence(){
 ['theme','cond','act','stop','test','limit'].forEach(function(id){ $(id).addEventListener('input',renderSentence); });
 
 var KEY='keisoku-gyakubiki-memos';
-function loadMemos(){ try{ var a=JSON.parse(localStorage.getItem(KEY)); return Array.isArray(a)?a.filter(function(m){return m&&typeof m==='object';}):[]; }catch(e){ return []; } }
+/* 保存メモは unshift で先頭に積むので、位置（添字）は並べ替えでずれる。
+   「更新」するには1件ずつの目印が要る。
+   ★ 前からある保存メモには id が無いので、読みこむときに足して書きもどす。
+     生徒がこれまでに書いたものは、そのまま引き継がれる。 */
+var memoSeq = 0;
+function newMemoId(){
+  memoSeq++;
+  return 'm' + Date.now().toString(36) + memoSeq.toString(36);
+}
+function loadMemos(){
+  var a;
+  try{ a=JSON.parse(localStorage.getItem(KEY)); }catch(e){ return []; }
+  if(!Array.isArray(a)) return [];
+  a = a.filter(function(m){ return m && typeof m==='object'; });
+  var added=false;
+  a.forEach(function(m){ if(!m.id){ m.id=newMemoId(); added=true; } });
+  if(added){ try{ localStorage.setItem(KEY,JSON.stringify(a)); }catch(e){} }
+  return a;
+}
+/* いま④のフォームに読み戻してある保存メモ。null なら新規 */
+var editId = null;
+function editIndex(a){
+  if(editId===null) return -1;
+  for(var i=0;i<a.length;i++){ if(a[i].id===editId) return i; }
+  return -1;
+}
+/* 「更新」か「新規」かで、ボタンの出方と文言を変える */
+function renderSaveMode(){
+  var on = editIndex(loadMemos()) >= 0;
+  if(!on) editId = null;
+  $('save').textContent = on ? 'この設計を更新する' : 'この設計を保存する';
+  $('save-new').hidden = !on;
+}
 function saveMemos(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)); return true; }catch(e){ $('save-status').textContent='保存できませんでした。ブラウザの保存設定や空き容量を確認し、必要なら印刷で残してください。'; return false; } }
 function renderSaved(){
   var a=loadMemos();
+  renderSaveMode();
   $('savedlist').innerHTML=a.length?a.map(function(m,i){
-    return '<div class="saved"><div class="th">'+esc(m.theme||'（テーマ未記入）')+'</div><p>'+esc(m.s||'入力未選択')+' で調べ、条件：'+esc(m.cond||'未記入')+' のとき、'+esc(m.a||'出力未選択')+' で '+esc(m.act||'未記入')+'。</p>'+['stop','test','limit'].map(function(k,j){return m[k]?'<p>'+['止め方・戻し方：','確かめ方：','模型の範囲：'][j]+esc(m[k])+'</p>':'';}).join('')+'<div class="btnrow"><button class="sub edit" data-i="'+i+'">読み戻して編集</button><button class="sub del" data-i="'+i+'">削除</button></div></div>';
+    return '<div class="saved'+(m.id===editId?' on':'')+'"><div class="th">'+esc(m.theme||'（テーマ未記入）')+'</div><p>'+esc(m.s||'入力未選択')+' で調べ、条件：'+esc(m.cond||'未記入')+' のとき、'+esc(m.a||'出力未選択')+' で '+esc(m.act||'未記入')+'。</p>'+['stop','test','limit'].map(function(k,j){return m[k]?'<p>'+['止め方・戻し方：','確かめ方：','模型の範囲：'][j]+esc(m[k])+'</p>':'';}).join('')+'<div class="btnrow"><button class="sub edit" data-i="'+i+'">読み戻して編集</button><button class="sub del" data-i="'+i+'">削除</button></div></div>';
   }).join(''):'<p class="empty">まだ保存されていません。</p>';
   document.querySelectorAll('.edit').forEach(function(b){b.onclick=function(){
-    var m=loadMemos()[+b.dataset.i]; memo={s:m.s||null,a:m.a||null};
+    var m=loadMemos()[+b.dataset.i]; if(!m) return;
+    memo={s:m.s||null,a:m.a||null};
+    editId = m.id;
     ['theme','cond','act','stop','test','limit'].forEach(function(k){$(k).value=m[k]||'';});
-    renderSlots(); renderSentence(); $('save-status').textContent='読み戻しました。修正後に保存すると、新しい設計として追加されます。'; $('theme').focus();
+    renderSlots(); renderSentence(); renderSaved();
+    $('save-status').className='';
+    $('save-status').textContent='読み戻しました。直したら「この設計を更新する」。'
+      + '元のものを残して別に取っておきたいときは「別案として保存する」。';
+    $('theme').focus();
   };});
   document.querySelectorAll('.del').forEach(function(b){b.onclick=function(){
     if(!confirm('この保存メモを削除しますか？')) return;
-    var a=loadMemos();a.splice(+b.dataset.i,1);if(saveMemos(a)){renderSaved();$('save-status').textContent='削除しました。';}
+    var a=loadMemos(), gone=a[+b.dataset.i];
+    a.splice(+b.dataset.i,1);
+    if(saveMemos(a)){
+      /* 消したものを編集中だったら、新規あつかいに戻す（更新先が無いので） */
+      if(gone && gone.id===editId) editId=null;
+      renderSaved();
+      $('save-status').textContent='削除しました。';
+    }
   };});
 }
-$('save').onclick=function(){
-  if(!memo.s||!memo.a||!$('cond').value.trim()||!$('act').value.trim()){
-    $('save-status').textContent='センサ・アクション装置を選び、動かす条件と動作を記入してから保存しよう。';return;
-  }
-  var a=loadMemos(),m={s:memo.s,a:memo.a};
+/* いまのフォームの中身を1件ぶんにまとめる */
+function formMemo(){
+  var m={s:memo.s,a:memo.a};
   ['theme','cond','act','stop','test','limit'].forEach(function(k){m[k]=$(k).value.trim();});
-  a.unshift(m);if(saveMemos(a)){renderSaved();$('save-status').textContent='このブラウザに保存しました。';}
+  return m;
+}
+function saveGateOk(){
+  if(memo.s&&memo.a&&$('cond').value.trim()&&$('act').value.trim()) return true;
+  $('save-status').className='';
+  $('save-status').textContent='センサ・アクション装置を選び、動かす条件と動作を記入してから保存しよう。';
+  return false;
+}
+/* 上書き（更新）。読み戻していないときは、ふつうに新規保存 */
+$('save').onclick=function(){
+  if(!saveGateOk()) return;
+  var a=loadMemos(), i=editIndex(a), m=formMemo();
+  if(i>=0){
+    m.id = a[i].id;
+    a[i] = m;
+    if(saveMemos(a)){ renderSaved(); $('save-status').textContent='この設計を更新しました。別案は増えていません。'; }
+  }else{
+    m.id = newMemoId();
+    a.unshift(m);
+    if(saveMemos(a)){ editId=m.id; renderSaved(); $('save-status').textContent='このブラウザに保存しました。'; }
+  }
+};
+/* 別案として保存。元のものはそのまま残し、以後は新しいほうを編集する */
+$('save-new').onclick=function(){
+  if(!saveGateOk()) return;
+  var a=loadMemos(), m=formMemo();
+  m.id = newMemoId();
+  a.unshift(m);
+  if(saveMemos(a)){
+    editId = m.id;
+    renderSaved();
+    $('save-status').textContent='別案として保存しました。元の設計はそのまま残っています。';
+  }
 };
 document.querySelectorAll('.choose').forEach(function(b){b.onclick=function(){
   state.type=b.dataset.choose;state.q='';state.cat='';$('q').value='';renderChips();renderList();showTab('find');window.scrollTo(0,0);
@@ -1349,8 +1439,9 @@ $('reset').onclick=function(){
   if(!confirm('入力中の設計をクリアしますか？ 保存したメモは残ります。')) return;
   $('save-status').textContent='';
   memo={s:null,a:null};
+  editId=null;                 /* 白紙にしたので、更新先も外す */
   ['theme','cond','act','stop','test','limit'].forEach(function(id){ $(id).value=''; });
-  renderSlots(); renderSentence();
+  renderSlots(); renderSentence(); renderSaved();
 };
 $('print').onclick=function(){ window.print(); };
 
@@ -1558,7 +1649,9 @@ function gDevHtml(v){
   return '<div class="gdev'+(v.t==='a'?' act':'')+'"><div>'
     +'<b>'+esc(v.n)+'</b><span class="gc">'+esc(v.c)+'</span>'
     +(v.b?'<span class="badge built">micro:bit内蔵</span>':'')
+    +(v.sim?'<span class="badge sim">模擬実験</span>':'')
     +'<p>'+esc(v.d)+'</p>'
+    +(v.sim?'<p class="simnote">この装置では'+esc(v.sim)+'。</p>':'')
     +(v.w?'<p>⚠ '+esc(v.w)+'</p>':'')
     +'<div class="refbox">'+refHtml(v.id)+'</div>'
     +'</div><button class="pick" data-id="'+v.id+'">これを使う</button></div>';
@@ -1572,8 +1665,12 @@ function gHintHtml(o,cls){
    先生にわたす文（AIおたずね箱ほうしき）
    生徒はAIに触らない。生徒が書いた内容から「先生がAIに聞くための文」を
    組み立てて、コピーできるようにするだけ。
-   肝は【この学校で使える装置】を必ず同梱すること。
-   これが無いと、AIは学校に無い部品を平気ですすめてくる。
+   肝は【この教材で扱う装置】の一覧を必ず同梱すること。
+   これが無いと、AIは資料に無い部品を平気ですすめてくる。
+   ただし、この一覧は石川研究室の資料をもとにした索引であって、
+   その学校に実物があるかどうかは確かめていない。
+   「学校にある装置」と言い切ると、生徒が手に入らないものを設計してしまう。
+   一覧の外を出さないことと、一覧の中が必ずあることは、別の話。
    ========================================================= */
 /* =========================================================
    相談カード
@@ -1644,7 +1741,11 @@ var tpol = '';
 var kkind = '';   /* ⑥のフォームで選ばれている困りごと */
 function curPol(){ return tpol || KIND_POL[kkind] || 'teach'; }
 function gDevList(t){
-  return DEV.filter(function(v){ return v.t===t; }).map(function(v){ return v.n; }).join('／');
+  /* 名前だけ並べると、AIは「CO2センサ（模擬）」でも濃度が測れる前提で書いてくる。
+     測れないものは、その場で測れないと書いておく */
+  return DEV.filter(function(v){ return v.t===t; }).map(function(v){
+    return v.n + (v.sim ? '〔実測できません：' + v.sim + '〕' : '');
+  }).join('／');
 }
 /* レコード（相談カードの中身）から、AIに送る文を組み立てる。
    ⑤（生徒の端末）でも⑥（先生の端末）でも、同じものが出る */
@@ -1662,8 +1763,12 @@ function buildPrompt(rec, polKey){
   L.push(pol.rule);
   L.push('');
   L.push('【いちばん大事な条件】');
-  L.push('・提案してよいのは、下の「この学校で使える装置」にあるものだけです。');
+  L.push('・提案してよいのは、下の「この教材で扱う装置」にあるものだけです。');
   L.push('　そこに無い部品（新しく買う必要があるもの）は、すすめないでください。');
+  L.push('・ただしこの一覧は、授業資料をもとにした索引です。');
+  L.push('　一覧にあっても、その学校に実物があるとはかぎりません（確認するのは教師です）。');
+  L.push('　だから「学校にあります」と断定せず、「この一覧にあります」という書き方をしてください。');
+  L.push('　手に入らなかったときのために、できれば代わりの案も1つ添えてください。');
   L.push('・つなぎ方、コネクタ番号（P0・P1など）、しきい値の具体的な数値は書かないでください。');
   L.push('　それらは北海道教育大学札幌校 石川研究室の配布資料で生徒が確かめる決まりです。');
   L.push('　かわりに「どの資料を見ればよいか」と「何と何を比べて決めるか」を示してください。');
@@ -1700,7 +1805,7 @@ function buildPrompt(rec, polKey){
     L.push('生徒が書いた言葉からは、装置を特定できませんでした。まず、何に気づけばよいかを一緒に考えてください。');
   }
   L.push('');
-  L.push('【この学校で使える装置（これ以外は提案しない）】');
+  L.push('【この教材で扱う装置（これ以外は提案しない／実物の有無は教師が確認）】');
   L.push('＜計測（センサ）＞'+gDevList('s'));
   L.push('＜制御（アクション装置）＞'+gDevList('a'));
   L.push('');
@@ -2140,16 +2245,36 @@ function gmsg(id, txt, ok){
 /* ---- 受付コード ---- */
 function normCode(v){ return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6); }
 
+/* いま入力欄に見えているコードと、つながっている受付が同じか。
+   ここがずれたまま送れると、別のクラスの受付に飛びこむ */
+function cCodeMatches(){
+  return !!ccode && normCode($('g-code').value) === ccode;
+}
 function cSyncSend(){
   var miss = GREQ.filter(function(p){ return !$(p[0]).value.trim(); });
-  $('g-send').disabled = !(ccode && croom && croom.open && !miss.length && gkind);
+  $('g-send').disabled =
+    !(cCodeMatches() && croom && croom.open && !miss.length && gkind);
 }
 
-/* コードが6文字そろったら、その受付があるか確かめる */
-var cChecking = false;
+/* コードが6文字そろったら、その受付があるか確かめる。
+
+   ★ 打ちかえが通信より速いので、順番の保証が要る。
+     もとは「確認中は新しい入力を無視する」形だったので、
+     1つめのコードを確かめている最中に打ちかえると、
+     2つめは調べられないまま、画面には2つめが見えているのに
+     つながっているのは1つめ、という食いちがいが起きた。
+     逆に両方走った場合も、遅れて返ってきた古いほうが後から上書きできた。
+
+   そこで呼び出しごとに番号を振り、
+   「いちばん新しい呼び出しの応答」以外は、返ってきても捨てる。
+   コードを消したときや忘れたときも番号を進めて、
+   飛んでいる途中の応答を無効にする。 */
+var cSeq = 0;
 function cCheck(){
   var code = normCode($('g-code').value);
   if($('g-code').value !== code) $('g-code').value = code;
+  var my = ++cSeq;                 /* この呼び出しの番号 */
+
   if(code.length < 6){
     ccode=''; croom=null; cmine=[];
     if(window.fbq) fbq.stopMine();
@@ -2157,14 +2282,17 @@ function cCheck(){
     gmsg('g-roommsg', code ? 'あと'+(6-code.length)+'文字です。' : '', false);
     return;
   }
-  if(cChecking) return;
-  cChecking = true;
+  /* 打ちかえた瞬間に、いったん送れなくする。
+     確かめ終わるまでは、画面のコードとつながり先が合っていないため */
+  cSyncSend();
   gmsg('g-roommsg','受付をさがしています…', false);
   waitFb(function(){
+    if(my !== cSeq) return;
     fbq.signInStudent().then(function(){
+      if(my !== cSeq) return null;            /* もう古い */
       return fbq.getRoom(code);
     }).then(function(room){
-      cChecking = false;
+      if(my !== cSeq) return;                 /* 古い応答は捨てる */
       if(!room){
         ccode=''; croom=null; cRenderInbox();
         gmsg('g-roommsg','その受付コードは見つかりませんでした。6文字を確かめてください。', false);
@@ -2179,7 +2307,7 @@ function cCheck(){
       }
       cSyncSend();
     }).catch(function(e){
-      cChecking = false;
+      if(my !== cSeq) return;
       ccode=''; croom=null; cSyncSend();
       gmsg('g-roommsg','つながりませんでした ―― '+fbErr(e), false);
     });
@@ -2190,13 +2318,17 @@ function cCheck(){
    ★ where("authorUid","==",自分) を外すと、ルールがクエリを丸ごと拒否する */
 function cWatchMine(){
   if(!ccode) return;
+  var code = ccode;
   waitFb(function(){
     var uid = fbq.uid();
     if(!uid) return;
-    fbq.watchMine(ccode, uid, function(list){
+    fbq.watchMine(code, uid, function(list){
+      /* 見はじめたあとにコードが変わっていたら、その通知はもう別の受付のもの */
+      if(code !== ccode) return;
       cmine = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
       cRenderInbox();
     }, function(e){
+      if(code !== ccode) return;
       gmsg('g-roommsg','答えの読みこみに失敗しました ―― '+fbErr(e), false);
     });
   });
@@ -2239,6 +2371,7 @@ function cRenderInbox(){
 
 $('g-code').addEventListener('input', cCheck);
 $('g-forget').onclick = function(){
+  cSeq++;                       /* 飛んでいる途中の応答を無効にする */
   try{ localStorage.removeItem(CCODE_KEY); }catch(e){}
   if(window.fbq) fbq.stopMine();
   ccode=''; croom=null; cmine=[]; $('g-code').value='';
@@ -2249,6 +2382,15 @@ $('g-forget').onclick = function(){
 
 $('g-send').onclick = function(){
   if(!ccode || !croom){ gmsg('g-sendmsg','先に受付コードを入れてください。', false); return; }
+  /* 押す直前に打ちかえられていたら送らない。
+     画面に見えているコードと、送り先の受付は必ず同じであること */
+  if(!cCodeMatches()){
+    cSyncSend();
+    gmsg('g-sendmsg','受付コードが変わりました。つながるのを待ってから、もう一度押してください。', false);
+    cCheck();
+    return;
+  }
+  var sendTo = ccode, sendRoom = croom;
   var rec = gRec(gRank('s',3), gRank('a',3));
   var btn = $('g-send'), old = btn.textContent;
   btn.disabled = true; btn.textContent = '送っています…';
@@ -2258,9 +2400,10 @@ $('g-send').onclick = function(){
     fbq.signInStudent().then(function(){
       /* おたずね箱のルールが通す形でそろえる。
          キーはルールの hasOnly と1対1。増やすと create が拒否される */
-      return fbq.addReq(ccode, {
+      if(sendTo !== ccode) throw new Error('受付コードが変わりました。もう一度押してください。');
+      return fbq.addReq(sendTo, {
         v:1,
-        ownerUid : croom.ownerUid,
+        ownerUid : sendRoom.ownerUid,
         authorUid: fbq.uid(),
         no   : '',
         name : String(rec.name||'').slice(0,40),
@@ -2299,6 +2442,12 @@ function showTab(name){
     $('t-'+k).setAttribute('aria-selected',on?'true':'false');
     $('p-'+k).hidden = !on;
   });
+  /* 検索欄はヘッダにあるので、放っておくとどのタブでも出たままになる。
+     ②〜⑥では結果の一覧（#list）が隠れているため、打ちこんでも何も起きず、
+     「検索が効かない」ように見えていた。①のときだけ出す。 */
+  var findOn = (name==='find');
+  $('searchbar').hidden = !findOn;
+  $('searchhint').hidden = !findOn;
 }
 ['find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
 
@@ -2543,6 +2692,7 @@ waitFb(function(){
 $('q').addEventListener('input',function(){ state.q=this.value; renderList(); });
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
+showTab('find');
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
 gLoad(); gRender(); gSync(); kRenderKind(); tRenderPol(); tSyncKey(); kRender();
 tRenderAuth(); tRenderRooms(); tRenderCloud(); cShowBtns(); cLoad(); cSyncSend();

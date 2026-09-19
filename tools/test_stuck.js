@@ -413,17 +413,23 @@ console.log("=== ⑥ 先生用タブ ===");
 {
   /* jsdom には TextDecoder / fetch が無いので入れてやる。
      fetch は偽物にして、送っている中身まで検査する。 */
-  function mkWin(reply) {
+  /* before は、スクリプトが走る前に window をいじりたいとき用
+     （前からある保存データを置いてから開く、など） */
+  function mkWin(reply, before) {
     const sent = {};
     const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously",
       pretendToBeVisual: true,
       beforeParse(win) {
         win.HTMLElement.prototype.scrollIntoView = function () {};
         win.TextDecoder = TextDecoder;
+        win.scrollTo = function () {};
+        win.confirm = function () { return true; };
+        win.alert = function () {};
         win.fetch = function (url, opt) {
           sent.url = url; sent.headers = opt.headers; sent.body = JSON.parse(opt.body);
           return Promise.resolve(reply(sent));
         };
+        if (before) before(win);
       } });
     return { win: dm.window, doc: dm.window.document, sent };
   }
@@ -552,8 +558,12 @@ console.log("=== ⑥ 先生用タブ ===");
        A.sent.body.fallbacks === "default" &&
        A.sent.headers["anthropic-beta"] === "server-side-fallback-2026-07-01");
     ok("adaptive thinking を使う", A.sent.body.thinking.type === "adaptive");
+    /* もとは「この学校で使える装置」。実物があるか確かめていないのに
+       学校にある前提で書いていたので、言い方を変えた（2026-09-20） */
     ok("装置一覧を積んだ文を送っている",
-       A.sent.body.messages[0].content.indexOf("この学校で使える装置") >= 0);
+       A.sent.body.messages[0].content.indexOf("この教材で扱う装置") >= 0);
+    ok("学校にあると断定していない",
+       A.sent.body.messages[0].content.indexOf("この学校で使える装置") < 0);
     ok("その生徒の相談を送っている",
        A.sent.body.messages[0].content.indexOf("教室が暑いとき") >= 0);
     ok("答えがつながって入る", g("t-ans").value === "かわいた土とぬれた土を比べよう", g("t-ans").value);
@@ -608,6 +618,169 @@ console.log("=== ⑥ 先生用タブ ===");
     ok("消すと保存先にも残らない",
        !E.win.sessionStorage.getItem("keisoku-gyakubiki-ai") &&
        !E.win.localStorage.getItem("keisoku-gyakubiki-ai"));
+
+    /* =====================================================================
+       2026-09-20 のレビューで挙がった5点
+       ===================================================================== */
+    const R = mkWin(() => ({ ok:true, body:null }));
+    const r = id => R.doc.getElementById(id);
+    const rq = sel => R.doc.querySelector(sel);
+    const rAll = sel => [...R.doc.querySelectorAll(sel)];
+    const rType = (id, v) => { r(id).value = v; r(id).dispatchEvent(new R.win.Event("input", { bubbles:true })); };
+
+    console.log("=== ① CO2・煙／異臭の矛盾（実測と模擬をわける） ===");
+    const DEVR = R.win.eval("DEV");
+    const REFR = R.win.eval("REF");
+    const co2 = DEVR.filter(v => v.id === "s-co2")[0];
+    const kem = DEVR.filter(v => v.id === "s-kemuri")[0];
+    const alc = DEVR.filter(v => v.id === "s-alcohol")[0];
+
+    ok("CO2は模擬だと名前で分かる", /模擬/.test(co2.n), co2.n);
+    ok("煙・異臭も模擬だと名前で分かる", /模擬/.test(kem.n), kem.n);
+    ok("CO2に模擬の印がある", !!co2.sim);
+    ok("煙・異臭に模擬の印がある", !!kem.sim);
+    ok("アルコールセンサは模擬ではない（実測できる）", !alc.sim);
+
+    /* もとの矛盾：説明は「濃度を調べる」、注意は「濃度は測れない」 */
+    ok("CO2の説明が『濃度を測る』と言っていない", co2.d.indexOf("濃度を調べ") < 0, co2.d);
+    ok("CO2の説明が、測れないことを先に言う", /測るセンサは.*ない/.test(co2.d), co2.d);
+    ok("CO2の注意と説明が食いちがっていない", /測っていない|測れない/.test(co2.w));
+    ok("CO2の使用例が実測の言い切りでない", /模擬実験/.test(co2.u), co2.u);
+    ok("煙の説明が『機種による』と言っていない", kem.d.indexOf("機種による") < 0, kem.d);
+    ok("煙の注意は警報器の代わりを禁じている", /警報器の代わりには.*しない/.test(kem.w));
+    ok("煙の使用例が実測の言い切りでない", /模擬実験/.test(kem.u), kem.u);
+
+    /* もとの矛盾：CO2/煙の資料注記は「アルコールセンサで代用します」、
+       アルコールセンサの注意は「代用品ではない」 */
+    ok("CO2の資料注記が『代用します』と言わない", REFR["s-co2"].n.indexOf("代用します") < 0, REFR["s-co2"].n);
+    ok("煙の資料注記が『代用します』と言わない", REFR["s-kemuri"].n.indexOf("代用します") < 0, REFR["s-kemuri"].n);
+    ok("CO2の資料注記は模擬だと言う", /模擬/.test(REFR["s-co2"].n));
+    ok("煙の資料注記は模擬だと言う", /模擬/.test(REFR["s-kemuri"].n));
+    ok("アルコールは代用品ではないと言ったまま", /代用品ではない/.test(alc.w));
+
+    /* 画面に出るか */
+    r("t-find").click();
+    rType("q", "換気");
+    const co2card = rAll("#list .card").filter(c => /CO2/.test(c.textContent))[0];
+    ok("①の一覧にCO2が出る", !!co2card);
+    ok("①のカードに模擬実験のバッジが出る",
+       !!co2card && !!co2card.querySelector(".badge.sim"),
+       co2card && co2card.querySelector(".badge.sim") ? "" : "バッジの要素が無い");
+    ok("①のカードに何が測れないかが出る",
+       !!co2card && !!co2card.querySelector(".simnote")
+       && /測れない/.test(co2card.querySelector(".simnote").textContent),
+       co2card && co2card.querySelector(".simnote") && co2card.querySelector(".simnote").textContent);
+    const hikari = rAll("#list .card").filter(c => /光センサ/.test(c.textContent))[0];
+    ok("模擬でない装置にはバッジを出さない",
+       rAll("#list .card").filter(c => c.querySelector(".badge.sim"))
+         .every(c => /CO2|煙・異臭/.test(c.textContent)));
+
+    console.log("=== ② 学校にある装置と決めつけない ===");
+    const bpR = R.win.eval("buildPrompt");
+    const pR = bpR({ theme:"教室が暑い", stuck:"知らせ方" }, "teach");
+    ok("『この学校で使える装置』と書かない", pR.indexOf("この学校で使える装置") < 0);
+    ok("『この教材で扱う装置』と書く", pR.indexOf("この教材で扱う装置") >= 0);
+    ok("実物があるとはかぎらないと断る", /実物があるとはかぎりません/.test(pR));
+    ok("確認するのは教師だと書く", /確認するのは教師/.test(pR));
+    ok("断定しない書き方を指示する", /「学校にあります」と断定せず/.test(pR));
+    ok("一覧の外を出さない指示は残っている", /これ以外は提案しない/.test(pR));
+    ok("模擬の装置は実測できないと一覧に書いてある", /実測できません/.test(pR));
+    ok("その断りはCO2に付いている", /CO2センサ（模擬）〔実測できません/.test(pR));
+
+    console.log("=== ③ 検索欄は「さがす」タブだけ ===");
+    /* 直す前は searchbar に id が無いので、null で落ちないようにしておく
+       （落ちると、そのあとの④まで走らない） */
+    const shown = id => { const el = r(id); return el ? el.hidden === false : "要素が無い"; };
+    r("t-find").click();
+    ok("①では検索欄が出ている", shown("searchbar") === true, String(shown("searchbar")));
+    ok("①では検索のヒントも出ている", shown("searchhint") === true, String(shown("searchhint")));
+    ["ex","step","memo","stuck","teach"].forEach(k => {
+      r("t-" + k).click();
+      ok(k + "では検索欄を出さない", shown("searchbar") === false, String(shown("searchbar")));
+      ok(k + "では検索のヒントも出さない", shown("searchhint") === false, String(shown("searchhint")));
+    });
+    r("t-find").click();
+    ok("①に戻すとまた出る", shown("searchbar") === true && shown("searchhint") === true);
+
+    console.log("=== ④ 保存メモの更新と別案 ===");
+    const KEYR = "keisoku-gyakubiki-memos";
+    const memos = () => JSON.parse(R.win.localStorage.getItem(KEYR) || "[]");
+    r("t-memo").click();
+    ok("はじめは『保存する』", r("save").textContent === "この設計を保存する", r("save").textContent);
+    ok("はじめは『別案として保存』を出さない", shown("save-new") === false, String(shown("save-new")));
+
+    R.win.eval("memo={s:'光センサ',a:'LED画面（内蔵）'}; renderSlots();");
+    rType("theme", "夜の廊下が暗い"); rType("cond", "暗くなったら"); rType("act", "明かりをつける");
+    r("save").click();
+    ok("1件保存された", memos().length === 1, JSON.stringify(memos().length));
+    ok("保存したものに目印（id）が付く", !!memos()[0].id);
+    ok("保存すると『更新する』に変わる", r("save").textContent === "この設計を更新する", r("save").textContent);
+    ok("『別案として保存』が出る", shown("save-new") === true, String(shown("save-new")));
+
+    /* 更新しても増えない（もとは毎回1件増えていた） */
+    rType("cond", "18時をすぎたら");
+    r("save").click();
+    ok("更新しても件数は増えない", memos().length === 1, String(memos().length));
+    ok("更新した中身が入っている", memos()[0].cond === "18時をすぎたら", memos()[0].cond);
+    ok("更新したと知らせる", /更新しました/.test(r("save-status").textContent), r("save-status").textContent);
+
+    /* 別案は増える。元は残る */
+    rType("cond", "人が通ったら");
+    if(r("save-new")) r("save-new").click();
+    ok("別案は1件増える", memos().length === 2, String(memos().length));
+    ok("元の設計は残っている", memos().some(m => m.cond === "18時をすぎたら"));
+    ok("別案も入っている", memos().some(m => m.cond === "人が通ったら"));
+    ok("元を残したと知らせる", /元の設計はそのまま残って/.test(r("save-status").textContent));
+    ok("ふたつの目印は別もの", memos()[0].id !== memos()[1].id);
+
+    /* 別案を保存したあとは、その別案を編集している */
+    rType("cond", "人が通って、かつ暗いとき");
+    r("save").click();
+    ok("続けて更新しても増えない", memos().length === 2, String(memos().length));
+    ok("別案のほうが更新された", memos().some(m => m.cond === "人が通って、かつ暗いとき"));
+    ok("元の設計はまだ残っている", memos().some(m => m.cond === "18時をすぎたら"));
+
+    /* 読み戻すと、その1件の更新になる */
+    const idx = memos().findIndex(m => m.cond === "18時をすぎたら");
+    ok("元の設計が一覧に残っている", idx >= 0, JSON.stringify(memos().map(m => m.cond)));
+    rAll("#savedlist .edit")[idx].click();
+    ok("読み戻すと『更新する』", r("save").textContent === "この設計を更新する");
+    ok("読み戻した中身が入る", r("cond").value === "18時をすぎたら", r("cond").value);
+    ok("編集中のものに印が付く", !!rq("#savedlist .saved.on"));
+    rType("cond", "19時をすぎたら");
+    r("save").click();
+    ok("読み戻したほうが更新される", memos().some(m => m.cond === "19時をすぎたら"));
+    ok("読み戻して更新しても増えない", memos().length === 2, String(memos().length));
+
+    /* クリアすると新規に戻る */
+    r("reset").click();
+    ok("クリアすると『保存する』に戻る", r("save").textContent === "この設計を保存する");
+    ok("クリアすると『別案』は消える", shown("save-new") === false, String(shown("save-new")));
+
+    console.log("=== ④-b 前からある保存メモを引き継ぐ ===");
+    const OLD = mkWin(() => ({ ok:true, body:null }), w => {
+      /* id を持たない、これまでの形で保存されているもの */
+      w.localStorage.setItem("keisoku-gyakubiki-memos", JSON.stringify([
+        { s:"土壌水分センサ", a:"水中ポンプ", theme:"水やり", cond:"かわいたら", act:"水を出す",
+          stop:"5秒で止める", test:"比べる", limit:"" }
+      ]));
+    });
+    const o = id => OLD.doc.getElementById(id);
+    o("t-memo").click();
+    const oldMemos = JSON.parse(OLD.win.localStorage.getItem("keisoku-gyakubiki-memos"));
+    ok("前からのメモが消えていない", oldMemos.length === 1, String(oldMemos.length));
+    ok("中身もそのまま", oldMemos[0].theme === "水やり" && oldMemos[0].cond === "かわいたら");
+    ok("目印が足されて書きもどされている", !!oldMemos[0].id);
+    ok("画面にも出ている", /水やり/.test(o("savedlist").textContent));
+    [...OLD.doc.querySelectorAll("#savedlist .edit")][0].click();
+    ok("前からのメモも読み戻せる", o("cond").value === "かわいたら", o("cond").value);
+    ok("前からのメモも『更新』になる", o("save").textContent === "この設計を更新する");
+    o("cond").value = "とてもかわいたら";
+    o("cond").dispatchEvent(new OLD.win.Event("input", { bubbles:true }));
+    o("save").click();
+    const after = JSON.parse(OLD.win.localStorage.getItem("keisoku-gyakubiki-memos"));
+    ok("前からのメモを更新しても増えない", after.length === 1, String(after.length));
+    ok("前からのメモが更新された", after[0].cond === "とてもかわいたら", after[0].cond);
 
     console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
     process.exit(fail ? 1 : 0);
