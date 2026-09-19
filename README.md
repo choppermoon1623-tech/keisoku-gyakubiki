@@ -193,7 +193,7 @@ AIも通信も使いません。ヒントはこのHTMLの中だけで組み立�
 
 ```
 npm install jsdom
-node tools/test_stuck.js   # 71項目。①の回帰もふくむ
+node tools/test_stuck.js   # 90項目。①の回帰もふくむ
 node tools/scenarios.js    # 生徒が書きそうな10通りで、何を返すか一覧
 python tools/check_urls.py # 石川研究室サイトのページが生きているか
 ```

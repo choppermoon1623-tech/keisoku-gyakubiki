@@ -216,5 +216,72 @@ cases.forEach(([q, expect]) => {
   else ok("検索『" + q + "』が何か返す", !!top);
 });
 
+const SEL_COND = '#g-kinds .chip[data-k="cond"]';
+const SEL_IDEA = '#g-kinds .chip[data-k="idea"]';
+const SEL_OTAZUNE = '#g-out a[href*="ai-otazune"]';
+
+console.log("=== 資料リンク（石川研究室） ===");
+{
+  const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const ww = dm.window, dd = ww.document;
+  ok("REFが51件そろっている", ww.DEV.every(v => v.id in ww.REF), "もれあり");
+  const cards = [...dd.querySelectorAll("#list .card")];
+  ok("全51枚のカードに資料リンクがある",
+     cards.length === 51 && cards.every(c => c.querySelector(".ref")), cards.length);
+  const hrefs = [...dd.querySelectorAll("#list .ref")].map(a => a.href);
+  ok("リンク先はすべて石川研究室サイト",
+     hrefs.every(h => h.indexOf("https://sites.google.com/s.hokkyodai.ac.jp/tech/") === 0));
+  ok("別名のときは注記を出す",
+     dd.body.textContent.indexOf("サイトでは「レバースイッチセンサ」という名前です") >= 0);
+  ok("資料ページが無いものはそう言う",
+     dd.body.textContent.indexOf("この装置だけの資料ページはありません") >= 0);
+  ok("②授業の例の配布資料もリンクになっている", !!dd.querySelector("#exlist .files a"));
+}
+
+console.log("=== 先生にわたす文（AIおたずね箱ほうしき） ===");
+{
+  const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const ww = dm.window, dd = ww.document, g = id => dd.getElementById(id);
+  const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new ww.Event("input")); };
+  set("g-theme", "植物の水やりを忘れる");
+  set("g-joken", "学校にある装置だけ");
+  set("g-mine", "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う");
+  set("g-stuck", "何の値で水を出すか、境目が決められない");
+  dd.querySelector(SEL_COND).click();
+  g("g-go").click();
+
+  const t = g("g-prompt").value;
+  ok("先生にわたす文が組み上がる", t.length > 800, t.length);
+  ok("生徒が書いた内容が入る", t.indexOf("植物の水やりを忘れる") >= 0);
+  ok("困っていることも入る", t.indexOf("条件（しきい値）の決め方が分からない") >= 0);
+  ok("候補と資料のファイル名が入る", t.indexOf("土壌水分センサの使い方.pptx") >= 0);
+  ok("51種の装置一覧が入る", ww.DEV.every(v => t.indexOf(v.n) >= 0), "もれあり");
+  ok("学校に無い部品を出さない指示がある", t.indexOf("すすめないでください") >= 0);
+  ok("コネクタ番号・しきい値を書かせない指示がある",
+     t.indexOf("しきい値の具体的な数値は書かないでください") >= 0);
+  ok("完成品を書かせない指示がある", t.indexOf("そのまま提出できる完成品") >= 0);
+  ok("石川研究室のURLが入る", t.indexOf("sites.google.com/s.hokkyodai.ac.jp/tech/") >= 0);
+  ok("おたずね箱へのリンクがある", !!dd.querySelector(SEL_OTAZUNE));
+
+  /* jsdom には navigator.clipboard が無い。学校のパソコンで使えないときと同じ経路 */
+  g("g-copy").click();
+  ok("clipboardが使えなくても、選択して知らせる",
+     g("g-copied").textContent.indexOf("コピーしてください") >= 0, g("g-copied").textContent);
+  ok("readonlyに戻している", g("g-prompt").hasAttribute("readonly"));
+
+  /* 候補が出なかったときも、文は作れる */
+  const dm2 = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const w2 = dm2.window, d2 = w2.document, g2 = id => d2.getElementById(id);
+  ["g-theme", "g-mine", "g-stuck"].forEach(id => {
+    g2(id).value = "あああ"; g2(id).dispatchEvent(new w2.Event("input"));
+  });
+  d2.querySelector(SEL_IDEA).click();
+  g2("g-go").click();
+  ok("候補なしでも文は作れる", g2("g-prompt").value.indexOf("候補】なし") >= 0);
+}
+
 console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
 process.exit(fail ? 1 : 0);
