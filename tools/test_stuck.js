@@ -342,6 +342,33 @@ console.log("=== リンクのhrefを実際に見る ===");
      refPages.filter(x => OK_PAGES.indexOf(x) < 0).join(" / "));
 }
 
+console.log("=== fbq の呼び出しと実装がそろっているか ===");
+/* Firebase は module script なので jsdom では走らない。
+   呼んでいるのに実装が無い（名前の打ちまちがい・消し忘れ）は、
+   画面を動かしても気づけないので、ソースの上で照合しておく。
+   おたずね箱の「クエリとルールの対応を固定する検査」と同じ考え方。 */
+{
+  const mod = HTML.split('<script type="module">')[1].split("</script>")[0];
+  const facade = mod.split("window.fbq = {")[1];
+  /* fbq の中で実装している名前 */
+  const impl = new Set([...facade.matchAll(/^\s{2}(?:async\s+)?([A-Za-z_$][\w$]*)\s*\(/gm)].map(m => m[1]));
+  /* ページの中から呼んでいる名前 */
+  const called = new Set([...HTML.matchAll(/\bfbq\.([A-Za-z_$][\w$]*)\s*\(/g)].map(m => m[1]));
+  ok("fbq の実装が読み取れている", impl.size >= 10, [...impl].join(","));
+  called.forEach(name => {
+    ok("fbq." + name + " の実装がある", impl.has(name), [...impl].join(","));
+  });
+  /* 装置共有で足したもの */
+  ["watchRoom", "updateEquipment"].forEach(name => {
+    ok("fbq." + name + " がある（装置共有で使う）", impl.has(name));
+  });
+  ok("装置は updateDoc で書く（ほかの項目を消さない）",
+     /updateEquipment\([^)]*\)\s*\{\s*return updateDoc\(/.test(facade),
+     facade.split("updateEquipment")[1] ? facade.split("updateEquipment")[1].slice(0, 80) : "");
+  ok("受付の保存は merge で行う（装置の設定を消さない）",
+     /saveRoom\([^)]*\)\s*\{\s*return setDoc\([^;]*\{ merge:true \}\)/.test(facade));
+}
+
 console.log("=== 検索の索引と並べ方 ===");
 {
   const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
@@ -701,6 +728,84 @@ console.log("=== ⑥ 先生用タブ ===");
     });
     r("t-find").click();
     ok("①に戻すとまた出る", shown("searchbar") === true && shown("searchhint") === true);
+
+    console.log("=== ③-b 装置パネルも、装置を扱うタブだけ ===");
+    /* 検索欄と同じで、タブの外に置いたものは自分で消さないと出たままになる。
+       ②授業の例・③進め方には装置の一覧が無く、⑥先生用には先生の編集欄がある。
+       ⑤は「先生に送る」の中に受付コード欄があるので、上の入力欄は出さない。 */
+    const vis = id => {
+      let n = r(id);
+      if (!n) return "要素が無い";
+      while (n && n !== R.doc.body) { if (n.hidden) return false; n = n.parentElement; }
+      return true;
+    };
+    [["find", true, true], ["memo", true, true], ["stuck", true, false],
+     ["ex", false, false], ["step", false, false], ["teach", false, false]]
+      .forEach(([k, panel, codeRow]) => {
+        r("t-" + k).click();
+        ok(k + "：装置パネルは" + (panel ? "出す" : "出さない"), vis("eq-shared") === panel, String(vis("eq-shared")));
+        ok(k + "：受付コード欄は" + (codeRow ? "出す" : "出さない"), vis("eq-code") === codeRow, String(vis("eq-code")));
+      });
+    r("t-stuck").click();
+    ok("⑤で受付コード欄が2つ並ばない",
+       !(vis("eq-code") === true && vis("g-code") === true),
+       "eq-code=" + vis("eq-code") + " g-code=" + vis("g-code"));
+    ok("⑤では「先生に送る」の欄に誘導する",
+       /先生に送る.*受付コード/.test(r("eq-summary").textContent), r("eq-summary").textContent);
+    ok("⑤でも装置の状態は読める", vis("eq-shared") === true);
+    r("t-find").click();
+
+    console.log("=== ③-c 装置の状態は、並べ替えであって選抜ではない ===");
+    /* 「使える」順に並べてから上位3つを切ると、関連の薄い「使える」装置が
+       関連の濃い装置を押し出す。「人が通ったら」と書いたのに人感センサが消え、
+       通過センサが1位になっていた（2026-09-20 修正）。
+       出す3つは関連の濃さで選び、その中を「使える→相談→未確認」で並べる。 */
+    const hintNames = () => {
+      r("t-stuck").click();
+      r("g-go").click();
+      return [...R.doc.querySelectorAll("#g-out .gdev b")].map(e => e.textContent);
+    };
+    const connect = states => R.win.eval(
+      "ccode='ABC123'; $('g-code').value='ABC123';"
+      + "croom={id:'ABC123',title:'2年A組',open:true,"
+      + "equipment:{v:1,states:" + JSON.stringify(states) + ",updatedAt:1}};");
+
+    r("t-stuck").click();
+    rType("g-theme", "祖父が夜トイレに行くとき、暗くてあぶない");
+    rType("g-mine", "人が通ったら電気をつける案を考えた");
+    rType("g-stuck", "夜だけ動かしたいのに、昼も反応してしまう");
+    rq('#g-kinds .chip[data-k="cond"]').click();
+
+    connect({});
+    const base = hintNames();
+    ok("つないでも、関連の濃い順はそのまま",
+       base.slice(0, 3).join("/") === "光センサ/明るさセンサ（内蔵）/人感センサ", base.join("/"));
+
+    /* 関連の薄い装置を「使える」にしても、関連の濃い装置を押し出さない */
+    connect({ "s-tsuuka": "yes" });
+    const weak = hintNames();
+    ok("関連の薄い『使える』は、上位3つに割りこまない",
+       weak.indexOf("通過センサ（レーザ）") < 0, weak.join("/"));
+    ok("生徒が書いた『人が通ったら』の人感センサは残る",
+       weak.indexOf("人感センサ") >= 0, weak.join("/"));
+
+    /* 上位に入っている装置が「使える」なら、その3つの中で先に出る */
+    connect({ "s-jinkan": "yes" });
+    const strong = hintNames();
+    ok("上位の『使える』は、その3つの中で先に出る",
+       strong[0] === "人感センサ", strong.join("/"));
+    ok("押し出されたものはない",
+       ["光センサ", "明るさセンサ（内蔵）", "人感センサ"].every(n => strong.indexOf(n) >= 0),
+       strong.join("/"));
+
+    /* 「使えない」は、並べ替えではなく除外 */
+    connect({ "s-hikari": "no" });
+    const banned = hintNames();
+    ok("『使えない』は候補から消える", banned.indexOf("光センサ") < 0, banned.join("/"));
+    ok("消えたぶん、次の候補がくり上がる", banned.length >= 2, banned.join("/"));
+
+    R.win.eval("ccode=''; croom=null; $('g-code').value='';");
+    r("t-find").click();
 
     console.log("=== ④ 保存メモの更新と別案 ===");
     const KEYR = "keisoku-gyakubiki-memos";

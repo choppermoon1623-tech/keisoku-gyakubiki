@@ -258,6 +258,18 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   #g-kinds{display:flex!important}
   #g-kinds .chip[aria-pressed="true"]{background:#fff!important;color:#000!important;border:1px solid #000!important}
 }
+
+.eq-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px}
+.eq-panel h2{margin:0 0 8px}.eq-panel p{font-size:13px;margin:6px 0}
+.eq-code-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#eq-code{font:inherit;width:160px;padding:9px;border:1px solid var(--line);border-radius:8px;text-transform:uppercase}
+.eq-badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;margin:4px;background:#eef2f8;color:#42536b}
+.eq-yes{background:#e6f6f1;color:#06684d}.eq-ask{background:#fff4cd;color:#6b4d00}.eq-no{background:#fce9e9;color:#923030}
+.eq-row{display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.eq-row select{font:inherit;padding:8px;min-width:0;max-width:100%}
+#eq-memo{font-size:13px;color:#6b4d00}
+@media(max-width:400px){.eq-row{grid-template-columns:minmax(0,1fr) 115px}}
+@media print{#eq-shared,#eq-teacher{display:none!important}}
 </style>
 </head>
 <body>
@@ -285,6 +297,17 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 </nav>
 
 <main>
+<aside class="eq-panel" id="eq-shared" aria-label="この授業の装置">
+  <h2>この授業で使える装置</h2>
+  <div id="eq-connect" class="eq-code-row">
+    <label for="eq-code">受付コード</label><input id="eq-code" maxlength="6" autocomplete="off" spellcheck="false" placeholder="例：K7M2QX">
+    <button class="sub" id="eq-disconnect">接続を解除</button>
+    <p id="eq-connection-status" role="status"></p>
+  </div>
+  <p id="eq-summary" role="status" aria-live="polite"></p>
+  <label><input type="checkbox" id="eq-showall">「使えない」装置も検索結果に表示する</label>
+  <p>状態は先生が設定します。「使える」は台数や貸出予約を保証するものではありません。</p>
+</aside>
 <section id="p-find" role="tabpanel" aria-labelledby="t-find">
   <p class="note-bar">計測・制御は <b>センサ（気づく）→ プログラム（判断する）→ アクション装置（動かす）</b> の流れ。センサが得た値を、プログラムが条件と比べて判断します。まず「何が分かれば困りごとを解決できるか」を考えよう。</p>
 
@@ -330,6 +353,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <input id="test" placeholder="例：条件の直前・ちょうど・直後で動作を比べる">
     <label for="limit">模型で試すこと・まだ確かめられないこと（任意）</label>
     <input id="limit" placeholder="例：ポンプの代わりにLEDで給水の合図を試す">
+    <p id="eq-memo" role="status"></p>
     <div class="sentence" id="sent"></div>
     <p id="save-status" role="status" aria-live="polite"></p>
     <div class="btnrow">
@@ -420,6 +444,15 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     </div>
   </div>
 
+  <details class="eq-panel" id="eq-teacher" hidden>
+    <summary id="eq-teacher-title">この受付で使える装置</summary>
+    <p>この受付の装置設定を、検索・ヒント・AI相談に使用します。まず「使える」「先生に相談」「使えない」を設定してください。未設定は「未確認」です。</p>
+    <p>変更後は下の「装置の状態を保存」を押してください。生徒の画面に自動で反映されます。</p>
+    <button class="sub" id="eq-mark-rest">未確認の装置を「使えない」にする</button>
+    <div id="eq-device-list"></div>
+    <div class="btnrow"><button class="main" id="eq-save">装置の状態を保存</button><button class="sub" id="eq-discard">未保存の変更を取り消す</button></div>
+    <p id="eq-save-msg" role="status" aria-live="polite"></p>
+  </details>
   <h2 class="tstep">2. 届いた相談</h2>
   <div id="k-cloudlist"><p class="empty">受付をひらくと、届いた相談がここに出ます。</p></div>
 
@@ -596,13 +629,20 @@ window.fbq = {
     const s = await getDoc(doc(db, ROOT, code));
     return s.exists() ? Object.assign({ id:s.id }, s.data()) : null;
   },
+  // 既存受付の owner-only update を利用。作成時の hasOnly は変更しない。
+  updateEquipment(code, equipment){ return updateDoc(doc(db, ROOT, code), {equipment}); },
+  watchRoom(code, cb, onErr){
+    return onSnapshot(doc(db, ROOT, code), {includeMetadataChanges:true}, snap=>{
+      cb(snap.exists()?Object.assign({id:snap.id},snap.data()):null,snap.metadata);
+    },onErr);
+  },
   saveRoom(code, data){ return setDoc(doc(db, ROOT, code), data, { merge:true }); },
   deleteRoom(code){ return deleteDoc(doc(db, ROOT, code)); },
   watchRooms(uid, cb, onErr){
     if(unsubRooms){ unsubRooms(); unsubRooms = null; }
-    unsubRooms = onSnapshot(query(collection(db, ROOT), where("ownerUid","==",uid)), snap=>{
+    unsubRooms = onSnapshot(query(collection(db, ROOT), where("ownerUid","==",uid)), {includeMetadataChanges:true}, snap=>{
       const list = []; snap.forEach(d=> list.push(Object.assign({ id:d.id }, d.data())));
-      cb(list);
+      cb(list, snap.metadata);
     }, err=> onErr && onErr(err));
   },
 
@@ -1207,7 +1247,7 @@ function scoreDev(q,pool){
    混ぜて切ると、片方が強いときにもう片方が丸ごと消える。 */
 function searchType(q,t){
   var pool=DEV.filter(function(v){
-    return v.t===t && (!state.cat||v.c===state.cat);
+    return v.t===t && eqSearchAllowed(v) && (!state.cat||v.c===state.cat);
   });
   if(!q) return pool;
   return scoreDev(q,pool)
@@ -1219,7 +1259,7 @@ function searchType(q,t){
 /* 上位の得点。どちらの種類を先に見せるか決めるのに使う */
 function topScore(q,t){
   if(!q) return 0;
-  var pool=DEV.filter(function(v){ return v.t===t && (!state.cat||v.c===state.cat); });
+  var pool=DEV.filter(function(v){ return v.t===t && eqSearchAllowed(v) && (!state.cat||v.c===state.cat); });
   var r=scoreDev(q,pool).sort(function(a,b){ return b.sc-a.sc; })[0];
   return r?r.sc:0;
 }
@@ -1265,6 +1305,7 @@ function cardHtml(v){
   h+='<span class="badge">'+(v.t==='s'?'計測（センサ）':'制御（アクション）')+'</span>';
   if(v.b) h+='<span class="badge built">'+(v.id==='s-mic'||v.id==='a-ongaku-b'?'micro:bit V2内蔵':'micro:bit内蔵')+'</span>';
   if(v.sim) h+='<span class="badge sim">模擬実験</span>';
+  h+=eqBadge(v);
   h+='<h3>'+esc(v.n)+'</h3><div class="cat">'+esc(v.c)+'</div>';
   h+='<p class="desc">'+esc(v.d)+'</p>';
   if(v.y&&v.y.length) h+='<div class="yy">'+v.y.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>';
@@ -1280,7 +1321,7 @@ var TLABEL={s:'気づく・調べる（計測＝センサ）',a:'動かす・知
 function renderList(){
   var q=norm(state.q);
   var groups=['s','a'].filter(function(t){ return !state.type || state.type===t; })
-    .map(function(t){ return {t:t, list:searchType(q,t), top:topScore(q,t)}; });
+    .map(function(t){ return {t:t, list:eqOrder(searchType(q,t)), top:topScore(q,t)}; });
   /* 当たりの強いほうを先に見せる（「まわす」ならアクション装置が先） */
   if(q && groups.length===2 && groups[1].top > groups[0].top) groups.reverse();
 
@@ -1293,6 +1334,7 @@ function renderList(){
   });
   $('list').innerHTML=h;
   $('empty').hidden = n>0;
+  $('empty').textContent=eqRoom() && !eqShowAll ? '見つかりませんでした。違う言葉で探すか、上の「使えない」装置も表示する設定で資料を確認できます。' : '見つかりませんでした。違う言葉でためしてみよう（例：あつい・ひかり・しらせる）。';
   var label = (state.q||state.cat) ? n+'件 見つかりました' : '全'+n+'件（言葉を入れるか、上のボタンでしぼりこもう）';
   $('count').textContent=(state.type==='s'?'センサ・入力を選択中：':state.type==='a'?'アクション装置を選択中：':'')+label;
   Array.prototype.forEach.call(document.querySelectorAll('#list .pick'),function(b){
@@ -1319,6 +1361,7 @@ function renderSlots(){
   });
 }
 function renderSentence(){
+  eqMemoNote();
   function f(x,ph){ return x ? '<em>'+esc(x)+'</em>' : '<em>'+ph+'</em>'; }
   var t=$('theme').value.trim(), c=$('cond').value.trim(), a=$('act').value.trim();
   var h='';
@@ -1582,7 +1625,7 @@ function scoreLong(q,pool){
    出せないこと自体が「ようすを具体的に書こう」というヒントになる */
 var GMIN = 25;
 function gRank(type,n){
-  var pool=DEV.filter(function(v){ return v.t===type; }), tot={};
+  var pool=DEV.filter(function(v){ return v.t===type && eqAllowed(v); }), tot={};
   GW.forEach(function(p){
     var q=norm($(p[0]).value); if(q.length<2) return;
     scoreLong(q,pool).forEach(function(r){ tot[r.v.id]=(tot[r.v.id]||0)+r.sc*p[1]; });
@@ -1590,7 +1633,11 @@ function gRank(type,n){
   var hit=pool.filter(function(v){ return (tot[v.id]||0)>=GMIN; })
               .sort(function(a,b){ return tot[b.id]-tot[a.id]; });
   if(!hit.length) return [];
-  return hit.filter(function(v){ return tot[v.id] >= tot[hit[0].id]*0.4; }).slice(0,n);
+  /* ★ 並べ替えてから切ると、関連の薄い「使える」装置が、関連の濃い装置を押し出す。
+     （「人が通ったら」と書いたのに人感センサが消え、通過センサが1位になっていた）
+     出す3つは関連の濃さで選び、その3つの中を「使える→相談→未確認」で並べる。
+     「使えない」は eqAllowed で先に外してあるので、ここには来ない。 */
+  return eqOrder(hit.filter(function(v){ return tot[v.id] >= tot[hit[0].id]*0.4; }).slice(0,n));
 }
 /* 近い授業例をさがす */
 EXAMPLES.forEach(function(e){ e.ix = norm(e.n+e.d+e.s+e.a+e.pt); });
@@ -1647,7 +1694,7 @@ function gGaps(sens,acts){
 
 function gDevHtml(v){
   return '<div class="gdev'+(v.t==='a'?' act':'')+'"><div>'
-    +'<b>'+esc(v.n)+'</b><span class="gc">'+esc(v.c)+'</span>'
+    +'<b>'+esc(v.n)+'</b>'+eqBadge(v)+'<span class="gc">'+esc(v.c)+'</span>'
     +(v.b?'<span class="badge built">micro:bit内蔵</span>':'')
     +(v.sim?'<span class="badge sim">模擬実験</span>':'')
     +'<p>'+esc(v.d)+'</p>'
@@ -1811,7 +1858,7 @@ function buildPrompt(rec, polKey){
   L.push('');
   L.push('【資料の場所】北海道教育大学札幌校 石川研究室「中学校技術科－授業資料HP」');
   L.push(labUrl(LAB_IDX));
-  return L.join('\n');
+  return L.join('\n')+eqPromptStatus();
 }
 
 $('g-go').onclick=function(){
@@ -2154,7 +2201,7 @@ $('t-ask').onclick = async function(){
   $('t-msg').className = 'gate'; $('t-msg').textContent = '';
   $('t-ans').value = '';
   try{
-    await askClaude(src, function(txt){ $('t-ans').value = txt; });
+    await askClaude(eqAppendPrompt(src), function(txt){ $('t-ans').value = txt; });
     /* 値を入れただけでは input が出ないので、ここで自分で保存する。
        クラウドの相談は「生徒に返す」を押すまで書きこまない */
     if(!CCUR && KCUR>=0) kSync();
@@ -2192,6 +2239,7 @@ function tCopy(id, msgEl, okMsg){
   pick();
 }
 $('t-copy').onclick = function(){
+  $('t-src').value=eqAppendPrompt($('t-src').value);
   tCopy('t-src','t-msg','コピーしました。ClaudeやChatGPTに貼り付けてください。');
 };
 $('t-anscopy').onclick = function(){
@@ -2238,6 +2286,7 @@ function fbErr(e){
   return (e && e.message) ? e.message : String(e);
 }
 function gmsg(id, txt, ok){
+  if(id==='g-roommsg') $('eq-connection-status').textContent=txt;
   $(id).className = 'gate' + (ok ? ' ok' : '');
   $(id).textContent = txt;
 }
@@ -2271,9 +2320,12 @@ function cSyncSend(){
    飛んでいる途中の応答を無効にする。 */
 var cSeq = 0;
 function cCheck(){
+  eqStopWatch();
   var code = normCode($('g-code').value);
   if($('g-code').value !== code) $('g-code').value = code;
-  var my = ++cSeq;                 /* この呼び出しの番号 */
+  var my = ++cSeq;
+  eqRefresh(); // 古い受付の表示をただちに解除
+  //                 /* この呼び出しの番号 */
 
   if(code.length < 6){
     ccode=''; croom=null; cmine=[];
@@ -2303,13 +2355,13 @@ function cCheck(){
           ? '「'+(room.title||'受付')+'」につながりました。'
           : '「'+(room.title||'受付')+'」は、いまは閉じています。送ることはできませんが、前に送った分の答えは見られます。',
           !!room.open);
-        cWatchMine();
+        cWatchMine(); eqWatch(code);
       }
-      cSyncSend();
+      cSyncSend(); eqRefresh();
     }).catch(function(e){
       if(my !== cSeq) return;
       ccode=''; croom=null; cSyncSend();
-      gmsg('g-roommsg','つながりませんでした ―― '+fbErr(e), false);
+      gmsg('g-roommsg','つながりませんでした ―― '+fbErr(e), false); eqRefresh();
     });
   });
 }
@@ -2371,12 +2423,13 @@ function cRenderInbox(){
 
 $('g-code').addEventListener('input', cCheck);
 $('g-forget').onclick = function(){
+  eqStopWatch();
   cSeq++;                       /* 飛んでいる途中の応答を無効にする */
   try{ localStorage.removeItem(CCODE_KEY); }catch(e){}
   if(window.fbq) fbq.stopMine();
   ccode=''; croom=null; cmine=[]; $('g-code').value='';
   cRenderInbox(); cSyncSend();
-  gmsg('g-roommsg','コードを忘れました。', true);
+  gmsg('g-roommsg','コードを忘れました。', true); eqRefresh();
   gmsg('g-sendmsg','', false);
 };
 
@@ -2436,12 +2489,21 @@ function cLoad(){
 
 
 /* タブ */
+/* いま開いているタブ。装置パネルの出し分けに使う */
+var curTab = 'find';
+/* 装置パネルを出すタブ。①さがす・④設計メモ・⑤行きづまったら。
+   ②授業の例・③進め方には装置の一覧が無く、⑥先生用には先生の編集欄がある */
+var EQ_TABS = ['find','memo','stuck'];
 function showTab(name){
+  curTab = name;
   ['find','ex','step','memo','stuck','teach'].forEach(function(k){
     var on = k===name;
     $('t-'+k).setAttribute('aria-selected',on?'true':'false');
     $('p-'+k).hidden = !on;
   });
+  /* 検索欄と同じで、タブの外に置いたものは自分で消さないと出たままになる */
+  $('eq-shared').hidden = EQ_TABS.indexOf(name) < 0;
+  if(typeof eqRefresh==='function') eqRefresh();
   /* 検索欄はヘッダにあるので、放っておくとどのタブでも出たままになる。
      ②〜⑥では結果の一覧（#list）が隠れているため、打ちこんでも何も起きず、
      「検索が効かない」ように見えていた。①のときだけ出す。 */
@@ -2515,8 +2577,10 @@ function tRenderRooms(){
 }
 
 function tOpenRoom(id){
+  if(troom && troom.id!==id && eqDirty && !confirm('装置の未保存の変更を取り消して別の受付を開きますか？')) return;
+  if(troom && troom.id!==id){CCUR=null; $('k-edit').hidden=true; cShowBtns();}
   troom = trooms.filter(function(x){ return x.id===id; })[0] || null;
-  tRenderRooms();
+  tRenderRooms(); eqRefresh();
   if(!troom){ treqs=[]; tRenderCloud(); return; }
   fbq.watchReqs(troom.id, function(list){
     treqs = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
@@ -2652,6 +2716,158 @@ $('k-newroom').onclick = function(){
   })(0);
 };
 
+/* 受付ごとの装置情報。設定のない装置は必ず未確認にする。 */
+var EQ_LABEL={yes:'使える',ask:'先生に相談',no:'使えない',unknown:'未確認'};
+var eqShowAll=false, eqFresh=false, eqStop=null, eqWatchSeq=0;
+var eqEditCode='', eqDraft={}, eqDirty=false, eqSaving=false;
+var eqLastSignature='';
+function eqRoom(){ return tuser ? troom : (cCodeMatches()?croom:null); }
+function eqStates(room){
+  var out={}, raw=room && room.equipment && room.equipment.states;
+  DEV.forEach(function(v){
+    var s=raw && raw[v.id];
+    if(s==='yes'||s==='ask'||s==='no') out[v.id]=s;
+  });
+  return out;
+}
+function eqStatus(v){ return eqStates(eqRoom())[v.id] || 'unknown'; }
+function eqBadge(v){
+  var s=eqStatus(v);
+  return '<span class="eq-badge eq-'+s+'">'+EQ_LABEL[s]+'</span>';
+}
+function eqAllowed(v){return eqStatus(v)!=='no';}
+function eqSearchAllowed(v){return eqShowAll || eqAllowed(v);}
+function eqOrder(list){
+  var rank={yes:0,ask:1,unknown:2,no:3};
+  return list.slice().sort(function(a,b){return rank[eqStatus(a)]-rank[eqStatus(b)];});
+}
+function eqStopWatch(){
+  ++eqWatchSeq;
+  if(eqStop) eqStop();
+  eqStop=null; eqFresh=false;
+}
+function eqWatch(code){
+  eqStopWatch();
+  if(!window.fbq || !fbq.watchRoom) return;
+  var seq=eqWatchSeq;
+  eqStop=fbq.watchRoom(code,function(room,meta){
+    if(seq!==eqWatchSeq || tuser || !cCodeMatches() || ccode!==code) return;
+    croom=room;
+    eqFresh=!!room && !(meta && (meta.fromCache || meta.hasPendingWrites));
+    cSyncSend(); eqRefresh();
+    if(!room) gmsg('g-roommsg','この受付は見つかりません。先生にコードを確認してください。',false);
+    else if(!room.open) gmsg('g-roommsg','この受付は閉じています。装置情報と以前の答えは確認できます。',false);
+  },function(){
+    if(seq!==eqWatchSeq) return;
+    eqFresh=false; eqRefresh();
+  });
+}
+function eqRefresh(){
+  var room=eqRoom();
+  var signature=JSON.stringify([room && room.id,eqStates(room)]);
+  var settingsChanged=signature!==eqLastSignature;
+  eqLastSignature=signature;
+  var count={yes:0,ask:0,no:0,unknown:0};
+  DEV.forEach(function(v){count[eqStatus(v)]++;});
+  var text='受付コードを入れると、この授業で使える装置を確認できます。未接続の装置はすべて未確認です。';
+  if(room){
+    var stamp=room.equipment && room.equipment.updatedAt;
+    text='「'+(room.title||'受付')+'」 '+room.id+'：使える '+count.yes+'／相談 '+count.ask+'／使えない '+count.no+'／未確認 '+count.unknown;
+    text+='。'+(stamp?'最終更新 '+new Date(stamp).toLocaleString('ja-JP'):'先生がまだ装置を設定していません');
+    if(!eqFresh || navigator.onLine===false) text+='。最新の状態を確認できません（最後に取得した情報です）';
+  }
+  /* ⑤には「先生に送る」の中に受付コード欄がある。
+     同じ役目の入力欄が1画面に2つ並ぶと、どちらに入れるのか分からなくなるので、
+     ⑤では上の入力欄を出さず、下の欄に誘導する */
+  var hideConnect = !!tuser || curTab==='stuck';
+  if(!room && hideConnect && !tuser){
+    text='下の「先生に送る」の受付コード欄に入れると、この授業で使える装置を確認できます。'
+       + '未接続の装置はすべて未確認です。';
+  }
+  $('eq-summary').textContent=text;
+  $('eq-connect').hidden=hideConnect;
+  $('eq-code').value=$('g-code').value;
+  $('eq-showall').checked=eqShowAll;
+  renderList(); eqMemoNote(); eqEditor();
+  if(settingsChanged && $('g-out').textContent.trim()){
+    $('g-out').innerHTML='<p class="note-bar">装置情報が変わりました。「ヒントを出す」を押して候補を更新してください。入力した文章は残っています。</p>';
+  }
+}
+function eqMemoNote(){
+  var room=eqRoom(), notes=[];
+  [memo.s,memo.a].forEach(function(n){
+    var v=DEV.find(function(x){return x.n===n;});
+    if(v) notes.push(v.n+'：'+EQ_LABEL[eqStatus(v)]);
+  });
+  $('eq-memo').textContent=notes.length?'装置の状態'+(room?'（'+room.title+'）':'')+'：'+notes.join('／')+'。設計内容はそのまま残しています。':'';
+}
+function eqEditor(){
+  var box=$('eq-teacher');
+  box.hidden=!(tuser && troom);
+  if(box.hidden){eqEditCode='';eqDirty=false;return;}
+  $('eq-teacher-title').textContent='「'+(troom.title||'受付')+'」で使える装置（'+troom.id+'）';
+  var changed=eqEditCode!==troom.id;
+  if(changed || !eqDirty){
+    eqEditCode=troom.id; eqDraft=eqStates(troom); eqDirty=false;
+    $('eq-device-list').innerHTML=['s','a'].map(function(type){
+      return '<h3>'+ (type==='s'?'センサ・入力':'アクション装置・出力')+'</h3>'+DEV.filter(function(v){return v.t===type;}).map(function(v){
+        return '<label class="eq-row" for="eq-'+v.id+'"><span>'+esc(v.n)+'</span><select id="eq-'+v.id+'" data-device="'+v.id+'">'+
+          Object.keys(EQ_LABEL).map(function(key){return '<option value="'+key+'"'+((eqDraft[v.id]||'unknown')===key?' selected':'')+'>'+EQ_LABEL[key]+'</option>';}).join('')+'</select></label>';
+      }).join('');
+    }).join('');
+    $('eq-device-list').querySelectorAll('select').forEach(function(el){el.onchange=function(){
+      if(el.value==='unknown') delete eqDraft[el.dataset.device];else eqDraft[el.dataset.device]=el.value;
+      eqDirty=true; $('eq-save-msg').textContent='未保存の変更があります。保存すると生徒の画面へ反映されます。';
+    };});
+    if(changed) $('eq-save-msg').textContent='';
+  }
+  $('eq-save').disabled=eqSaving;
+  $('eq-device-list').querySelectorAll('select').forEach(function(el){el.disabled=eqSaving;});
+}
+function eqPromptStatus(){
+  var room=eqRoom();
+  if(!room) return '';
+  return '\n【この受付の装置の状態】\n受付：'+room.title+'（'+room.id+'）\n'+
+    ((!eqFresh || navigator.onLine===false)?'最新情報は未確認。以下は最後に取得した状態です。\n':'')+
+    '上の教材一覧・候補一覧より、この受付の状態を優先する。「使えない」は提案しない。「先生に相談」「未確認」は利用可能と断定せず、先生への確認を条件にする。使える装置でも配線の互換性は別途確認する。\n'+
+    DEV.map(function(v){return v.n+'：'+EQ_LABEL[eqStatus(v)];}).join('\n');
+}
+function eqAppendPrompt(src){
+  var marker='\n【この受付の装置の状態】';
+  var i=src.lastIndexOf(marker);
+  if(i>=0) src=src.slice(0,i);
+  return src+eqPromptStatus();
+}
+$('eq-code').addEventListener('input',function(){
+  $('g-code').value=this.value; cCheck(); this.value=$('g-code').value;
+});
+$('eq-disconnect').onclick=function(){$('g-forget').click();};
+$('eq-showall').onchange=function(){eqShowAll=this.checked;renderList();};
+$('eq-save').onclick=async function(){
+  if(!tuser || !troom || eqSaving) return;
+  var code=troom.id, states=Object.assign({},eqDraft);
+  eqSaving=true;eqEditor(); $('eq-save-msg').textContent='保存しています…';
+  try{
+    await fbq.updateEquipment(code,{v:1,states:states,updatedAt:Date.now()});
+    if(troom && troom.id===code){eqDirty=false;$('eq-save-msg').textContent='保存しました。接続している生徒の画面に反映されます。';}
+  }catch(e){
+    if(troom && troom.id===code) $('eq-save-msg').textContent='保存できませんでした。変更はまだ生徒に反映されていません。'+fbErr(e);
+  }finally{eqSaving=false;eqEditor();}
+};
+$('eq-discard').onclick=function(){
+  if(eqDirty && !confirm('装置の未保存の変更を取り消しますか？')) return;
+  eqDirty=false; eqEditor(); $('eq-save-msg').textContent='保存済みの状態に戻しました。';
+};
+$('eq-mark-rest').onclick=function(){
+  if(eqSaving) return;
+  DEV.forEach(function(v){if(!eqDraft[v.id]) eqDraft[v.id]='no';});
+  $('eq-device-list').querySelectorAll('select').forEach(function(el){el.value=eqDraft[el.dataset.device];});
+  eqDirty=true; $('eq-save-msg').textContent='未確認の装置を「使えない」にしました。保存するまで生徒には反映されません。';
+};
+window.addEventListener('offline',function(){eqFresh=false;eqRefresh();});
+window.addEventListener('online',function(){if(!tuser && cCodeMatches()) eqWatch(ccode);else eqRefresh();});
+
+
 /* ログインの出入りを見はる。
    生徒（匿名）でログインしている状態と、先生（Google）は同じ auth を使うので、
    匿名のときは先生用の画面を出さない */
@@ -2661,7 +2877,9 @@ waitFb(function(){
     tuser = (u && !u.isAnonymous) ? u : null;
     tRenderAuth();
     if(tuser){
-      fbq.watchRooms(tuser.uid, function(list){
+      eqStopWatch();
+      fbq.watchRooms(tuser.uid, function(list,meta){
+        eqFresh=!(meta && (meta.fromCache || meta.hasPendingWrites));
         trooms = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
         if(troom){
           var still = trooms.filter(function(x){ return x.id===troom.id; })[0];
@@ -2672,8 +2890,9 @@ waitFb(function(){
            まだ何も開いていなければ、いちばん新しい受付をそのまま開く
            （受付をつくった直後に、続けて相談を受け取れるように） */
         if(!troom && trooms.length){ tOpenRoom(trooms[0].id); return; }
-        tRenderRooms();
+        tRenderRooms(); eqRefresh();
       }, function(e){
+        eqFresh=false;eqRefresh();
         $('k-rooms').innerHTML = '<p class="empty">受付を読みこめませんでした ―― '+esc(fbErr(e))+'</p>';
       });
       /* 先生としてログインすると、生徒側の購読は続けられない（別人になる） */
@@ -2681,7 +2900,7 @@ waitFb(function(){
         gmsg('g-roommsg','いまは先生としてログインしています。生徒として使うときは、⑥でログアウトしてください。', false); }
     }else{
       trooms=[]; troom=null; treqs=[]; CCUR=null;
-      tRenderRooms(); tRenderCloud(); cShowBtns();
+      tRenderRooms(); tRenderCloud(); cShowBtns(); eqRefresh();
       if(wasTeacher && ccode) cCheck();   /* ログアウトしたら生徒として戻す */
     }
     if(u) $('k-loginmsg').textContent='';
@@ -2695,7 +2914,7 @@ $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.ty
 showTab('find');
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
 gLoad(); gRender(); gSync(); kRenderKind(); tRenderPol(); tSyncKey(); kRender();
-tRenderAuth(); tRenderRooms(); tRenderCloud(); cShowBtns(); cLoad(); cSyncSend();
+tRenderAuth(); tRenderRooms(); tRenderCloud(); cShowBtns(); cLoad(); cSyncSend(); eqRefresh();
 </script>
 </body>
 </html>
