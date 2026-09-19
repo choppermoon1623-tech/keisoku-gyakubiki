@@ -1,0 +1,220 @@
+/* ⑤「行きづまったら」タブの動作確認 */
+const fs = require("fs");
+const { JSDOM } = require("jsdom");
+
+const HTML = fs.readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+
+let pass = 0, fail = 0;
+function ok(name, cond, extra) {
+  if (cond) { pass++; }
+  else { fail++; console.log("  NG  " + name + (extra ? "  → " + extra : "")); }
+}
+
+const errs = [];
+const dom = new JSDOM(HTML, {
+  url: "http://localhost/",
+  runScripts: "dangerously",
+  pretendToBeVisual: true,
+});
+dom.window.addEventListener("error", e => errs.push(String(e.error || e.message)));
+dom.window.onerror = (m) => errs.push(String(m));
+const w = dom.window, d = w.document;
+const $ = id => d.getElementById(id);
+w.HTMLElement.prototype.scrollIntoView = function () {};
+w.scrollTo = function () {};
+
+console.log("=== 読み込み ===");
+ok("スクリプトがエラーなく走る", errs.length === 0, errs.join(" / "));
+ok("⑤タブのボタンがある", !!$("t-stuck"));
+ok("⑤タブの中身がある", !!$("p-stuck"));
+ok("①〜④はそのまま", ["t-find", "t-ex", "t-step", "t-memo"].every(i => !!$(i)));
+
+console.log("=== タブ切りかえ ===");
+$("t-stuck").click();
+ok("⑤を押すと⑤が出る", $("p-stuck").hidden === false);
+ok("⑤を押すと①が隠れる", $("p-find").hidden === true);
+ok("aria-selectedが⑤に移る", $("t-stuck").getAttribute("aria-selected") === "as".slice(0,0) + "true");
+$("t-find").click();
+ok("①に戻れる", $("p-find").hidden === false && $("p-stuck").hidden === true);
+
+console.log("=== ①タブの回帰（セレクタを絞った影響） ===");
+/* 押すと chips は描き直されるので、そのつど引き直す */
+const chipSel = "#chips-s .chip";
+const cat = d.querySelector(chipSel).dataset.cat;
+d.querySelector(chipSel).click();
+ok("カテゴリのボタンがまだ効く",
+   d.querySelector('#chips-s .chip[data-cat="' + cat + '"]').getAttribute("aria-pressed") === "true");
+d.querySelector('#chips-s .chip[data-cat="' + cat + '"]').click();
+ok("もう一度押すと解除される",
+   d.querySelector('#chips-s .chip[data-cat="' + cat + '"]').getAttribute("aria-pressed") === "false");
+$("q").value = "土がかわいたら";
+$("q").dispatchEvent(new w.Event("input"));
+const firstCard = d.querySelector("#list .card h3");
+ok("①の検索がまだ効く（土がかわいたら→土壌水分センサ）",
+   firstCard && firstCard.textContent.indexOf("土壌水分") >= 0,
+   firstCard && firstCard.textContent);
+ok("①の「これを使う」がまだ効く", !!d.querySelector("#list .pick"));
+$("clr").click();
+
+console.log("=== 書かないと押せない ===");
+$("t-stuck").click();
+ok("最初はボタンが押せない", $("g-go").disabled === true);
+ok("あと4つと出る", /あと4つ/.test($("g-gate").textContent), $("g-gate").textContent);
+
+function type(id, v) { $(id).value = v; $(id).dispatchEvent(new w.Event("input")); }
+type("g-theme", "祖父が夜トイレに行くとき、暗くてあぶない");
+ok("1つ書いてもまだ押せない", $("g-go").disabled === true);
+ok("あと3つ", /あと3つ/.test($("g-gate").textContent), $("g-gate").textContent);
+type("g-mine", "人が通ったら電気をつける案を考えた");
+type("g-stuck", "夜だけ動かしたいのに、昼も反応してしまう。どう区別すればいいか分からない");
+ok("3つ書いてもまだ押せない（困っていること未選択）", $("g-go").disabled === true);
+ok("あと1つ", /あと1つ/.test($("g-gate").textContent), $("g-gate").textContent);
+
+const kinds = d.querySelectorAll("#g-kinds .chip");
+ok("困っていることの選択肢が5つ", kinds.length === 5, kinds.length);
+kinds[2].click(); /* 条件（しきい値） */
+ok("4つそろうと押せる", $("g-go").disabled === false);
+ok("押せる旨が出る", /押せます/.test($("g-gate").textContent), $("g-gate").textContent);
+kinds[2].click();
+ok("選び直しで外すと、また押せなくなる", $("g-go").disabled === true);
+kinds[2].click();
+
+console.log("=== ヒントの中身 ===");
+$("g-go").click();
+const out = $("g-out");
+const txt = out.textContent;
+ok("ヒントが出る", out.innerHTML.length > 200);
+ok("装置の見出しが出る", /書いた言葉から見つかった装置/.test(txt));
+ok("確かめたいことが出る", /いま、確かめたいこと/.test(txt));
+ok("困っていることへのヒントが出る", /困っていることへのヒント/.test(txt));
+ok("選んだ種類に合ったヒントが出る", /しきい値.*分からないとき|条件（しきい値）の決め方/.test(txt), txt.slice(0,0));
+ok("条件・きまりが空だと指摘される", /「条件・きまり」が空のまま/.test(txt));
+ok("④が空だと指摘される", /設計メモが、まだ空いている/.test(txt));
+ok("最後のひと押しが出る", /印刷して先生に見せる/.test(txt));
+ok("エラーは出ていない", errs.length === 0, errs.join(" / "));
+
+const devNames = [...out.querySelectorAll(".gdev b")].map(e => e.textContent);
+console.log("  候補（暗い・人が通る）:", devNames.join(" / "));
+ok("暗さに関わるセンサが候補に出る", devNames.some(n => /光センサ/.test(n)), devNames.join("/"));
+ok("『夜だけ動かしたい』から時刻も候補に出る", devNames.some(n => /時刻/.test(n)), devNames.join("/"));
+ok("『電気をつける』からスマートプラグが出る", devNames.some(n => /スマートプラグ/.test(n)), devNames.join("/"));
+const exNames = [...out.querySelectorAll(".ex h3")].map(e => e.textContent);
+console.log("  近い授業例:", exNames.join(" / "));
+
+console.log("=== ヒントから④へ ===");
+const pickBtn = out.querySelector(".gdev .pick");
+const pickedName = pickBtn.closest(".gdev").querySelector("b").textContent;
+pickBtn.click();
+ok("「これを使う」で④に移る", $("p-memo").hidden === false);
+ok("④のスロットに入る", $("slot-s").textContent.indexOf(pickedName) >= 0 || $("slot-a").textContent.indexOf(pickedName) >= 0,
+   $("slot-s").textContent + " | " + $("slot-a").textContent);
+
+console.log("=== 書いたものが残る ===");
+const saved = JSON.parse(w.localStorage.getItem("keisoku-gyakubiki-stuck"));
+ok("localStorageに保存される", saved && saved["g-theme"].indexOf("祖父") >= 0);
+ok("困っていることも保存される", saved && saved.k === "cond", saved && saved.k);
+
+const dom2 = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true });
+const w2 = dom2.window;
+w2.HTMLElement.prototype.scrollIntoView = function () {};
+/* 同一オリジンなので localStorage は引き継がれない。手で入れて読み戻しを見る */
+w2.localStorage.setItem("keisoku-gyakubiki-stuck", JSON.stringify({
+  k: "ng", "g-theme": "ためしのテーマ", "g-joken": "", "g-mine": "ためしの案", "g-stuck": "ためしの行きづまり"
+}));
+const dom3 = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+  beforeParse(win) {
+    win.HTMLElement.prototype.scrollIntoView = function () {};
+    win.localStorage.setItem("keisoku-gyakubiki-stuck", JSON.stringify({
+      k: "ng", "g-theme": "ためしのテーマ", "g-joken": "", "g-mine": "ためしの案", "g-stuck": "ためしの行きづまり"
+    }));
+  }});
+const d3 = dom3.window.document;
+ok("開き直すと書いたものが戻る", d3.getElementById("g-theme").value === "ためしのテーマ",
+   d3.getElementById("g-theme").value);
+ok("困っていることの選択も戻る",
+   d3.querySelector('#g-kinds .chip[data-k="ng"]').getAttribute("aria-pressed") === "true");
+ok("戻したあとボタンが押せる", d3.getElementById("g-go").disabled === false);
+
+console.log("=== 欠けの指摘（場合分け） ===");
+function scenario(theme, joken, mine, stuck, kind) {
+  const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const ww = dm.window, dd = ww.document, g = id => dd.getElementById(id);
+  const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new ww.Event("input")); };
+  set("g-theme", theme); set("g-joken", joken); set("g-mine", mine); set("g-stuck", stuck);
+  dd.querySelector('#g-kinds .chip[data-k="' + kind + '"]').click();
+  g("g-go").click();
+  const o = g("g-out");
+  return {
+    txt: o.textContent,
+    sens: [...o.querySelectorAll(".gdev:not(.act) b")].map(e => e.textContent),
+    acts: [...o.querySelectorAll(".gdev.act b")].map(e => e.textContent),
+  };
+}
+
+const A = scenario("教室が暑いとき、だれも気づかない", "2週間でつくる",
+  "温度をはかる案を考えた", "はかったあと、どうやって知らせればいいか分からない", "dev");
+console.log("  A センサ:", A.sens.join("/"), "｜アクション:", A.acts.join("/"));
+ok("A: 温度のセンサが出る（漢字の「暑い」でも引ける）", A.sens.some(n => /温度/.test(n)), A.sens.join("/"));
+ok("A: 動作は無理に出さない", A.acts.length === 0, A.acts.join("/"));
+ok("A: 動かす側がまだ、と指摘する", /「動かす・知らせる」側がまだ/.test(A.txt));
+
+const B = scenario("ろうかを走る人にやめてほしい", "",
+  "音声で注意する装置を作りたい", "何をきっかけに鳴らせばいいか決まらない", "idea");
+console.log("  B センサ:", B.sens.join("/"), "｜アクション:", B.acts.join("/"));
+ok("B: 音声の装置が出る", B.acts.some(n => /音声|スピーカ|ブザー/.test(n)), B.acts.join("/"));
+ok("B: センサは無理に出さない", B.sens.length === 0, B.sens.join("/"));
+ok("B: 気づく側がまだ、と指摘する", /何で「気づく」かがまだ/.test(B.txt));
+ok("B: 音声案内の授業例が出る", /音声案内装置/.test(B.txt));
+
+const C = scenario("あああ", "", "いいい", "ううう", "idea");
+ok("C: 候補を出さない", C.sens.length === 0 && C.acts.length === 0, C.sens.join("/") + C.acts.join("/"));
+console.log("  C（意味のない文字）:", C.sens.join("/"), C.acts.join("/"));
+ok("C: 見当がつかないときはそう言う", /装置の見当がつきませんでした/.test(C.txt));
+ok("C: 言いかえの例を出す", /暗くなったら/.test(C.txt));
+
+const D = scenario("植物の水やりを忘れる", "学校にある装置だけ",
+  "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う",
+  "何の値で水を出すか、境目が決められない", "cond");
+console.log("  D センサ:", D.sens.join("/"), "｜アクション:", D.acts.join("/"));
+ok("D: 土壌水分センサが出る", D.sens.some(n => /土壌/.test(n)), D.sens.join("/"));
+ok("D: ポンプが出る", D.acts.some(n => /ポンプ/.test(n)), D.acts.join("/"));
+ok("D: 両方そろった旨が出る", /両方に、あたりがついている/.test(D.txt));
+ok("D: 条件・きまりを書いたので、その指摘は出ない", !/「条件・きまり」が空のまま/.test(D.txt));
+ok("D: 自動水やりの授業例が出る", /自動水やり/.test(D.txt));
+ok("D: 関係のない授業例は出さない", !/フードコート/.test(D.txt));
+
+/* 装置の話がまったく無い相談でも、まちがった候補を出さない */
+const E = scenario("グループで話し合いがうまくいかない", "", "みんなの意見をまとめたい",
+  "どうやって決めればいいか分からない", "idea");
+ok("E: 装置の話が無ければ候補を出さない", E.sens.length === 0 && E.acts.length === 0,
+   E.sens.join("/") + E.acts.join("/"));
+ok("E: 言いかえをうながす", /装置の見当がつきませんでした/.test(E.txt));
+
+/* 文の途中に偶然あらわれる2文字（「開いたのどうして」→「のど」）で加湿器を出さない */
+const F = scenario("教室のドアが開けっぱなしで寒い", "", "ドアが開いたら知らせたい",
+  "どうやってドアが開いたと分かるのか", "dev");
+ok("F: 開閉検知センサが出る", F.sens.some(n => /開閉/.test(n)), F.sens.join("/"));
+ok("F: 「のど」の偶然の一致で加湿器を出さない", !F.acts.some(n => /加湿/.test(n)), F.acts.join("/"));
+
+console.log("\n=== ①の検索の回帰（元の45パターンから抜粋） ===");
+const cases = [
+  ["くらい", "光センサ"], ["ひとがくる", null], ["あつい", null], ["みず", null],
+  ["ドアがあいた", null], ["火事", null], ["土がかわいたら", "土壌水分センサ"],
+  ["音を出さずに知らせたい", null], ["回したい", null], ["暗くなったら", "光センサ"],
+];
+const dom4 = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+  beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+const d4 = dom4.window.document, w4 = dom4.window;
+cases.forEach(([q, expect]) => {
+  d4.getElementById("q").value = q;
+  d4.getElementById("q").dispatchEvent(new w4.Event("input"));
+  const top = d4.querySelector("#list .card h3");
+  const n = top ? top.textContent : "(なし)";
+  console.log("  " + q.padEnd(14) + " → " + n);
+  if (expect) ok("検索『" + q + "』→ " + expect, n === expect, n);
+  else ok("検索『" + q + "』が何か返す", !!top);
+});
+
+console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
+process.exit(fail ? 1 : 0);
