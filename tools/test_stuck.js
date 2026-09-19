@@ -96,7 +96,13 @@ ok("エラーは出ていない", errs.length === 0, errs.join(" / "));
 const devNames = [...out.querySelectorAll(".gdev b")].map(e => e.textContent);
 console.log("  候補（暗い・人が通る）:", devNames.join(" / "));
 ok("暗さに関わるセンサが候補に出る", devNames.some(n => /光センサ/.test(n)), devNames.join("/"));
-ok("『夜だけ動かしたい』から時刻も候補に出る", devNames.some(n => /時刻/.test(n)), devNames.join("/"));
+/* もとは「『夜だけ動かしたい』から時刻も出る」を確かめていたが、
+   その年月日・時刻が人感センサを押しのけて1位に居座っていた（2026-09-19 修正）。
+   生徒が書いたのは「人が通ったら」なので、そこを先に出すのが正しい。 */
+ok("「人が通ったら」で人感センサが出る（活用形でも引ける）",
+   devNames.some(n => /人感/.test(n)), devNames.join("/"));
+ok("困りごとの言い回しに当たっただけの装置が1位にならない",
+   devNames[0] !== "年月日・時刻", devNames.join("/"));
 ok("『電気をつける』からスマートプラグが出る", devNames.some(n => /スマートプラグ/.test(n)), devNames.join("/"));
 const exNames = [...out.querySelectorAll(".ex h3")].map(e => e.textContent);
 console.log("  近い授業例:", exNames.join(" / "));
@@ -163,8 +169,11 @@ const B = scenario("ろうかを走る人にやめてほしい", "",
   "音声で注意する装置を作りたい", "何をきっかけに鳴らせばいいか決まらない", "idea");
 console.log("  B センサ:", B.sens.join("/"), "｜アクション:", B.acts.join("/"));
 ok("B: 音声の装置が出る", B.acts.some(n => /音声|スピーカ|ブザー/.test(n)), B.acts.join("/"));
-ok("B: センサは無理に出さない", B.sens.length === 0, B.sens.join("/"));
-ok("B: 気づく側がまだ、と指摘する", /何で「気づく」かがまだ/.test(B.txt));
+/* もとは「センサは出さない」を確かめていた。「走る」を人感センサの言いかえ語に
+   足したので、ろうかを走る人に気づく側も出るようになった（2026-09-19 修正）。
+   条件と止め方は生徒が決めるので、答えを渡してしまうことにはならない。 */
+ok("B: 走る人に気づくセンサが出る", B.sens.some(n => /人感/.test(n)), B.sens.join("/"));
+ok("B: 両方そろったので、条件と止め方へ進ませる", /条件（しきい値）/.test(B.txt));
 ok("B: 音声案内の授業例が出る", /音声案内装置/.test(B.txt));
 
 const C = scenario("あああ", "", "いいい", "ううう", "idea");

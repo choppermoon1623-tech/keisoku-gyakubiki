@@ -176,27 +176,37 @@ h2.tstep{border-left-color:#7a5af0;color:#4a3a86}
   #p-teach label[for="k-sens"],#p-teach label[for="k-acts"]{display:none!important}
   #t-ans{border:1px solid #bbb;color:#000}
 }
-.tbox{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;
-  box-shadow:var(--shadow);overflow:hidden}
-.tbox>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:700;color:#4a3a86;
-  background:#f1eefc;list-style:none}
-.tbox>summary::-webkit-details-marker{display:none}
-.tbox>summary::before{content:'▸ ';color:#7a5af0}
-.tbox[open]>summary::before{content:'▾ '}
-.tin{padding:14px}
-.tin label,.tin .glb{display:block;font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 4px}
-.tin input,.tin select,.tin textarea{width:100%;padding:10px;border:1px solid var(--line);
-  border-radius:8px;font:inherit;font-size:15px}
-.tin textarea{line-height:1.6;resize:vertical}
-#t-set{margin-top:14px;border:1px dashed var(--line);border-radius:10px}
-#t-set>summary{cursor:pointer;padding:9px 12px;font-size:13px;color:var(--sub)}
-.warnbox{font-size:12px;color:#a13b12;background:#fdefe4;border-radius:8px;padding:9px 11px;margin:6px 0 0}
+
+/* ---- クラウド（先生に送る・先生からの答え） ---- */
+#g-cloud{margin-top:22px}
+#g-cloud label{display:block;font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 4px}
+#g-cloud input{width:100%;max-width:280px;padding:10px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:17px;font-weight:700}
+#k-newtitle{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+  font:inherit;font-size:15px}
+.room{background:#fff;border:1px solid var(--line);border-left:5px solid #7a5af0;border-radius:12px;
+  padding:11px 13px;margin:8px 0;box-shadow:var(--shadow)}
+.room.on{outline:3px solid #7a5af0;outline-offset:2px}
+.room .code{font-size:20px;font-weight:800;letter-spacing:.18em;color:#4a3a86}
+.room p{margin:3px 0 0;font-size:13px;color:var(--sub)}
+.room.closed{opacity:.62}
+.card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--line);
+  border-radius:12px;padding:11px 13px;margin:8px 0;box-shadow:var(--shadow)}
+.card.on{outline:3px solid #7a5af0;outline-offset:2px}
+.card.new{border-left-color:#e8b53a}
+.card.work{border-left-color:#7a5af0}
+.card.done{border-left-color:var(--accent)}
+.card.ng{border-left-color:#bbb}
+.card .th{font-weight:700;font-size:14px}
+.card p{margin:3px 0 0;font-size:13px;color:var(--sub);white-space:pre-wrap}
+.card .ans{margin-top:8px;padding:10px 12px;background:var(--accent-bg);border-radius:8px;
+  color:#14361f;font-size:14px;line-height:1.75;white-space:pre-wrap}
 @media print{
-  .tbox>summary,#t-set,#t-src,.tbox .note-bar,.tbox .gnudge,#t-pol,#t-polds{display:none!important}
-  .tbox{border:0;box-shadow:none}
-  .tin{padding:0}
-  #t-ans{border:1px solid #bbb;color:#000}
+  #g-code,#g-send,#g-forget,#g-cloud .count,#g-cloud label,#g-roommsg,#g-sendmsg{display:none!important}
+  #k-signin,#k-signed,#k-rooms,#k-cloudlist{display:none!important}
+  .card,.room{box-shadow:none;border:1px solid #bbb;break-inside:avoid}
 }
+.tin{padding:14px}
 .refbox{margin:0 0 8px}
 .ref{display:inline-block;font-size:12px;color:var(--sensor);text-decoration:none;
   background:var(--sensor-bg);border-radius:8px;padding:6px 10px;line-height:1.4;
@@ -329,7 +339,9 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 </section>
 
 <section id="p-stuck" role="tabpanel" aria-labelledby="t-stuck" hidden>
-  <p class="note-bar">行きづまったら、まず<b>書いてみる</b>。テーマ・自分が考えたこと・行きづまったところの3つを書くと、その言葉からヒントを出します。書いているうちに、自分で答えが見つかることもあります。<br><b>AIは使いません。</b>書いた内容はこのパソコンの中だけに残り、どこにも送られません。</p>
+  <p class="note-bar">行きづまったら、まず<b>書いてみる</b>。テーマ・自分が考えたこと・行きづまったところの3つを書くと、その言葉からヒントを出します。書いているうちに、自分で答えが見つかることもあります。<br>
+  <b>AIは使いません。</b>書いた内容はこのパソコンの中だけに残ります。<br>
+  それでも進まないときは、<b>先生から受付コードをもらって「先生に送る」を押したときだけ</b>、その1件が先生に届きます。先生がAIに聞いて、<b>答えを読んで確かめてから</b>返します。</p>
   <div class="builder">
     <label for="g-name">なまえ・出席番号（先生にわたすときに使います）</label>
     <input id="g-name" placeholder="例：1年A組 12番 山田">
@@ -352,6 +364,28 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   </div>
   <div id="g-out"></div>
 
+  <div id="g-cloud">
+    <h2 class="tstep">先生に送る</h2>
+    <p class="count">先生から<b>受付コード</b>（6文字）をもらったときだけ使えます。
+    コードを入れて「先生に送る」を押すと、上に出ている<b>相談カードと同じ中身</b>が先生に届きます。
+    先生がAIに聞いて、答えを確かめてから返します。<b>みなさんはAIを使いません。</b><br>
+    コードをもらっていないときは、相談カードをコピーして先生にわたすか、この画面を印刷してください。</p>
+    <label for="g-code">受付コード（6文字）</label>
+    <input id="g-code" maxlength="6" autocomplete="off" spellcheck="false"
+           placeholder="例：K7M2QX" style="text-transform:uppercase;letter-spacing:.18em">
+    <p class="gate" id="g-roommsg" role="status" aria-live="polite"></p>
+    <div class="btnrow">
+      <button class="main" id="g-send" disabled>先生に送る</button>
+      <button class="sub" id="g-forget">このコードを忘れる</button>
+    </div>
+    <p class="gate" id="g-sendmsg" role="status" aria-live="polite"></p>
+
+    <h2 class="tstep">先生からの答え</h2>
+    <p class="count" id="g-inbox-lead">受付コードを入れると、自分が出した相談と、先生からの答えがここに出ます。
+    ほかの人の相談は見えません。<b>ブラウザのデータを消すと、自分が出した相談も見えなくなります。</b></p>
+    <div id="g-inbox"></div>
+  </div>
+
 </section>
 
 <section id="p-teach" role="tabpanel" aria-labelledby="t-teach" hidden>
@@ -359,7 +393,32 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   答えは<b>先生が読んで直してから</b>生徒に返します。<br>
   APIキーを入れなくても使えます（「送る文をコピー」して、ふだん使っているClaudeやChatGPTに貼るだけ）。</p>
 
-  <h2 class="tstep">1. 受け取る</h2>
+  <h2 class="tstep">1. 受付をひらく（クラウドで受け取る）</h2>
+  <div class="builder">
+    <p class="count"><b>AIおたずね箱と同じしくみ・同じログインです。</b>
+    受付をつくると<b>6文字のコード</b>が出ます。それを生徒に伝えると、⑤の画面から直接送られてきます。
+    紙やClassroomで受け取りたいときは、ここを飛ばして下の「貼りこんで受け取る」を使ってください。</p>
+    <div id="k-signin">
+      <div class="btnrow"><button class="main" id="k-login">Googleでログイン</button></div>
+      <p class="gate" id="k-loginmsg" role="status" aria-live="polite"></p>
+    </div>
+    <div id="k-signed" hidden>
+      <p class="gate ok" id="k-who"></p>
+      <div id="k-rooms"></div>
+      <label for="k-newtitle">新しい受付の名前</label>
+      <input id="k-newtitle" placeholder="例：2年A組 計測・制御">
+      <div class="btnrow">
+        <button class="main" id="k-newroom">受付をつくる</button>
+        <button class="sub" id="k-logout">ログアウト</button>
+      </div>
+      <p class="gate" id="k-roommsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <h2 class="tstep">2. 届いた相談</h2>
+  <div id="k-cloudlist"><p class="empty">受付をひらくと、届いた相談がここに出ます。</p></div>
+
+  <h2 class="tstep">3. 貼りこんで受け取る（コードを使わないとき）</h2>
   <div class="builder">
     <label for="k-in">生徒から受け取った相談カードを貼る（何人分でもまとめて）</label>
     <textarea id="k-in" rows="6" placeholder="Classroomのコメント、メール、共有ドキュメント…どこで受け取ったものでも、そのまま貼ってください。何枚あってもかまいません。"></textarea>
@@ -369,14 +428,13 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     </div>
     <p class="gate" id="k-readmsg" role="status" aria-live="polite"></p>
   </div>
-
-  <h2 class="tstep">2. 相談の一覧</h2>
   <div id="k-list"></div>
 
-  <h2 class="tstep">3. AIにかける</h2>
+  <h2 class="tstep">4. AIにかける</h2>
   <div class="builder">
     <p class="gate" id="k-none">上の一覧から「ひらく」を押してください。白紙で1件つくって、先生が直接書いてもかまいません。</p>
     <div id="k-edit" hidden>
+      <p class="gate ok" id="k-src-lb" hidden></p>
       <label for="k-name">なまえ・出席番号</label>
       <input id="k-name">
       <label for="k-theme">テーマ・課題</label>
@@ -411,11 +469,15 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
       <label for="t-ans">AIの答え（そのまま渡さず、直してから渡してください）</label>
       <textarea id="t-ans" rows="10"></textarea>
       <div class="btnrow">
+        <button class="main" id="c-reply" hidden>生徒に返す</button>
+        <button class="sub" id="c-work" hidden>対応中にする</button>
+        <button class="sub" id="c-ng" hidden>見送りにする</button>
         <button class="sub" id="t-anscopy">答えをコピー</button>
         <button class="sub" id="t-print">印刷して渡す</button>
         <button class="sub" id="k-done">返したことにする</button>
         <button class="sub" id="k-del">この相談を消す</button>
       </div>
+      <p class="gate" id="c-msg" role="status" aria-live="polite"></p>
       <p class="gnudge"><b>渡す前にかならず読んでください。</b>
       AIには「学校にある51種の装置の中からだけ提案する」「つなぎ方・コネクタ番号・しきい値の数値は書かない」
       「そのまま提出できる完成品は書かない」と指示してありますが、守られているかは先生が確かめます。</p>
@@ -468,6 +530,107 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 <p>内蔵機能の確認：<a href="https://microbit.org/get-started/features/sensors/" target="_blank" rel="noopener">micro:bit公式・センサ</a> ／ <a href="https://microbit.org/get-started/features/sound-input/" target="_blank" rel="noopener">マイク</a> ／ <a href="https://microbit.org/get-started/features/sound-output/" target="_blank" rel="noopener">スピーカー</a>（2026年9月確認）</p>
 </footer>
 
+<script type="module">
+/* ============================================================
+   Firebase ―― AIおたずね箱と同じプロジェクト（ai-otazune・東京リージョン）
+   ・先生 … Googleログイン
+   ・生徒 … 匿名ログイン
+   おたずね箱と同じ otazune コレクションに、同じ形で書く。だから
+   先生は受付（コード）を1つ持てば、教科をまたいで同じログインで見られる。
+   ★ ルールは ai-otazune/firestore.rules。kind と fields は自由な値を許しているので、
+     このアプリを足すためにルールを変える必要はない。変えたときだけ
+       firebase deploy --only firestore:rules
+     を忘れないこと。
+   ★ Firestore のルールはフィルタではない。権限の無い文書が混じりうるクエリは
+     丸ごと拒否される。だから先生側の購読にも必ず where(ownerUid == 自分) を付ける。
+     ここを外すと、先生の一覧が permission-denied で空になる。
+   ============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc,
+         onSnapshot, query, where }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDzGJOrVYFqq_qx5lLSUAyMMx_yBDeX1Hg",
+  authDomain: "ai-otazune.firebaseapp.com",
+  projectId: "ai-otazune",
+  storageBucket: "ai-otazune.firebasestorage.app",
+  messagingSenderId: "39506916906",
+  appId: "1:39506916906:web:adea0049dee2abed8cf553"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const ROOT = "otazune";
+
+let unsubRooms = null, unsubReqs = null, unsubMine = null;
+
+window.fbq = {
+  onAuth(cb){ onAuthStateChanged(auth, cb); },
+  user(){ return auth.currentUser; },
+  uid(){ return auth.currentUser ? auth.currentUser.uid : null; },
+  isAnon(){ return !!(auth.currentUser && auth.currentUser.isAnonymous); },
+  signInTeacher(){ return signInWithPopup(auth, new GoogleAuthProvider()); },
+  /* 先生としてログイン中に匿名ログインを呼ぶと、先生が追い出される。
+     だれもログインしていないときだけ入る */
+  signInStudent(){
+    if(auth.currentUser) return Promise.resolve(auth.currentUser);
+    return signInAnonymously(auth);
+  },
+  signOut(){ this.stopAll(); return signOut(auth); },
+  stopAll(){
+    [unsubRooms,unsubReqs,unsubMine].forEach(function(f){ if(f) f(); });
+    unsubRooms = unsubReqs = unsubMine = null;
+  },
+
+  /* ---- 受付（room） ---- */
+  async getRoom(code){
+    const s = await getDoc(doc(db, ROOT, code));
+    return s.exists() ? Object.assign({ id:s.id }, s.data()) : null;
+  },
+  saveRoom(code, data){ return setDoc(doc(db, ROOT, code), data, { merge:true }); },
+  deleteRoom(code){ return deleteDoc(doc(db, ROOT, code)); },
+  watchRooms(uid, cb, onErr){
+    if(unsubRooms){ unsubRooms(); unsubRooms = null; }
+    unsubRooms = onSnapshot(query(collection(db, ROOT), where("ownerUid","==",uid)), snap=>{
+      const list = []; snap.forEach(d=> list.push(Object.assign({ id:d.id }, d.data())));
+      cb(list);
+    }, err=> onErr && onErr(err));
+  },
+
+  /* ---- 相談（req） ---- */
+  addReq(code, data){ return addDoc(collection(db, ROOT, code, "reqs"), data); },
+  updateReq(code, id, patch){ return updateDoc(doc(db, ROOT, code, "reqs", id), patch); },
+  deleteReq(code, id){ return deleteDoc(doc(db, ROOT, code, "reqs", id)); },
+  /* 先生用。受付の分ぜんぶ */
+  watchReqs(code, cb, onErr){
+    if(unsubReqs){ unsubReqs(); unsubReqs = null; }
+    const q = query(collection(db, ROOT, code, "reqs"),
+                    where("ownerUid","==", auth.currentUser ? auth.currentUser.uid : "-"));
+    unsubReqs = onSnapshot(q, snap=>{
+      const list = []; snap.forEach(d=> list.push(Object.assign({ id:d.id }, d.data())));
+      cb(list);
+    }, err=> onErr && onErr(err));
+  },
+  stopReqs(){ if(unsubReqs){ unsubReqs(); unsubReqs = null; } },
+  /* 生徒用。自分が出した分だけ */
+  watchMine(code, uid, cb, onErr){
+    if(unsubMine){ unsubMine(); unsubMine = null; }
+    const q = query(collection(db, ROOT, code, "reqs"), where("authorUid","==",uid));
+    unsubMine = onSnapshot(q, snap=>{
+      const list = []; snap.forEach(d=> list.push(Object.assign({ id:d.id }, d.data())));
+      cb(list);
+    }, err=> onErr && onErr(err));
+  },
+  stopMine(){ if(unsubMine){ unsubMine(); unsubMine = null; } }
+};
+window.dispatchEvent(new Event("fbq-ready"));
+</script>
+
+
 <script>
 /* =========================================================
    データ：センサ／アクション装置
@@ -503,7 +666,7 @@ var DEV = [
 {id:'s-jinkan',t:'s',c:'人・タッチ',n:'人感センサ',
  d:"人の動きなどに反応するセンサ。何に反応するかは機種によって異なる。",
  y:['人が来たら','だれか近づいたら','人がいるか調べたい','だれもいないとき','見はりたい'],
- k:['高齢者','見守り','防犯','留守','人','ふしんしゃ','こうれいしゃ','みまもり','しょうえね','にんかん','ひと','ちかづく','しんにゅう','ぼうはん','るす','むじん','だれか','近づく','通る','とおる','いるかどうか','せきゅりてぃ'],
+ k:['高齢者','見守り','防犯','留守','人','ふしんしゃ','こうれいしゃ','みまもり','しょうえね','にんかん','ひと','ちかづく','しんにゅう','ぼうはん','るす','むじん','だれか','近づく','通る','とおる','いるかどうか','せきゅりてぃ','走る人','はしる人','走り回る'],
  u:'人が来たら明かりや音で知らせる。防犯・省エネのしくみに。',
  w:"「反応しない＝人がいない」とは限らない。静止した人にも反応するか、使う機種で確かめよう。"},
 {id:'s-button',t:'s',c:'人・タッチ',n:'押しボタンセンサ',
@@ -941,6 +1104,39 @@ DEV.forEach(function(v){
   });
 });
 
+/* 言いかえ語は辞書の形（「通る」「暗い」）で書いてあるが、
+   生徒は「通ったら」「暗くて」と活用させて書く。そのままでは一文字も当たらない。
+   （これが「人が通ったら」で人感センサが出てこなかった原因）
+   語幹だけ（「通」）にすると「交通」「通学」にまで当たるので、
+   実際にありうる語尾に置きかえた形だけを作って持っておく。
+   ⑤の長い文の検索でだけ使う。①の短い言葉の検索はこれまでどおり。 */
+var CONJ = {
+  'い':['く','かっ','くて'],
+  'る':['っ','り','ら','れ','た','て'],
+  'う':['っ','い','わ','え'],
+  'く':['い','き','か','け'],
+  'ぐ':['い','ぎ','が','げ'],
+  'す':['し','さ','せ'],
+  'つ':['っ','ち','た','て'],
+  'ぬ':['ん','に','な','ね'],
+  'ぶ':['ん','び','ば','べ'],
+  'む':['ん','み','ま','め'],
+  'た':['て','たら'],
+  'だ':['で','だら']
+};
+DEV.forEach(function(v){
+  v.phv = [];
+  v.ph.forEach(function(p){
+    if(p.length<2) return;
+    var tail = CONJ[p.slice(-1)];
+    if(!tail) return;
+    tail.forEach(function(t){
+      var x = p.slice(0,-1) + t;
+      if(x.length>=2 && v.ph.indexOf(x)<0 && v.phv.indexOf(x)<0) v.phv.push(x);
+    });
+  });
+});
+
 /* 「のど」「ふる」「るす」のような、ひらがなだけの2文字の言いかえ語は、
    文の途中に偶然あらわれる（「開いたのどうして」「ふるえて」）。
    文で打たれたときだけ使わない。「暑い」「火事」「教室」のように
@@ -1183,8 +1379,12 @@ $('tips').innerHTML=TIPS.map(function(s){
    ========================================================= */
 var GREQ = [['g-theme','テーマ・課題'],['g-mine','自分が考えた案'],['g-stuck','行きづまったところ']];
 var GALL = ['g-name','g-theme','g-joken','g-mine','g-stuck'];
-/* 検索に効かせる重み。行きづまりの記述がいちばん具体的なので重くする */
-var GW = [['g-theme',1],['g-joken',0.6],['g-mine',1.2],['g-stuck',1.4]];
+/* 検索に効かせる重み。
+   装置の手がかりが書いてあるのは「テーマ」と「自分が考えた案」で、
+   「どこで行きづまったか」は困りごとの記述（「昼も反応してしまう」「分からない」）。
+   ここを重くしていたせいで、困りごとの言い回しにたまたま一致した装置が
+   1位を取っていた。手がかりのある欄を重くする。 */
+var GW = [['g-theme',1.2],['g-joken',0.5],['g-mine',1.4],['g-stuck',0.8]];
 
 var GKIND = [
 {k:'idea',nm:'テーマや案が思いつかない',
@@ -1221,6 +1421,7 @@ function gSync(){
   $('g-gate').textContent = miss.length
     ? 'あと'+miss.length+'つ ―― '+miss.join(' ／ ')+' を書くと、ボタンが押せます。'
     : '書けました。「ヒントを出す」が押せます。';
+  if(typeof cSyncSend==='function') cSyncSend();
   gSave();
 }
 
@@ -1243,24 +1444,47 @@ function gLoad(){
 }
 
 /* ①の検索は短い言葉向け。⑤は長い文が来るので、雑音を落とした採点にする。
-   ・言いかえ語が文の中にまるごと入っていたら、強く加点
-   ・めずらしい2文字が、名前・言いかえ語に当たったときだけ数える
-   （説明文にたまたま入っているだけの一致は、長文だと積み上がって居場所を奥う） */
+   長い文は当たりの数がそもそも多いので、点を素直に足し上げると
+   「たまたま当たった1語が強い装置」と「説明文が長い装置」の2種類が上位を占める。
+   実際に ⑤ が壊れて見えていたのはこれで、
+     ・「夜だけ動かしたいのに」→ 年月日・時刻（言いかえ語「夜だけ」に丸ごと一致して独走）
+     ・どの文でも CO2センサ（説明文への細かい一致が積み上がる）
+   の2つが定位置になっていた。だから、
+     ・語句の一致（ph・phv）には上限をつけ、1つの一致で独走させない
+     ・説明文だけの一致（weak）にも上限をつける
+     ・名前・言いかえ語にどこも当たっていないものは、そもそも候補にしない
+   の3つで頭を押さえる。 */
+var PH_CAP = 40;    /* 語句の一致で稼げる上限 */
+var WEAK_CAP = 6;   /* 説明文へのまぐれ当たりで稼げる上限 */
+/* 場所の言葉は、①で短く打つときは手がかりになる（「教室」→換気→CO2センサ）。
+   けれど⑤の長い文では「どこでの話か」を言っているだけで、何を測るかを決めない。
+   これを語句一致に数えていたせいで、教室の話すべてにCO2センサが付いてきていた。
+   ⑤の語句一致からだけ外す。①の検索はこれまでどおり。 */
+var GPLACE = ['教室','台所','学校','家','部屋','廊下','玄関','道路','校庭','体育館',
+  'トイレ','畑','庭','駐車場','階段','ろうか','げんかん','だいどころ','がっこう',
+  'へや','いえ','はたけ','にわ','かいだん','どうろ','こうてい'].map(norm);
+function phSkip(p){ return GPLACE.indexOf(p)>=0; }
 function scoreLong(q,pool){
   var bg=bigrams(q), w=weights(bg);
   return pool.map(function(v){
-    var sc=0;
+    var ph=0, strong=0, weak=0;
     v.ph.forEach(function(p){
-      if(!phOk(p,true)) return;        /* ⑤は常に長文あつかい */
-      if(q.indexOf(p)>=0) sc += 20 + p.length*4;
+      if(!phOk(p,true) || phSkip(p)) return;   /* ⑤は常に長文あつかい */
+      if(q.indexOf(p)>=0) ph += 20 + p.length*4;
+    });
+    /* 活用させた形。辞書の形そのままより一段弱くみる */
+    v.phv.forEach(function(p){
+      if(!phOk(p,true) || phSkip(p)) return;
+      if(q.indexOf(p)>=0) ph += 14 + p.length*4;
     });
     bg.forEach(function(g,i){
       if(w[i]<1) return;
-      if(v.nm.indexOf(g)>=0) sc+=9;
-      else if(v.hi.indexOf(g)>=0) sc+=6;
-      else if(v.all.indexOf(g)>=0) sc+=1.5;
+      if(v.nm.indexOf(g)>=0) strong+=9;
+      else if(v.hi.indexOf(g)>=0) strong+=6;
+      else if(v.all.indexOf(g)>=0) weak+=1.5;
     });
-    return {v:v,sc:sc};
+    if(!ph && !strong) return {v:v,sc:0};   /* 説明文だけの一致は候補にしない */
+    return {v:v, sc:Math.min(ph,PH_CAP) + strong + Math.min(weak,WEAK_CAP)};
   });
 }
 /* 自信が持てないときは、無理に候補を出さない。
@@ -1520,7 +1744,8 @@ $('g-go').onclick=function(){
   h+='<h2 style="border-left-color:#7a5af0">それでも進まないときは、先生に出す</h2>';
   h+='<p class="count">下の<b>相談カード</b>を先生にわたすと、先生がAIに聞いて、'
    +'<b>答えを読んで確かめてから</b>返してくれます。みなさんはAIを使いません。<br>'
-   +'コピーしてClassroomに貼るか、この画面を印刷してわたしてください。</p>';
+   +'先生から<b>受付コード</b>をもらっているときは、このすぐ下の「先生に送る」が早いです。<br>'
+   +'コードが無いときは、コピーしてClassroomに貼るか、この画面を印刷してわたしてください。</p>';
   h+='<textarea id="g-card" class="gpr" rows="9" readonly></textarea>';
   h+='<p class="gate" id="g-copied" role="status" aria-live="polite"></p>';
   h+='<div class="btnrow">'
@@ -1629,6 +1854,9 @@ function kForm(){
 /* フォームが変わったら、送る文を作り直して保存する */
 function kSync(){
   $('t-src').value = buildPrompt(kForm(), curPol());
+  /* クラウドの相談は、先生が「生徒に返す」を押したときにだけ書きこむ。
+     一文字打つたびに生徒の画面が書きかわると、読んでいる途中で内容が変わる */
+  if(CCUR) return;
   if(KCUR<0) return;
   var a=kAll(), r=kForm();
   if(!a[KCUR]) return;
@@ -1638,7 +1866,7 @@ function kSync(){
 function kOpen(i){
   var a=kAll(), r=a[i];
   if(!r) return;
-  KCUR=i;
+  KCUR=i; CCUR=null;   /* ローカルとクラウドは同時に開かない */
   KF.forEach(function(f){ $(f[0]).value = r[f[1]] || ''; });
   kkind = kindKey(r.kind);
   tpol  = r.pol || '';
@@ -1647,7 +1875,7 @@ function kOpen(i){
   $('t-msg').textContent='';
   kRenderKind(); tRenderPol();
   $('t-src').value = buildPrompt(kForm(), curPol());
-  kRender();
+  cShowBtns(); kRender(); tRenderCloud();
   $('k-edit').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1661,7 +1889,7 @@ $('k-read').onclick=function(){
   /* 貼った順のまま、新しいものを上に積む */
   got.forEach(function(r){ r.status='new'; r.at=Date.now(); });
   var a=got.concat(kAll());
-  kPut(a); KCUR=-1; kRender();
+  kPut(a); KCUR=-1; CCUR=null; cShowBtns(); tRenderCloud(); kRender();
   $('k-in').value='';
   $('k-readmsg').className='gate ok';
   $('k-readmsg').textContent=got.length+'件 読みこみました。一覧から「ひらく」を押してください。';
@@ -1680,6 +1908,14 @@ $('k-done').onclick=function(){
   $('t-msg').textContent = a[KCUR].status==='done' ? '「返した」にしました。' : '「未」にもどしました。';
 };
 $('k-del').onclick=function(){
+  if(CCUR){
+    if(!confirm('この相談をクラウドから消しますか？ 生徒の画面からも消えます。元にもどせません。')) return;
+    var id=CCUR.id, code=troom?troom.id:'';
+    fbq.deleteReq(code, id).then(function(){
+      CCUR=null; $('k-edit').hidden=true; $('k-none').hidden=false; cShowBtns(); tRenderCloud();
+    }).catch(function(e){ gmsg('c-msg','消せませんでした ―― '+fbErr(e), false); });
+    return;
+  }
   if(KCUR<0) return;
   if(!confirm('この相談を消しますか？')) return;
   var a=kAll(); a.splice(KCUR,1); kPut(a);
@@ -1814,8 +2050,9 @@ $('t-ask').onclick = async function(){
   $('t-ans').value = '';
   try{
     await askClaude(src, function(txt){ $('t-ans').value = txt; });
-    /* 値を入れただけでは input が出ないので、ここで自分で保存する */
-    if(KCUR>=0) kSync();
+    /* 値を入れただけでは input が出ないので、ここで自分で保存する。
+       クラウドの相談は「生徒に返す」を押すまで書きこまない */
+    if(!CCUR && KCUR>=0) kSync();
     $('t-msg').className = 'gate ok';
     $('t-msg').textContent = '答えが出ました。読んで、直してから生徒に渡してください。';
   }catch(e){
@@ -1860,6 +2097,200 @@ $('t-print').onclick = function(){ window.print(); };
 
 $('g-print').onclick=function(){ window.print(); };
 GALL.forEach(function(id){ $(id).addEventListener('input',gSync); });
+/* =========================================================
+   クラウド ―― 生徒が先生に送り、先生が返す
+   AIおたずね箱と同じ Firebase・同じ otazune コレクションを使う。
+   だから先生は受付を1つ持てば、教科をまたいで同じログインで見られる。
+
+   生徒はAIに触らない。ここで送るのは、⑤で組み立てた相談カードと同じ中身。
+   受付コードを入れたときだけ送信欄が働く。コードが無ければ、このページは
+   これまでどおり、どこにも通信をしない。
+   ========================================================= */
+var CKIND = 'keisoku';            /* おたずね箱の型。計測・制御の相談 */
+var CCODE_KEY = 'keisoku-gyakubiki-code';
+var ccode = '';                   /* 確かめ済みの受付コード */
+var croom = null;                 /* その受付の中身 */
+var cmine = [];                   /* 自分が出した相談 */
+
+/* Firebase は module で読むので、読み終わるのを待ってから触る */
+function waitFb(fn){
+  if(window.fbq) fn();
+  else window.addEventListener('fbq-ready', fn, {once:true});
+}
+/* ログインの失敗は、原因が分かれば直せる。だまって失敗させない */
+function fbErr(e){
+  var c = (e && e.code) || '';
+  if(c.indexOf('configuration-not-found')>=0)
+    return 'このアプリの準備がまだ終わっていません（Firebaseの「匿名ログイン」が有効になっていません）。先生にお知らせください。';
+  if(c.indexOf('unauthorized-domain')>=0)
+    return 'このアドレスからはログインできない設定になっています。先生にお知らせください。';
+  if(c.indexOf('popup-closed')>=0 || c.indexOf('cancelled-popup')>=0)
+    return 'ログインの窓が閉じられました。もう一度お試しください。';
+  if(c.indexOf('permission-denied')>=0)
+    return '読み書きが許可されませんでした。受付コードと、受付が開いているかを確かめてください。';
+  if(c.indexOf('network')>=0)
+    return 'ネットワークにつながりませんでした。時間をおいて、もう一度お試しください。';
+  return (e && e.message) ? e.message : String(e);
+}
+function gmsg(id, txt, ok){
+  $(id).className = 'gate' + (ok ? ' ok' : '');
+  $(id).textContent = txt;
+}
+
+/* ---- 受付コード ---- */
+function normCode(v){ return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6); }
+
+function cSyncSend(){
+  var miss = GREQ.filter(function(p){ return !$(p[0]).value.trim(); });
+  $('g-send').disabled = !(ccode && croom && croom.open && !miss.length && gkind);
+}
+
+/* コードが6文字そろったら、その受付があるか確かめる */
+var cChecking = false;
+function cCheck(){
+  var code = normCode($('g-code').value);
+  if($('g-code').value !== code) $('g-code').value = code;
+  if(code.length < 6){
+    ccode=''; croom=null; cmine=[];
+    if(window.fbq) fbq.stopMine();
+    cRenderInbox(); cSyncSend();
+    gmsg('g-roommsg', code ? 'あと'+(6-code.length)+'文字です。' : '', false);
+    return;
+  }
+  if(cChecking) return;
+  cChecking = true;
+  gmsg('g-roommsg','受付をさがしています…', false);
+  waitFb(function(){
+    fbq.signInStudent().then(function(){
+      return fbq.getRoom(code);
+    }).then(function(room){
+      cChecking = false;
+      if(!room){
+        ccode=''; croom=null; cRenderInbox();
+        gmsg('g-roommsg','その受付コードは見つかりませんでした。6文字を確かめてください。', false);
+      }else{
+        ccode=code; croom=room;
+        try{ localStorage.setItem(CCODE_KEY, code); }catch(e){}
+        gmsg('g-roommsg', room.open
+          ? '「'+(room.title||'受付')+'」につながりました。'
+          : '「'+(room.title||'受付')+'」は、いまは閉じています。送ることはできませんが、前に送った分の答えは見られます。',
+          !!room.open);
+        cWatchMine();
+      }
+      cSyncSend();
+    }).catch(function(e){
+      cChecking = false;
+      ccode=''; croom=null; cSyncSend();
+      gmsg('g-roommsg','つながりませんでした ―― '+fbErr(e), false);
+    });
+  });
+}
+
+/* 自分が出した分だけを見はる。ほかの人の分はルールで読めない。
+   ★ where("authorUid","==",自分) を外すと、ルールがクエリを丸ごと拒否する */
+function cWatchMine(){
+  if(!ccode) return;
+  waitFb(function(){
+    var uid = fbq.uid();
+    if(!uid) return;
+    fbq.watchMine(ccode, uid, function(list){
+      cmine = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+      cRenderInbox();
+    }, function(e){
+      gmsg('g-roommsg','答えの読みこみに失敗しました ―― '+fbErr(e), false);
+    });
+  });
+}
+
+var CSTATUS = {
+  'new' :['先生が見るのを待っています','new'],
+  'work':['先生が見ています','work'],
+  'done':['答えが返ってきました','done'],
+  'ng'  :['この相談は見送りになりました','ng']
+};
+function cRenderInbox(){
+  if(!ccode){ $('g-inbox').innerHTML=''; return; }
+  if(!cmine.length){
+    $('g-inbox').innerHTML = '<p class="empty">まだ送っていません。上の「先生に送る」を押すと、ここに出ます。</p>';
+    return;
+  }
+  $('g-inbox').innerHTML = cmine.map(function(r){
+    var st = CSTATUS[r.status] || CSTATUS['new'];
+    var f  = r.fields || {};
+    return '<div class="card '+st[1]+'">'
+      + '<div class="th">'+esc(f.theme||'（テーマ未記入）')
+      + '<span class="tag'+(r.status==='done'?' ok':'')+'">'+esc(st[0])+'</span></div>'
+      + (f.stuck?'<p>'+esc(f.stuck)+'</p>':'')
+      + (r.status==='done' && r.answer ? '<div class="ans">'+esc(r.answer)+'</div>' : '')
+      + (r.status==='new'
+          ? '<div class="btnrow"><button class="sub cdel" data-id="'+esc(r.id)+'">これを取り消す</button></div>'
+          : '')
+      + '</div>';
+  }).join('');
+  Array.prototype.forEach.call($('g-inbox').querySelectorAll('.cdel'), function(b){
+    b.onclick = function(){
+      if(!confirm('この相談を取り消しますか？（先生がまだ見ていないときだけできます）')) return;
+      fbq.deleteReq(ccode, b.dataset.id)
+        .then(function(){ gmsg('g-sendmsg','取り消しました。', true); })
+        .catch(function(e){ gmsg('g-sendmsg','取り消せませんでした ―― '+fbErr(e), false); });
+    };
+  });
+}
+
+$('g-code').addEventListener('input', cCheck);
+$('g-forget').onclick = function(){
+  try{ localStorage.removeItem(CCODE_KEY); }catch(e){}
+  if(window.fbq) fbq.stopMine();
+  ccode=''; croom=null; cmine=[]; $('g-code').value='';
+  cRenderInbox(); cSyncSend();
+  gmsg('g-roommsg','コードを忘れました。', true);
+  gmsg('g-sendmsg','', false);
+};
+
+$('g-send').onclick = function(){
+  if(!ccode || !croom){ gmsg('g-sendmsg','先に受付コードを入れてください。', false); return; }
+  var rec = gRec(gRank('s',3), gRank('a',3));
+  var btn = $('g-send'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = '送っています…';
+  gmsg('g-sendmsg','', false);
+  var now = Date.now();
+  waitFb(function(){
+    fbq.signInStudent().then(function(){
+      /* おたずね箱のルールが通す形でそろえる。
+         キーはルールの hasOnly と1対1。増やすと create が拒否される */
+      return fbq.addReq(ccode, {
+        v:1,
+        ownerUid : croom.ownerUid,
+        authorUid: fbq.uid(),
+        no   : '',
+        name : String(rec.name||'').slice(0,40),
+        kind : CKIND,
+        fields: {
+          theme: rec.theme, joken: rec.joken, mine: rec.mine, stuck: rec.stuck,
+          komari: rec.kind, sens: rec.sens, acts: rec.acts
+        },
+        status:'new', answer:'', memo:'', policy:'',
+        createdAt: now, updatedAt: now, answeredAt: 0
+      });
+    }).then(function(){
+      btn.textContent = old; cSyncSend();
+      gmsg('g-sendmsg','先生に届きました。答えが返ってくると、下の「先生からの答え」に出ます。', true);
+      cWatchMine();
+    }).catch(function(e){
+      btn.textContent = old; cSyncSend();
+      gmsg('g-sendmsg','送れませんでした ―― '+fbErr(e), false);
+    });
+  });
+};
+
+/* 前の時間に入れたコードがあれば、そのまま答えを見られるようにする */
+function cLoad(){
+  var code='';
+  try{ code = normCode(localStorage.getItem(CCODE_KEY)); }catch(e){}
+  if(code.length===6){ $('g-code').value = code; cCheck(); }
+  else cRenderInbox();
+}
+
 
 /* タブ */
 function showTab(name){
@@ -1871,12 +2302,250 @@ function showTab(name){
 }
 ['find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
 
+
+/* =========================================================
+   ⑥ 先生用 ―― クラウドで受け取る
+   AIおたずね箱と同じログイン・同じ受付（otazune コレクション）。
+   先生は受付を1つ持てば、おたずね箱と逆引きの両方の相談を
+   同じGoogleアカウントで見られる。
+
+   ★ Firestore のルールはフィルタではない。権限の無い文書が混じりうる
+     クエリは丸ごと拒否される。だから先生側の購読にも
+     where("ownerUid","==",自分) を必ず付ける（fbq.watchReqs が付けている）。
+     ここを外すと、一覧が permission-denied で空になる。
+   ========================================================= */
+var tuser = null;        /* ログイン中の先生 */
+var trooms = [];         /* 自分の受付 */
+var troom  = null;       /* 選んでいる受付 */
+var treqs  = [];         /* その受付に届いた相談 */
+var CCUR   = null;       /* いま④に開いているクラウドの相談。null ならローカル */
+
+/* まぎらわしい I O 0 1 を外した32文字。黒板に書いても読みまちがえない */
+var CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){
+  var s='';
+  for(var i=0;i<6;i++) s += CODE_CHARS.charAt(Math.floor(Math.random()*CODE_CHARS.length));
+  return s;
+}
+
+function tRenderAuth(){
+  $('k-signin').hidden = !!tuser;
+  $('k-signed').hidden = !tuser;
+  if(tuser){
+    $('k-who').textContent = (tuser.displayName || tuser.email || '先生') + ' でログイン中';
+  }
+}
+
+function tRenderRooms(){
+  if(!trooms.length){
+    $('k-rooms').innerHTML = '<p class="empty">まだ受付がありません。下で名前を入れて「受付をつくる」を押してください。</p>';
+    return;
+  }
+  $('k-rooms').innerHTML = trooms.map(function(r){
+    var on = troom && troom.id===r.id;
+    return '<div class="room'+(on?' on':'')+(r.open?'':' closed')+'">'
+      + '<div class="code">'+esc(r.id)+'</div>'
+      + '<p><b>'+esc(r.title||'（名前なし）')+'</b>　'+(r.open?'受付中':'閉じています')+'</p>'
+      + '<div class="btnrow">'
+      +   '<button class="sub rpick" data-id="'+esc(r.id)+'">'+(on?'開いています':'ひらく')+'</button>'
+      +   '<button class="sub rtoggle" data-id="'+esc(r.id)+'">'+(r.open?'受付を閉じる':'受付を開く')+'</button>'
+      + '</div></div>';
+  }).join('');
+  Array.prototype.forEach.call($('k-rooms').querySelectorAll('.rpick'), function(b){
+    b.onclick = function(){ tOpenRoom(b.dataset.id); };
+  });
+  Array.prototype.forEach.call($('k-rooms').querySelectorAll('.rtoggle'), function(b){
+    b.onclick = function(){
+      var r = trooms.filter(function(x){ return x.id===b.dataset.id; })[0];
+      if(!r) return;
+      fbq.saveRoom(r.id, { open: !r.open, updatedAt: Date.now() })
+        .then(function(){ gmsg('k-roommsg', r.open?'受付を閉じました。':'受付を開きました。', true); })
+        .catch(function(e){ gmsg('k-roommsg','変えられませんでした ―― '+fbErr(e), false); });
+    };
+  });
+}
+
+function tOpenRoom(id){
+  troom = trooms.filter(function(x){ return x.id===id; })[0] || null;
+  tRenderRooms();
+  if(!troom){ treqs=[]; tRenderCloud(); return; }
+  fbq.watchReqs(troom.id, function(list){
+    treqs = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+    tRenderCloud();
+  }, function(e){
+    $('k-cloudlist').innerHTML = '<p class="empty">読みこめませんでした ―― '+esc(fbErr(e))+'</p>';
+  });
+}
+
+var TSTATUS = { 'new':['未対応','new'], 'work':['対応中','work'],
+                'done':['返した','done'], 'ng':['見送り','ng'] };
+function tRenderCloud(){
+  if(!troom){
+    $('k-cloudlist').innerHTML = '<p class="empty">受付をひらくと、届いた相談がここに出ます。</p>';
+    return;
+  }
+  if(!treqs.length){
+    $('k-cloudlist').innerHTML = '<p class="empty">「'+esc(troom.id)+'」にはまだ届いていません。'
+      + '生徒に受付コード <b>'+esc(troom.id)+'</b> を伝えてください。</p>';
+    return;
+  }
+  $('k-cloudlist').innerHTML = treqs.map(function(r){
+    var st = TSTATUS[r.status] || TSTATUS['new'];
+    var f  = r.fields || {};
+    var on = CCUR && CCUR.id===r.id;
+    return '<div class="card '+st[1]+(on?' on':'')+'">'
+      + '<div class="th">'+esc(r.name||'（なまえなし）')
+      + '<span class="tag'+(r.status==='done'?' ok':'')+'">'+esc(st[0])+'</span></div>'
+      + '<p>'+esc(f.theme||'（テーマ未記入）')+'</p>'
+      + (f.stuck?'<p>'+esc(String(f.stuck).slice(0,60))+'</p>':'')
+      + '<div class="btnrow"><button class="sub cpick" data-id="'+esc(r.id)+'">ひらく</button></div>'
+      + '</div>';
+  }).join('');
+  Array.prototype.forEach.call($('k-cloudlist').querySelectorAll('.cpick'), function(b){
+    b.onclick = function(){ cOpen(b.dataset.id); };
+  });
+}
+
+/* クラウドの相談を④のフォームに開く。
+   ローカル（貼りこみ）の一覧とは同時に開かない */
+function cOpen(id){
+  var r = treqs.filter(function(x){ return x.id===id; })[0];
+  if(!r) return;
+  CCUR = r; KCUR = -1;
+  var f = r.fields || {};
+  $('k-name').value  = r.name || '';
+  $('k-theme').value = f.theme || '';
+  $('k-joken').value = f.joken || '';
+  $('k-mine').value  = f.mine || '';
+  $('k-stuck').value = f.stuck || '';
+  $('k-sens').value  = f.sens || '';
+  $('k-acts').value  = f.acts || '';
+  kkind = kindKey(f.komari);
+  tpol  = r.policy || '';
+  $('t-ans').value = r.answer || '';
+  $('k-edit').hidden = false; $('k-none').hidden = true;
+  $('k-src-lb').hidden = false;
+  $('k-src-lb').textContent = '受付「'+(troom?troom.id:'')+'」に届いた相談です。'
+    + '「生徒に返す」を押すと、生徒の画面に出ます。';
+  $('t-msg').textContent = ''; gmsg('c-msg','', false);
+  kRenderKind(); tRenderPol();
+  $('t-src').value = buildPrompt(kForm(), curPol());
+  cShowBtns(); kRender(); tRenderCloud();
+  $('k-edit').scrollIntoView({behavior:'smooth',block:'start'});
+}
+/* クラウド用とローカル用でボタンを出し分ける */
+function cShowBtns(){
+  var cloud = !!CCUR;
+  ['c-reply','c-work','c-ng'].forEach(function(id){ $(id).hidden = !cloud; });
+  ['k-done'].forEach(function(id){ $(id).hidden = cloud; });
+  $('k-src-lb').hidden = !cloud;
+}
+
+function cPatch(patch, okMsg){
+  if(!CCUR || !troom) return;
+  patch.updatedAt = Date.now();
+  fbq.updateReq(troom.id, CCUR.id, patch)
+    .then(function(){
+      CCUR = Object.assign({}, CCUR, patch);
+      gmsg('c-msg', okMsg, true);
+    })
+    .catch(function(e){ gmsg('c-msg','書きこめませんでした ―― '+fbErr(e), false); });
+}
+$('c-reply').onclick = function(){
+  var ans = $('t-ans').value.trim();
+  if(!ans){ gmsg('c-msg','「AIの答え」が空です。読んで直したものを入れてから返してください。', false); return; }
+  if(!confirm('この答えを生徒に返しますか？\n\n生徒の画面にそのまま出ます。読んで確かめましたか？')) return;
+  cPatch({ answer:$('t-ans').value, status:'done', policy:curPol(), answeredAt:Date.now() },
+         '生徒に返しました。生徒の画面に出ています。');
+};
+$('c-work').onclick = function(){ cPatch({ status:'work' }, '「対応中」にしました。生徒の画面にも出ます。'); };
+$('c-ng').onclick = function(){
+  if(!confirm('この相談を見送りにしますか？')) return;
+  cPatch({ status:'ng' }, '「見送り」にしました。');
+};
+
+$('k-login').onclick = function(){
+  waitFb(function(){
+    fbq.signInTeacher().catch(function(e){ gmsg('k-loginmsg','ログインできませんでした ―― '+fbErr(e), false); });
+  });
+};
+$('k-logout').onclick = function(){
+  waitFb(function(){
+    troom=null; treqs=[]; CCUR=null; cShowBtns();
+    fbq.signOut().catch(function(){});
+  });
+};
+$('k-newroom').onclick = function(){
+  var title = $('k-newtitle').value.trim();
+  if(!title){ gmsg('k-roommsg','受付の名前を入れてください。', false); return; }
+  if(!tuser){ gmsg('k-roommsg','先にログインしてください。', false); return; }
+  var btn = $('k-newroom'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = 'つくっています…';
+  /* 同じコードが先にあったら、取り直す */
+  (function tryOnce(n){
+    var code = newCode();
+    fbq.getRoom(code).then(function(exists){
+      if(exists && n<8) return tryOnce(n+1);
+      var now = Date.now();
+      /* キーはおたずね箱のルールの hasOnly と1対1。増やすと create が拒否される */
+      return fbq.saveRoom(code, {
+        v:1, ownerUid:fbq.uid(), title:title.slice(0,100), note:'',
+        kinds:[CKIND], nameMode:'name', open:true, createdAt:now, updatedAt:now
+      }).then(function(){
+        btn.disabled=false; btn.textContent=old;
+        $('k-newtitle').value='';
+        gmsg('k-roommsg','受付をつくりました。コードは「'+code+'」です。生徒に伝えてください。', true);
+      });
+    }).catch(function(e){
+      btn.disabled=false; btn.textContent=old;
+      gmsg('k-roommsg','つくれませんでした ―― '+fbErr(e), false);
+    });
+  })(0);
+};
+
+/* ログインの出入りを見はる。
+   生徒（匿名）でログインしている状態と、先生（Google）は同じ auth を使うので、
+   匿名のときは先生用の画面を出さない */
+waitFb(function(){
+  fbq.onAuth(function(u){
+    var wasTeacher = !!tuser;
+    tuser = (u && !u.isAnonymous) ? u : null;
+    tRenderAuth();
+    if(tuser){
+      fbq.watchRooms(tuser.uid, function(list){
+        trooms = list.slice().sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+        if(troom){
+          var still = trooms.filter(function(x){ return x.id===troom.id; })[0];
+          troom = still || null;
+          if(!troom){ treqs=[]; tRenderCloud(); }
+        }
+        /* 受付が1つでも開いていないと、届いた相談が出ない。
+           まだ何も開いていなければ、いちばん新しい受付をそのまま開く
+           （受付をつくった直後に、続けて相談を受け取れるように） */
+        if(!troom && trooms.length){ tOpenRoom(trooms[0].id); return; }
+        tRenderRooms();
+      }, function(e){
+        $('k-rooms').innerHTML = '<p class="empty">受付を読みこめませんでした ―― '+esc(fbErr(e))+'</p>';
+      });
+      /* 先生としてログインすると、生徒側の購読は続けられない（別人になる） */
+      if(ccode){ fbq.stopMine(); cmine=[]; cRenderInbox();
+        gmsg('g-roommsg','いまは先生としてログインしています。生徒として使うときは、⑥でログアウトしてください。', false); }
+    }else{
+      trooms=[]; troom=null; treqs=[]; CCUR=null;
+      tRenderRooms(); tRenderCloud(); cShowBtns();
+      if(wasTeacher && ccode) cCheck();   /* ログアウトしたら生徒として戻す */
+    }
+    if(u) $('k-loginmsg').textContent='';
+  });
+});
+
 /* 検索 */
 $('q').addEventListener('input',function(){ state.q=this.value; renderList(); });
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
 gLoad(); gRender(); gSync(); kRenderKind(); tRenderPol(); tSyncKey(); kRender();
+tRenderAuth(); tRenderRooms(); tRenderCloud(); cShowBtns(); cLoad(); cSyncSend();
 </script>
 </body>
 </html>
