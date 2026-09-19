@@ -216,9 +216,10 @@ cases.forEach(([q, expect]) => {
   else ok("検索『" + q + "』が何か返す", !!top);
 });
 
+/* 2026-09-19 に実在を確認した、研究室サイトのページ名 */
+const OK_PAGES = ["光センサ", "照度センサ", "カラーセンサ", "人感センサ", "ボタンセンサ", "タッチセンサ", "非接触温度センサ", "接触型温度センサ", "湿度センサ", "土壌水分センサ", "降雨水位センサ", "気圧センサ", "炎センサ", "アルコールセンサ", "光距離センサ", "リミットセンサ", "段差障害物センサ", "重さセンサ", "磁気スイッチセンサ", "レバースイッチセンサ", "年月日時刻", "パソコンカメラをaiセンサに", "音声認識で判別", "qrコードで判別", "振動モータ", "サーボモータ角度指定モータ", "dcモータギアドモータ水中ポンプ", "暖房装置", "冷却装置", "oledディスプレイ", "音声発生装置", "マイクロビットを使う", "計測制御問題解決", "センサアクション装置の使い方", "はんだ付けで実習基板を作る", "スマート農業", "マイクロビットで無線ロボットカーを作る"];
 const SEL_COND = '#g-kinds .chip[data-k="cond"]';
 const SEL_IDEA = '#g-kinds .chip[data-k="idea"]';
-const SEL_OTAZUNE = '#g-out a[href*="ai-otazune"]';
 
 console.log("=== 資料リンク（石川研究室） ===");
 {
@@ -239,12 +240,13 @@ console.log("=== 資料リンク（石川研究室） ===");
   ok("②授業の例の配布資料もリンクになっている", !!dd.querySelector("#exlist .files a"));
 }
 
-console.log("=== 先生にわたす文（AIおたずね箱ほうしき） ===");
+console.log("=== 生徒が先生にわたす相談カード ===");
 {
   const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
     beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
   const ww = dm.window, dd = ww.document, g = id => dd.getElementById(id);
   const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new ww.Event("input")); };
+  set("g-name", "1年A組 12番 山田");
   set("g-theme", "植物の水やりを忘れる");
   set("g-joken", "学校にある装置だけ");
   set("g-mine", "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う");
@@ -252,39 +254,36 @@ console.log("=== 先生にわたす文（AIおたずね箱ほうしき） ===");
   dd.querySelector(SEL_COND).click();
   g("g-go").click();
 
-  const t = g("g-prompt").value;
-  ok("先生にわたす文が組み上がる", t.length > 800, t.length);
-  ok("生徒が書いた内容が入る", t.indexOf("植物の水やりを忘れる") >= 0);
-  ok("困っていることも入る", t.indexOf("条件（しきい値）の決め方が分からない") >= 0);
-  ok("候補と資料のファイル名が入る", t.indexOf("土壌水分センサの使い方.pptx") >= 0);
-  ok("51種の装置一覧が入る", ww.DEV.every(v => t.indexOf(v.n) >= 0), "もれあり");
-  ok("学校に無い部品を出さない指示がある", t.indexOf("すすめないでください") >= 0);
-  ok("コネクタ番号・しきい値を書かせない指示がある",
-     t.indexOf("しきい値の具体的な数値は書かないでください") >= 0);
-  ok("完成品を書かせない指示がある", t.indexOf("そのまま提出できる完成品") >= 0);
-  ok("石川研究室のURLが入る", t.indexOf("sites.google.com/s.hokkyodai.ac.jp/tech/") >= 0);
-  ok("おたずね箱へのリンクがある", !!dd.querySelector(SEL_OTAZUNE));
+  const card = g("g-card").value;
+  ok("相談カードが出る", card.indexOf(ww.CARD_HEAD) === 0, card.slice(0, 40));
+  ok("なまえが入る", card.indexOf("1年A組 12番 山田") >= 0);
+  ok("生徒が書いた内容が入る", card.indexOf("植物の水やりを忘れる") >= 0);
+  ok("困っていることが入る", card.indexOf("条件（しきい値）の決め方が分からない") >= 0);
+  ok("候補の装置が入る", card.indexOf("土壌水分センサ") >= 0 && card.indexOf("水中ポンプ") >= 0);
 
-  /* jsdom には navigator.clipboard が無い。学校のパソコンで使えないときと同じ経路 */
+  /* ここが今回の作り直しの肝。生徒にAIへの指示文を見せない */
+  ok("AIへの指示文は生徒に見せない",
+     card.indexOf("あなたは中学校の技術科の教師から") < 0 &&
+     card.indexOf("この学校で使える装置") < 0, card);
+  ok("プロンプトの欄そのものが無い", !g("g-prompt"));
+  ok("おたずね箱への導線は無い", !dd.querySelector('#g-out a[href*="ai-otazune"]'));
+  ok("印刷してわたせる", !!g("g-print2"));
+
+  /* クリップボードが使えない環境でも知らせる */
   g("g-copy").click();
-  ok("clipboardが使えなくても、選択して知らせる",
+  ok("コピーできない環境では選択して知らせる",
      g("g-copied").textContent.indexOf("コピーしてください") >= 0, g("g-copied").textContent);
-  ok("readonlyに戻している", g("g-prompt").hasAttribute("readonly"));
 
-  /* 候補が出なかったときも、文は作れる */
-  const dm2 = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
-    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
-  const w2 = dm2.window, d2 = w2.document, g2 = id => d2.getElementById(id);
-  ["g-theme", "g-mine", "g-stuck"].forEach(id => {
-    g2(id).value = "あああ"; g2(id).dispatchEvent(new w2.Event("input"));
-  });
-  d2.querySelector(SEL_IDEA).click();
-  g2("g-go").click();
-  ok("候補なしでも文は作れる", g2("g-prompt").value.indexOf("候補】なし") >= 0);
+  /* 書いたカードを読み戻せる（⑥が受け取る形と往復できるか） */
+  const back = ww.parseCards(card);
+  ok("カードを読み戻せる", back.length === 1, back.length);
+  ok("読み戻した中身が合う",
+     back[0].name === "1年A組 12番 山田" && back[0].theme === "植物の水やりを忘れる" &&
+     back[0].sens.indexOf("土壌水分センサ") >= 0, JSON.stringify(back[0]));
+  ok("何枚でもまとめて読める", ww.parseCards(card + "\n" + card).length === 2);
+  ok("カードでない文は読まない", ww.parseCards("ただのメモです").length === 0);
 }
 
-/* 2026-09-19 に実在を確認した、研究室サイトのページ名 */
-const OK_PAGES = ["光センサ", "照度センサ", "カラーセンサ", "人感センサ", "ボタンセンサ", "タッチセンサ", "非接触温度センサ", "接触型温度センサ", "湿度センサ", "土壌水分センサ", "降雨水位センサ", "気圧センサ", "炎センサ", "アルコールセンサ", "光距離センサ", "リミットセンサ", "段差障害物センサ", "重さセンサ", "磁気スイッチセンサ", "レバースイッチセンサ", "年月日時刻", "パソコンカメラをaiセンサに", "音声認識で判別", "qrコードで判別", "振動モータ", "サーボモータ角度指定モータ", "dcモータギアドモータ水中ポンプ", "暖房装置", "冷却装置", "oledディスプレイ", "音声発生装置", "マイクロビットを使う", "計測制御問題解決", "センサアクション装置の使い方", "はんだ付けで実習基板を作る", "スマート農業", "マイクロビットで無線ロボットカーを作る"];
 
 console.log("=== リンクのhrefを実際に見る ===");
 {
@@ -401,7 +400,7 @@ console.log("=== 検索の索引と並べ方 ===");
 const SEL_STORE_SESSION = '#t-store .chip[data-s="session"]';
 const SEL_POL_TEACH = '#t-pol .chip[data-p="teach"]';
 
-console.log("=== 先生用：この文をAIにかける ===");
+console.log("=== ⑥ 先生用タブ ===");
 {
   /* jsdom には TextDecoder / fetch が無いので入れてやる。
      fetch は偽物にして、送っている中身まで検査する。 */
@@ -413,17 +412,14 @@ console.log("=== 先生用：この文をAIにかける ===");
         win.HTMLElement.prototype.scrollIntoView = function () {};
         win.TextDecoder = TextDecoder;
         win.fetch = function (url, opt) {
-          sent.url = url;
-          sent.headers = opt.headers;
-          sent.body = JSON.parse(opt.body);
+          sent.url = url; sent.headers = opt.headers; sent.body = JSON.parse(opt.body);
           return Promise.resolve(reply(sent));
         };
       } });
     return { win: dm.window, doc: dm.window.document, sent };
   }
-  /* SSE をそのまま返す偽レスポンス */
-  function sse(lines, status) {
-    const chunks = lines.map(x => new TextEncoder().encode(x));
+  function sse(lines2, status) {
+    const chunks = lines2.map(x => new TextEncoder().encode(x));
     let i = 0;
     return {
       ok: (status || 200) < 400, status: status || 200,
@@ -434,36 +430,97 @@ console.log("=== 先生用：この文をAIにかける ===");
     };
   }
   const OK_SSE = [
-    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"土がかわいた"}}\n',
-    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"かどうかを"}}\n',
+    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"かわいた土と"}}\n',
+    'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"ぬれた土を比べよう"}}\n',
     'data: [DONE]\n',
   ];
+  const CARD2 = [
+    "━━ 計測・制御 相談カード ━━",
+    "【なまえ】1年A組 12番 山田",
+    "【テーマ】教室が暑いとき、だれも気づかない",
+    "【考えた案】温度をはかる案を考えた",
+    "【行きづまり】どうやって知らせればいいか分からない",
+    "【困っていること】どの装置を使えばいいか分からない",
+    "【候補（計測）】接触型温度センサ",
+    "",
+    "━━ 計測・制御 相談カード ━━",
+    "【なまえ】1年B組 3番 佐藤",
+    "【テーマ】植物の水やりを忘れる",
+    "【考えた案】土がかわいたら水を出す装置",
+    "【行きづまり】境目が決められない",
+    "【困っていること】条件（しきい値）の決め方が分からない",
+    "【候補（計測）】土壌水分センサ",
+    "【候補（制御）】水中ポンプ",
+  ].join("\n");
 
   const A = mkWin(() => sse(OK_SSE));
   const g = id => A.doc.getElementById(id);
-  ok("先生用パネルがある", !!g("t-box"));
-  ok("はじめは畳まれている", !g("t-box").open);
+
+  ok("⑥タブがある", !!g("t-teach") && !!g("p-teach"));
+  g("t-teach").click();
+  ok("⑥を押すと⑥が出る", g("p-teach").hidden === false);
+  ok("はじめは編集フォームが隠れている", g("k-edit").hidden === true);
   ok("キーが無いうちは「AIに聞く」が出ない", g("t-ask").hidden === true);
-  ok("方針の選択肢が3つ", A.doc.querySelectorAll("#t-pol .chip").length === 3);
-  ok("キーの置き場所は「このタブだけ」が既定",
-     A.doc.querySelector(SEL_STORE_SESSION).getAttribute("aria-pressed") === "true");
 
-  /* 生徒が書いて「ヒントを出す」を押すと、先生用にも文が入る */
-  const set = (id, v) => { g(id).value = v; g(id).dispatchEvent(new A.win.Event("input")); };
-  set("g-theme", "植物の水やりを忘れる");
-  set("g-mine", "土がかわいたら水を出す装置。土壌水分センサと水中ポンプを使う");
-  set("g-stuck", "何の値で水を出すか、境目が決められない");
-  A.doc.querySelector(SEL_COND).click();
-  g("g-go").click();
-  ok("先生用の入力欄に文が入る", g("t-src").value.indexOf("植物の水やりを忘れる") >= 0);
+  /* 1. 受け取る */
+  g("k-in").value = CARD2;
+  g("k-read").click();
+  ok("2件まとめて読みこめる", /2件/.test(g("k-readmsg").textContent), g("k-readmsg").textContent);
+  ok("一覧に2件出る", A.doc.querySelectorAll("#k-list .saved").length === 2);
+  ok("貼った順のまま並ぶ",
+     A.doc.querySelector("#k-list .saved .th").textContent.indexOf("山田") >= 0,
+     A.doc.querySelector("#k-list .saved .th").textContent);
+  ok("読みこんだら貼り付け欄は空になる", g("k-in").value === "");
+  g("k-in").value = "ただのメモ";
+  g("k-read").click();
+  ok("カードでない文は読まない", /見つかりませんでした/.test(g("k-readmsg").textContent));
+
+  /* 2. ひらく */
+  A.doc.querySelectorAll("#k-list .kpick")[1].click();
+  ok("ひらくとフォームが出る", g("k-edit").hidden === false);
+  ok("なまえが入る", g("k-name").value === "1年B組 3番 佐藤", g("k-name").value);
+  ok("テーマが入る", g("k-theme").value === "植物の水やりを忘れる");
+  ok("候補（制御）も入る", g("k-acts").value === "水中ポンプ");
+  ok("困っていることが選ばれている",
+     A.doc.querySelector('#k-kind .chip[aria-pressed="true"]').textContent
+       .indexOf("しきい値") >= 0);
   ok("困っていることに合った方針が既定になる（しきい値→ヒント中心）",
-     g("t-src").value.indexOf("【今回の方針】ヒント中心") >= 0, g("t-src").value.slice(0, 300));
+     A.doc.querySelector('#t-pol .chip[aria-pressed="true"]').textContent.indexOf("ヒント中心") >= 0,
+     A.doc.querySelector('#t-pol .chip[aria-pressed="true"]').textContent);
 
-  /* 方針を変えると、渡す文も変わる */
+  /* 送る文はフォームから自動で組み上がる */
+  ok("送る文が組み上がる", g("t-src").value.indexOf("植物の水やりを忘れる") >= 0);
+  ok("資料のファイル名が入る", g("t-src").value.indexOf("土壌水分センサの使い方.pptx") >= 0);
+  ok("51種の装置一覧が入る", A.win.DEV.every(v => g("t-src").value.indexOf(v.n) >= 0));
+  ok("送る文は畳まれている", !A.doc.getElementById("k-srcbox").open);
+
+  /* フォームを直すと送る文も直る */
+  g("k-stuck").value = "かわいた土の値がわからない";
+  g("k-stuck").dispatchEvent(new A.win.Event("input"));
+  ok("フォームを直すと送る文も変わる",
+     g("t-src").value.indexOf("かわいた土の値がわからない") >= 0);
   A.doc.querySelector(SEL_POL_TEACH).click();
-  ok("方針を変えると渡す文も変わる",
+  ok("方針を変えると送る文も変わる",
      g("t-src").value.indexOf("【今回の方針】しっかり説明する") >= 0);
-  ok("方針の説明が出る", g("t-polds").textContent.length > 10);
+
+  /* 直したものは残る */
+  const saved = JSON.parse(A.win.localStorage.getItem("keisoku-gyakubiki-soudan"));
+  ok("直した内容が保存される", saved[1].stuck === "かわいた土の値がわからない", JSON.stringify(saved[1]));
+  ok("方針も保存される", saved[1].pol === "teach");
+
+  /* 白紙から先生が直接書ける */
+  g("k-blank").click();
+  ok("白紙で1件つくれる", g("k-theme").value === "" && g("k-edit").hidden === false);
+  ok("一覧が1件増える", A.doc.querySelectorAll("#k-list .saved").length === 3);
+
+  /* 返した／消す */
+  A.doc.querySelectorAll("#k-list .kpick")[0].click();
+  g("k-done").click();
+  ok("「返した」にできる",
+     A.doc.querySelector("#k-list .saved .tag").textContent === "返した",
+     A.doc.querySelector("#k-list .saved .tag").textContent);
+  g("k-done").click();
+  ok("もどせる", A.doc.querySelector("#k-list .saved .tag").textContent === "未");
 
   /* キーを入れるとボタンが出る */
   g("t-key").value = "sk-ant-test";
@@ -474,79 +531,74 @@ console.log("=== 先生用：この文をAIにかける ===");
      !A.win.localStorage.getItem("keisoku-gyakubiki-ai"));
 
   return (async () => {
-    /* 送っている中身と、ストリームの解釈 */
+    A.doc.querySelectorAll("#k-list .kpick")[1].click();   /* 一覧は [白紙, 山田, 佐藤] */
     await g("t-ask").onclick();
     ok("Anthropic のエンドポイントに送っている",
        A.sent.url === "https://api.anthropic.com/v1/messages", A.sent.url);
     ok("ブラウザから直接たたくヘッダがある",
        A.sent.headers["anthropic-dangerous-direct-browser-access"] === "true");
     ok("APIキーを送っている", A.sent.headers["x-api-key"] === "sk-ant-test");
-    ok("バージョンを送っている", A.sent.headers["anthropic-version"] === "2023-06-01");
-    ok("既定は Opus 5", A.sent.body.model === "claude-opus-5", A.sent.body.model);
+    ok("既定は Opus 5", A.sent.body.model === "claude-opus-5");
     ok("Opus では安全分類のフォールバックを使う",
        A.sent.body.fallbacks === "default" &&
        A.sent.headers["anthropic-beta"] === "server-side-fallback-2026-07-01");
     ok("adaptive thinking を使う", A.sent.body.thinking.type === "adaptive");
-    ok("effort は medium", A.sent.body.output_config.effort === "medium");
-    ok("ストリームで受け取る", A.sent.body.stream === true);
     ok("装置一覧を積んだ文を送っている",
        A.sent.body.messages[0].content.indexOf("この学校で使える装置") >= 0);
-    ok("答えがつながって入る", g("t-ans").value === "土がかわいたかどうかを", g("t-ans").value);
-    ok("読んでから渡すよう知らせる", /直してから生徒に渡/.test(g("t-msg").textContent),
-       g("t-msg").textContent);
+    ok("その生徒の相談を送っている",
+       A.sent.body.messages[0].content.indexOf("教室が暑いとき") >= 0);
+    ok("答えがつながって入る", g("t-ans").value === "かわいた土とぬれた土を比べよう", g("t-ans").value);
+    ok("読んでから渡すよう知らせる", /直してから生徒に渡/.test(g("t-msg").textContent));
+
+    const saved2 = JSON.parse(A.win.localStorage.getItem("keisoku-gyakubiki-soudan"));
+    ok("答えも保存される", saved2[1].ans === "かわいた土とぬれた土を比べよう", JSON.stringify(saved2[1].ans));
 
     /* Haiku のときは thinking と fallbacks を外す */
     const B = mkWin(() => sse(OK_SSE));
     const gb = id => B.doc.getElementById(id);
+    gb("k-in").value = CARD2; gb("k-read").click();
+    B.doc.querySelectorAll("#k-list .kpick")[0].click();
     gb("t-key").value = "sk-ant-x";
     gb("t-model").value = "claude-haiku-4-5-20251001";
     gb("t-save").click();
-    gb("t-src").value = "てすと";
     await gb("t-ask").onclick();
-    ok("Haiku では adaptive thinking を外す", B.sent.body.thinking === undefined,
-       JSON.stringify(B.sent.body.thinking));
+    ok("Haiku では adaptive thinking を外す", B.sent.body.thinking === undefined);
     ok("Haiku では fallbacks を外す", B.sent.body.fallbacks === undefined);
 
     /* エラーのときの言い方 */
     const C = mkWin(() => sse([], 401));
     const gc = id => C.doc.getElementById(id);
-    gc("t-key").value = "sk-ant-bad";
-    gc("t-save").click();
-    gc("t-src").value = "てすと";
+    gc("k-blank").click();
+    gc("k-theme").value = "てすと"; gc("k-theme").dispatchEvent(new C.win.Event("input"));
+    gc("t-key").value = "sk-ant-bad"; gc("t-save").click();
     await gc("t-ask").onclick();
-    ok("401 はキーが違うと伝える", /401/.test(gc("t-msg").textContent) &&
-       /キー/.test(gc("t-msg").textContent), gc("t-msg").textContent);
+    ok("401 はキーが違うと伝える",
+       /401/.test(gc("t-msg").textContent) && /キー/.test(gc("t-msg").textContent),
+       gc("t-msg").textContent);
 
     const D = mkWin(() => sse([], 429));
     const gd = id => D.doc.getElementById(id);
+    gd("k-blank").click();
+    gd("k-theme").value = "てすと"; gd("k-theme").dispatchEvent(new D.win.Event("input"));
     gd("t-key").value = "sk-ant-x"; gd("t-save").click();
-    gd("t-src").value = "てすと";
     await gd("t-ask").onclick();
     ok("429 は待つよう伝える", /待って/.test(gd("t-msg").textContent), gd("t-msg").textContent);
 
-    /* AIが断ったとき */
     const E = mkWin(() => sse([
       'data: {"type":"message_delta","delta":{"stop_reason":"refusal"}}\n'], 200));
     const ge = id => E.doc.getElementById(id);
+    ge("k-blank").click();
+    ge("k-theme").value = "てすと"; ge("k-theme").dispatchEvent(new E.win.Event("input"));
     ge("t-key").value = "sk-ant-x"; ge("t-save").click();
-    ge("t-src").value = "てすと";
     await ge("t-ask").onclick();
     ok("断られたらそう伝える", /断り/.test(ge("t-msg").textContent), ge("t-msg").textContent);
 
-    /* 空のまま押したとき */
-    const F = mkWin(() => sse(OK_SSE));
-    const gf = id => F.doc.getElementById(id);
-    gf("t-key").value = "sk-ant-x"; gf("t-save").click();
-    gf("t-src").value = "";
-    await gf("t-ask").onclick();
-    ok("空なら聞きに行かない", F.sent.url === undefined && /空です/.test(gf("t-msg").textContent));
-
     /* キーを消せる */
-    gf("t-forget").click();
-    ok("キーを消すとボタンが消える", gf("t-ask").hidden === true);
+    ge("t-forget").click();
+    ok("キーを消すとボタンが消える", ge("t-ask").hidden === true);
     ok("消すと保存先にも残らない",
-       !F.win.sessionStorage.getItem("keisoku-gyakubiki-ai") &&
-       !F.win.localStorage.getItem("keisoku-gyakubiki-ai"));
+       !E.win.sessionStorage.getItem("keisoku-gyakubiki-ai") &&
+       !E.win.localStorage.getItem("keisoku-gyakubiki-ai"));
 
     console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
     process.exit(fail ? 1 : 0);

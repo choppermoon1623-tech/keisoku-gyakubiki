@@ -139,15 +139,43 @@ input{min-width:0} .grid{grid-template-columns:repeat(auto-fit,minmax(min(280px,
 .gpr{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
   font-family:ui-monospace,"Consolas","Yu Gothic UI",monospace;font-size:12px;line-height:1.6;
   background:#fbfcfe;color:var(--ink);resize:vertical}
-a.linkbtn{display:inline-block;text-decoration:none;text-align:center}
-a.linkbtn:hover{background:#f2f5f9}
-@media print{ .gpr,a.linkbtn{display:none!important} }
+/* 相談カードは印刷して先生にわたすので、印刷では消さない */
+@media print{ .gpr{background:#fff;color:#000;border:1px solid #bbb} }
 .ghead{font-size:14px;margin:18px 0 8px;padding-left:10px;border-left:5px solid var(--sensor);
   color:var(--sensor);font-weight:700}
 .ghead.a{border-left-color:var(--action);color:var(--action)}
 .ghead:first-child{margin-top:2px}
 .ghead span{font-weight:400;color:var(--sub);font-size:12px;margin-left:6px}
 .ghead + .grid{margin-bottom:6px}
+.tab-btn.teach{color:#7a5af0}
+.tab-btn.teach[aria-selected="true"]{color:#7a5af0;border-bottom-color:#7a5af0}
+h2.tstep{border-left-color:#7a5af0;color:#4a3a86}
+.saved.on{outline:3px solid #7a5af0;outline-offset:2px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;
+  background:#eef2f8;color:var(--sub);margin-left:6px}
+.tag.ok{background:var(--accent-bg);color:var(--accent)}
+#k-srcbox{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:0 10px}
+#k-srcbox>summary{cursor:pointer;padding:9px 2px;font-size:13px;color:var(--sub)}
+#k-srcbox>textarea{margin-bottom:10px}
+#t-set{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);overflow:hidden}
+#t-set>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:700;color:#4a3a86;
+  background:#f1eefc;list-style:none}
+#t-set>summary::-webkit-details-marker{display:none}
+.builder textarea,.tin textarea{width:100%;padding:10px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:15px;line-height:1.6;resize:vertical}
+.tin label,.tin .glb{display:block;font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 4px}
+.tin input,.tin select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+  font:inherit;font-size:15px}
+.builder select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+  font:inherit;font-size:15px}
+.warnbox{font-size:12px;color:#a13b12;background:#fdefe4;border-radius:8px;padding:9px 11px;margin:6px 0 0}
+@media print{
+  #k-in,#k-list,#k-srcbox,#t-set,#k-none,#k-kind,#t-pol,#t-polds,h2.tstep,#p-teach .note-bar,
+  #p-teach .gnudge,#k-sens,#k-acts{display:none!important}
+  #p-teach label[for="k-sens"],#p-teach label[for="k-acts"]{display:none!important}
+  #t-ans{border:1px solid #bbb;color:#000}
+}
 .tbox{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;
   box-shadow:var(--shadow);overflow:hidden}
 .tbox>summary{cursor:pointer;padding:12px 14px;font-size:14px;font-weight:700;color:#4a3a86;
@@ -238,6 +266,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <button class="tab-btn" id="t-step"  role="tab" aria-selected="false" aria-controls="p-step">③ 進め方</button>
     <button class="tab-btn" id="t-memo"  role="tab" aria-selected="false" aria-controls="p-memo">④ 設計メモ</button>
     <button class="tab-btn" id="t-stuck" role="tab" aria-selected="false" aria-controls="p-stuck">⑤ 行きづまったら</button>
+    <button class="tab-btn teach" id="t-teach" role="tab" aria-selected="false" aria-controls="p-teach">⑥ 先生用</button>
   </div>
 </nav>
 
@@ -302,6 +331,8 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 <section id="p-stuck" role="tabpanel" aria-labelledby="t-stuck" hidden>
   <p class="note-bar">行きづまったら、まず<b>書いてみる</b>。テーマ・自分が考えたこと・行きづまったところの3つを書くと、その言葉からヒントを出します。書いているうちに、自分で答えが見つかることもあります。<br><b>AIは使いません。</b>書いた内容はこのパソコンの中だけに残り、どこにも送られません。</p>
   <div class="builder">
+    <label for="g-name">なまえ・出席番号（先生にわたすときに使います）</label>
+    <input id="g-name" placeholder="例：1年A組 12番 山田">
     <label for="g-theme">テーマ・課題（何を解決しようとしている？）<span class="req">必須</span></label>
     <input id="g-theme" placeholder="例：祖父が夜トイレに行くとき、暗くてあぶない">
     <label for="g-joken">条件・きまり（使える日数・お金・学校にある装置など）</label>
@@ -321,61 +352,97 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   </div>
   <div id="g-out"></div>
 
-  <details id="t-box" class="tbox">
-    <summary>先生用 ―― この文をAIにかける</summary>
-    <div class="tin">
-      <p class="note-bar"><b>生徒は使いません。</b>上で組み立てた文を、先生がAIにかけるところです。
-      答えは<b>先生が読んで直してから</b>生徒に渡します。<br>
-      いつもの使い方は「文をコピー」してClaudeやChatGPTに貼るだけ。お金もかかりません。
-      下の設定にAPIキーを入れたときだけ、この画面から直接聞けるようになります。</p>
+</section>
+
+<section id="p-teach" role="tabpanel" aria-labelledby="t-teach" hidden>
+  <p class="note-bar"><b>ここは先生用です。</b>生徒から受け取った「相談カード」を貼りこんで、1件ずつAIにかけます。
+  答えは<b>先生が読んで直してから</b>生徒に返します。<br>
+  APIキーを入れなくても使えます（「送る文をコピー」して、ふだん使っているClaudeやChatGPTに貼るだけ）。</p>
+
+  <h2 class="tstep">1. 受け取る</h2>
+  <div class="builder">
+    <label for="k-in">生徒から受け取った相談カードを貼る（何人分でもまとめて）</label>
+    <textarea id="k-in" rows="6" placeholder="Classroomのコメント、メール、共有ドキュメント…どこで受け取ったものでも、そのまま貼ってください。何枚あってもかまいません。"></textarea>
+    <div class="btnrow">
+      <button class="main" id="k-read">読みこむ</button>
+      <button class="sub" id="k-blank">白紙で1件つくる</button>
+    </div>
+    <p class="gate" id="k-readmsg" role="status" aria-live="polite"></p>
+  </div>
+
+  <h2 class="tstep">2. 相談の一覧</h2>
+  <div id="k-list"></div>
+
+  <h2 class="tstep">3. AIにかける</h2>
+  <div class="builder">
+    <p class="gate" id="k-none">上の一覧から「ひらく」を押してください。白紙で1件つくって、先生が直接書いてもかまいません。</p>
+    <div id="k-edit" hidden>
+      <label for="k-name">なまえ・出席番号</label>
+      <input id="k-name">
+      <label for="k-theme">テーマ・課題</label>
+      <input id="k-theme">
+      <label for="k-joken">条件・きまり</label>
+      <input id="k-joken">
+      <label for="k-mine">考えた案・ためしたこと</label>
+      <textarea id="k-mine" rows="3"></textarea>
+      <label for="k-stuck">どこで行きづまったか</label>
+      <textarea id="k-stuck" rows="3"></textarea>
+      <p class="glb">いま、いちばん困っていること</p>
+      <div class="chips" id="k-kind"></div>
+      <label for="k-sens">候補（計測）　※「／」で区切る</label>
+      <input id="k-sens">
+      <label for="k-acts">候補（制御）　※「／」で区切る</label>
+      <input id="k-acts">
 
       <p class="glb">答え方の方針<span class="req">1件ごとに変えられます</span></p>
       <div class="chips" id="t-pol"></div>
       <p class="gate" id="t-polds"></p>
 
-      <label for="t-src">AIに渡す文</label>
-      <textarea id="t-src" class="gpr" rows="7" placeholder="上で「ヒントを出す」を押すと、ここに入ります。ほかの生徒から受け取った文を貼ってもかまいません。"></textarea>
       <div class="btnrow">
         <button class="main" id="t-ask" hidden>🤖 AIに聞く</button>
-        <button class="sub" id="t-copy">文をコピー</button>
+        <button class="sub" id="t-copy">送る文をコピー</button>
       </div>
       <p class="gate" id="t-msg" role="status" aria-live="polite"></p>
+      <details id="k-srcbox">
+        <summary>AIに送る文を見る（直してから送ることもできます）</summary>
+        <textarea id="t-src" class="gpr" rows="10"></textarea>
+      </details>
 
       <label for="t-ans">AIの答え（そのまま渡さず、直してから渡してください）</label>
       <textarea id="t-ans" rows="10"></textarea>
       <div class="btnrow">
         <button class="sub" id="t-anscopy">答えをコピー</button>
-        <button class="sub" id="t-print">答えを印刷</button>
-        <button class="sub" id="t-clear">消す</button>
+        <button class="sub" id="t-print">印刷して渡す</button>
+        <button class="sub" id="k-done">返したことにする</button>
+        <button class="sub" id="k-del">この相談を消す</button>
       </div>
-
-      <details id="t-set">
-        <summary>設定（APIキー・モデル）</summary>
-        <div class="tin">
-          <label for="t-key">Anthropic APIキー（任意）</label>
-          <input id="t-key" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-          <p class="warnbox"><b>生徒が使う端末には入れないでください。</b>
-          既定では<b>このタブを閉じると消えます</b>。教室の共用パソコンでは、この既定のままで使ってください。</p>
-          <p class="glb">キーの置き場所</p>
-          <div class="chips" id="t-store"></div>
-          <label for="t-model">使うモデル</label>
-          <select id="t-model">
-            <option value="claude-opus-5">Claude Opus 5（いちばん賢い・既定）</option>
-            <option value="claude-sonnet-5">Claude Sonnet 5（速くて安い）</option>
-            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5（いちばん安い）</option>
-          </select>
-          <div class="btnrow">
-            <button class="main" id="t-save">保存</button>
-            <button class="sub" id="t-forget">キーを消す</button>
-          </div>
-          <p class="gate" id="t-setmsg" role="status" aria-live="polite"></p>
-        </div>
-      </details>
-
       <p class="gnudge"><b>渡す前にかならず読んでください。</b>
       AIには「学校にある51種の装置の中からだけ提案する」「つなぎ方・コネクタ番号・しきい値の数値は書かない」
-      「そのまま提出できる完成品は書かない」と指示してありますが、守られているかは先生が確かめます。<br>
-      答えが的外れなときは、方針を変えるか、生徒の書いた欄を一緒に書き直してから、もう一度かけてみてください。</p>
+      「そのまま提出できる完成品は書かない」と指示してありますが、守られているかは先生が確かめます。</p>
+    </div>
+  </div>
+
+  <details id="t-set">
+    <summary>設定（APIキー・モデル）</summary>
+    <div class="tin">
+      <p class="count">APIキーは<b>入れなくても使えます</b>。入れると「🤖 AIに聞く」が出て、この画面から直接聞けます（従量課金）。</p>
+      <label for="t-key">Anthropic APIキー（任意）</label>
+      <input id="t-key" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+      <p class="warnbox"><b>生徒が使う端末には入れないでください。</b>
+      既定では<b>このタブを閉じると消えます</b>。共用のパソコンでは、この既定のままで使ってください。</p>
+      <p class="glb">キーの置き場所</p>
+      <div class="chips" id="t-store"></div>
+      <label for="t-model">使うモデル</label>
+      <select id="t-model">
+        <option value="claude-opus-5">Claude Opus 5（いちばん賢い・既定）</option>
+        <option value="claude-sonnet-5">Claude Sonnet 5（速くて安い）</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5（いちばん安い）</option>
+      </select>
+      <div class="btnrow">
+        <button class="main" id="t-save">保存</button>
+        <button class="sub" id="t-forget">キーを消す</button>
+      </div>
+      <p class="gate" id="t-setmsg" role="status" aria-live="polite"></p>
     </div>
   </details>
 </section>
@@ -1115,7 +1182,7 @@ $('tips').innerHTML=TIPS.map(function(s){
    通信もAIも使わない。
    ========================================================= */
 var GREQ = [['g-theme','テーマ・課題'],['g-mine','自分が考えた案'],['g-stuck','行きづまったところ']];
-var GALL = ['g-theme','g-joken','g-mine','g-stuck'];
+var GALL = ['g-name','g-theme','g-joken','g-mine','g-stuck'];
 /* 検索に効かせる重み。行きづまりの記述がいちばん具体的なので重くする */
 var GW = [['g-theme',1],['g-joken',0.6],['g-mine',1.2],['g-stuck',1.4]];
 
@@ -1154,8 +1221,6 @@ function gSync(){
   $('g-gate').textContent = miss.length
     ? 'あと'+miss.length+'つ ―― '+miss.join(' ／ ')+' を書くと、ボタンが押せます。'
     : '書けました。「ヒントを出す」が押せます。';
-  /* 「いま困っていること」が変わると、先生用の方針の既定も変わる */
-  if(typeof tRenderPol==='function') tRenderPol();
   gSave();
 }
 
@@ -1286,7 +1351,55 @@ function gHintHtml(o,cls){
    肝は【この学校で使える装置】を必ず同梱すること。
    これが無いと、AIは学校に無い部品を平気ですすめてくる。
    ========================================================= */
-var OTAZUNE = 'https://choppermoon1623-tech.github.io/ai-otazune/';
+/* =========================================================
+   相談カード
+   生徒が書いたものを、先生が読める1枚の文にする。
+   Classroomのコメント・メール・紙、どれで渡しても通る形にしてある。
+   先生はこれをまとめて⑥に貼り、1件ずつAIにかける。
+   ========================================================= */
+var CARD_HEAD = '━━ 計測・制御 相談カード ━━';
+var CARD_FIELDS = [
+  ['name','なまえ'], ['theme','テーマ'], ['joken','条件'],
+  ['mine','考えた案'], ['stuck','行きづまり'], ['kind','困っていること'],
+  ['sens','候補（計測）'], ['acts','候補（制御）']
+];
+function cardText(rec){
+  var L=[CARD_HEAD];
+  CARD_FIELDS.forEach(function(f){
+    var v=String(rec[f[0]]||'').trim();
+    if(v) L.push('【'+f[1]+'】'+v);
+  });
+  return L.join('\n');
+}
+/* 何枚でもまとめて貼れるように、見出しで切って読む */
+function parseCards(txt){
+  var out=[];
+  String(txt||'').split(CARD_HEAD).forEach(function(chunk){
+    if(!chunk.trim()) return;
+    var rec={}, cur=null;
+    chunk.split('\n').forEach(function(line){
+      var m=line.match(/^【([^】]+)】([\s\S]*)$/);
+      if(m){
+        var f=CARD_FIELDS.filter(function(x){ return x[1]===m[1]; })[0];
+        cur = f ? f[0] : null;
+        if(cur) rec[cur]=m[2].trim();
+      }else if(cur && line.trim()){
+        rec[cur] += '\n' + line.trim();
+      }
+    });
+    if(rec.theme || rec.stuck || rec.mine) out.push(rec);
+  });
+  return out;
+}
+function devByName(n){
+  n=String(n||'').trim();
+  if(!n) return null;
+  return DEV.filter(function(v){ return v.n===n; })[0] || null;
+}
+function kindKey(nm){
+  var g=GKIND.filter(function(x){ return x.nm===String(nm||'').trim(); })[0];
+  return g ? g.k : '';
+}
 
 /* 答え方の方針。AIおたずね箱と同じ3つ。1件ごとに先生が切りかえる */
 var TPOL = {
@@ -1304,20 +1417,25 @@ var TPOL_ORDER = ['check','hint','teach'];
 /* 困っていることに合わせた既定 */
 var KIND_POL = {idea:'teach', dev:'check', cond:'hint', prog:'check', ng:'hint'};
 var tpol = '';
-function curPol(){ return tpol || KIND_POL[gkind] || 'teach'; }
+var kkind = '';   /* ⑥のフォームで選ばれている困りごと */
+function curPol(){ return tpol || KIND_POL[kkind] || 'teach'; }
 function gDevList(t){
   return DEV.filter(function(v){ return v.t===t; }).map(function(v){ return v.n; }).join('／');
 }
-function gPrompt(sens,acts){
-  var L=[], kd=GKIND.filter(function(g){ return g.k===gkind; })[0];
+/* レコード（相談カードの中身）から、AIに送る文を組み立てる。
+   ⑤（生徒の端末）でも⑥（先生の端末）でも、同じものが出る */
+function buildPrompt(rec, polKey){
+  var L=[], pol=TPOL[polKey] || TPOL.teach;
+  var sensN = String(rec.sens||'').split('／').map(function(x){return x.trim();}).filter(Boolean);
+  var actsN = String(rec.acts||'').split('／').map(function(x){return x.trim();}).filter(Boolean);
   L.push('あなたは中学校の技術科の教師から依頼を受けたAIです。');
   L.push('生徒はAIを直接使えないため、教師が生徒の代わりに質問しています。');
   L.push('あなたの答えは、教師が読んで確かめたうえで生徒に渡されます。');
   L.push('');
   L.push('【読み手】中学生');
   L.push('【単元】技術科「計測・制御による問題解決」。micro:bit とジョイント基板を使います。');
-  L.push('【今回の方針】' + TPOL[curPol()].nm);
-  L.push(TPOL[curPol()].rule);
+  L.push('【今回の方針】' + pol.nm);
+  L.push(pol.rule);
   L.push('');
   L.push('【いちばん大事な条件】');
   L.push('・提案してよいのは、下の「この学校で使える装置」にあるものだけです。');
@@ -1335,21 +1453,23 @@ function gPrompt(sens,acts){
   L.push('・400〜600字程度。見出しや箇条書きを使ってよい。');
   L.push('');
   L.push('―― ここから生徒が書いた内容 ――');
-  [['g-theme','テーマ・課題'],['g-joken','条件・きまり'],
-   ['g-mine','自分が考えた案・ためしたこと'],['g-stuck','どこで行きづまったか']]
+  [['theme','テーマ・課題'],['joken','条件・きまり'],
+   ['mine','自分が考えた案・ためしたこと'],['stuck','どこで行きづまったか']]
   .forEach(function(f){
-    var v=$(f[0]).value.trim();
+    var v=String(rec[f[0]]||'').trim();
     if(v) L.push('【'+f[1]+'】\n'+v);
   });
-  if(kd) L.push('【いま、いちばん困っていること】'+kd.nm);
+  if(String(rec.kind||'').trim()) L.push('【いま、いちばん困っていること】'+String(rec.kind).trim());
   L.push('―― ここまで ――');
   L.push('');
-  if(sens.length || acts.length){
+  if(sensN.length || actsN.length){
     L.push('【逆引きシステムが出した候補】');
-    sens.concat(acts).forEach(function(v){
-      var r=REF[v.id];
-      L.push('・'+(v.t==='s'?'計測':'制御')+'：'+v.n
-        +(r?'（資料：'+r.f+'）':'（この装置だけの資料ページはありません）'));
+    [['計測',sensN],['制御',actsN]].forEach(function(pair){
+      pair[1].forEach(function(nm){
+        var v=devByName(nm), r=v?REF[v.id]:null;
+        L.push('・'+pair[0]+'：'+nm
+          +(v ? (r?'（資料：'+r.f+'）':'（この装置だけの資料ページはありません）') : ''));
+      });
     });
   }else{
     L.push('【逆引きシステムが出した候補】なし。');
@@ -1396,47 +1516,44 @@ $('g-go').onclick=function(){
   h+='<p class="gnudge">書いているうちに気づいたことがあれば、上の欄に書き足して、もう一度「ヒントを出す」を押そう。<br>'
    +'それでも進まないときは、<b>この画面を印刷して先生に見せる</b>のがいちばん早い。何を考えて、どこで止まったかが全部書いてあるので、話が早く進みます。</p>';
 
-  /* 先生にわたす文（AIおたずね箱ほうしき） */
-  h+='<h2 style="border-left-color:#7a5af0">それでも進まないときは、先生に聞く</h2>';
-  h+='<p class="count">下の文は、<b>先生がAIに聞くための文</b>です。生徒はAIを使いません。'
-   +'コピーして先生にわたすか、<b>AIおたずね箱</b>に貼ってください。'
-   +'先生が答えを読んで確かめてから、みなさんに返します。</p>';
-  h+='<textarea id="g-prompt" class="gpr" rows="10" readonly></textarea>';
+  /* 先生に出す ―― 生徒にはAIへの指示文を見せない。読める1枚だけ渡す */
+  h+='<h2 style="border-left-color:#7a5af0">それでも進まないときは、先生に出す</h2>';
+  h+='<p class="count">下の<b>相談カード</b>を先生にわたすと、先生がAIに聞いて、'
+   +'<b>答えを読んで確かめてから</b>返してくれます。みなさんはAIを使いません。<br>'
+   +'コピーしてClassroomに貼るか、この画面を印刷してわたしてください。</p>';
+  h+='<textarea id="g-card" class="gpr" rows="9" readonly></textarea>';
   h+='<p class="gate" id="g-copied" role="status" aria-live="polite"></p>';
   h+='<div class="btnrow">'
-   +'<button class="main" id="g-copy">この文をコピーする</button>'
-   +'<a class="sub linkbtn" href="'+OTAZUNE+'" target="_blank" rel="noopener">AIおたずね箱をひらく</a>'
+   +'<button class="main" id="g-copy">相談カードをコピー</button>'
+   +'<button class="sub" id="g-print2">印刷する</button>'
    +'</div>';
-  h+='<p class="gnudge"><b>先生へ：</b>この文には<b>この学校で使える51種の装置の一覧</b>が入っています。'
-   +'だからAIは、学校に無い部品をすすめてきません。'
-   +'つなぎ方・コネクタ番号・しきい値は「書かないで」と指示してあります'
-   +'（それらは石川研究室の配布資料で生徒が確かめる決まりなので、AIに推測させません）。'
-   +'返ってきた答えは、<b>そのまま渡さず、必ず目を通してから</b>渡してください。</p>';
 
   $('g-out').innerHTML=h;
   Array.prototype.forEach.call($('g-out').querySelectorAll('.pick'),function(b){
     b.onclick=function(){ pick(b.dataset.id); };
   });
-  $('g-prompt').value = gPrompt(sens,acts);
-  GLAST = {sens:sens, acts:acts};
-  tFill();
+  $('g-card').value = cardText(gRec(sens,acts));
   $('g-copy').onclick = function(){
-    var ta=$('g-prompt');
-    /* 学校のパソコンでは clipboard が使えないことがある。
-       そのときは選択状態にして、手でコピーしてもらう */
-    try{
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(ta.value).then(function(){
-          $('g-copied').textContent='コピーしました。先生にわたすか、AIおたずね箱に貼ってください。';
-          $('g-copied').className='gate ok';
-        },function(){ gSelect(); });
-        return;
-      }
-    }catch(e){}
-    gSelect();
+    tCopy('g-card','g-copied','コピーしました。先生にわたしてください。');
   };
+  $('g-print2').onclick = function(){ window.print(); };
   $('g-out').scrollIntoView({behavior:'smooth',block:'start'});
 };
+
+/* ⑤の入力欄から、相談カードのもとになるレコードを作る */
+function gRec(sens,acts){
+  var kd=GKIND.filter(function(g){ return g.k===gkind; })[0];
+  return {
+    name : $('g-name').value.trim(),
+    theme: $('g-theme').value.trim(),
+    joken: $('g-joken').value.trim(),
+    mine : $('g-mine').value.trim(),
+    stuck: $('g-stuck').value.trim(),
+    kind : kd ? kd.nm : '',
+    sens : sens.map(function(v){ return v.n; }).join('／'),
+    acts : acts.map(function(v){ return v.n; }).join('／')
+  };
+}
 $('g-clear').onclick=function(){
   if(!confirm('書いたものを消しますか？（④の設計メモは残ります）')) return;
   GALL.forEach(function(id){ $(id).value=''; });
@@ -1448,14 +1565,42 @@ $('g-clear').onclick=function(){
    生徒はここを使わない。既定はコピー方式で、APIキーを入れたときだけ
    この画面から直接聞ける。答えは先生が直してから生徒に渡す。
    ========================================================= */
-var GLAST = null;      /* 直前に出した候補 */
-var TSRC_AUTO = '';    /* 自動で入れた文。先生が書きかえたら上書きしない */
+/* ---- 相談の一覧（この端末に保存） ---- */
+var KKEY='keisoku-gyakubiki-soudan';
+var KCUR=-1;
+function kAll(){ try{ var a=JSON.parse(localStorage.getItem(KKEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function kPut(a){ try{ localStorage.setItem(KKEY,JSON.stringify(a)); }catch(e){
+  $('k-readmsg').className='gate'; $('k-readmsg').textContent='保存できませんでした。ブラウザの空き容量を確認してください。'; } }
 
-function tFill(){
-  if(!GLAST) return;
-  var t = gPrompt(GLAST.sens, GLAST.acts);
-  var ta = $('t-src');
-  if(!ta.value.trim() || ta.value === TSRC_AUTO){ ta.value = t; TSRC_AUTO = t; }
+var KF=[['k-name','name'],['k-theme','theme'],['k-joken','joken'],
+        ['k-mine','mine'],['k-stuck','stuck'],['k-sens','sens'],['k-acts','acts']];
+
+function kRender(){
+  var a=kAll();
+  $('k-list').innerHTML = a.length ? a.map(function(r,i){
+    return '<div class="saved'+(i===KCUR?' on':'')+'">'
+      + '<div class="th">'+esc(r.name||'（なまえなし）')
+      + (r.status==='done'?'<span class="tag ok">返した</span>':'<span class="tag">未</span>')+'</div>'
+      + '<p>'+esc(r.theme||'（テーマ未記入）')+'</p>'
+      + (r.stuck?'<p>'+esc(String(r.stuck).slice(0,60))+'</p>':'')
+      + '<div class="btnrow"><button class="sub kpick" data-i="'+i+'">ひらく</button></div></div>';
+  }).join('') : '<p class="empty">まだありません。上の欄にカードを貼って「読みこむ」を押してください。</p>';
+  Array.prototype.forEach.call($('k-list').querySelectorAll('.kpick'), function(b){
+    b.onclick=function(){ kOpen(+b.dataset.i); };
+  });
+}
+
+function kRenderKind(){
+  $('k-kind').innerHTML = GKIND.map(function(g){
+    return '<button type="button" class="chip" data-k="'+g.k+'" aria-pressed="'+(kkind===g.k)+'">'
+      + esc(g.nm) + '</button>';
+  }).join('');
+  Array.prototype.forEach.call($('k-kind').querySelectorAll('.chip'), function(b){
+    b.onclick=function(){
+      kkind = (kkind===b.dataset.k)?'':b.dataset.k;
+      kRenderKind(); tRenderPol(); kSync();
+    };
+  });
 }
 
 function tRenderPol(){
@@ -1465,11 +1610,83 @@ function tRenderPol(){
       + esc(TPOL[k].nm) + '</button>';
   }).join('');
   Array.prototype.forEach.call($('t-pol').querySelectorAll('.chip'), function(b){
-    b.onclick = function(){ tpol = b.dataset.p; tRenderPol(); tFill(); };
+    b.onclick = function(){ tpol = b.dataset.p; tRenderPol(); kSync(); };
   });
   $('t-polds').textContent = TPOL[cur].ds
     + (tpol ? '' : '（「いま困っていること」に合わせた既定です）');
 }
+
+/* フォーム → レコード */
+function kForm(){
+  var r={};
+  KF.forEach(function(f){ r[f[1]] = $(f[0]).value.trim(); });
+  var g=GKIND.filter(function(x){ return x.k===kkind; })[0];
+  r.kind = g ? g.nm : '';
+  r.pol  = tpol;
+  r.ans  = $('t-ans').value;
+  return r;
+}
+/* フォームが変わったら、送る文を作り直して保存する */
+function kSync(){
+  $('t-src').value = buildPrompt(kForm(), curPol());
+  if(KCUR<0) return;
+  var a=kAll(), r=kForm();
+  if(!a[KCUR]) return;
+  r.status = a[KCUR].status || 'new';
+  a[KCUR] = r; kPut(a); kRender();
+}
+function kOpen(i){
+  var a=kAll(), r=a[i];
+  if(!r) return;
+  KCUR=i;
+  KF.forEach(function(f){ $(f[0]).value = r[f[1]] || ''; });
+  kkind = kindKey(r.kind);
+  tpol  = r.pol || '';
+  $('t-ans').value = r.ans || '';
+  $('k-edit').hidden=false; $('k-none').hidden=true;
+  $('t-msg').textContent='';
+  kRenderKind(); tRenderPol();
+  $('t-src').value = buildPrompt(kForm(), curPol());
+  kRender();
+  $('k-edit').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+$('k-read').onclick=function(){
+  var got = parseCards($('k-in').value);
+  if(!got.length){
+    $('k-readmsg').className='gate';
+    $('k-readmsg').textContent='相談カードが見つかりませんでした。「'+CARD_HEAD+'」からはじまる文を貼ってください。';
+    return;
+  }
+  /* 貼った順のまま、新しいものを上に積む */
+  got.forEach(function(r){ r.status='new'; r.at=Date.now(); });
+  var a=got.concat(kAll());
+  kPut(a); KCUR=-1; kRender();
+  $('k-in').value='';
+  $('k-readmsg').className='gate ok';
+  $('k-readmsg').textContent=got.length+'件 読みこみました。一覧から「ひらく」を押してください。';
+};
+$('k-blank').onclick=function(){
+  var a=kAll();
+  a.unshift({name:'',theme:'',joken:'',mine:'',stuck:'',kind:'',sens:'',acts:'',status:'new',at:Date.now()});
+  kPut(a); kRender(); kOpen(0);
+};
+$('k-done').onclick=function(){
+  if(KCUR<0) return;
+  var a=kAll(); if(!a[KCUR]) return;
+  a[KCUR].status = (a[KCUR].status==='done')?'new':'done';
+  kPut(a); kRender();
+  $('t-msg').className='gate ok';
+  $('t-msg').textContent = a[KCUR].status==='done' ? '「返した」にしました。' : '「未」にもどしました。';
+};
+$('k-del').onclick=function(){
+  if(KCUR<0) return;
+  if(!confirm('この相談を消しますか？')) return;
+  var a=kAll(); a.splice(KCUR,1); kPut(a);
+  KCUR=-1; $('k-edit').hidden=true; $('k-none').hidden=false; kRender();
+};
+KF.forEach(function(f){ $(f[0]).addEventListener('input', kSync); });
+$('t-ans').addEventListener('input', function(){ if(KCUR>=0) kSync(); });
 
 /* 設定。キーの置き場所は「このタブだけ」を既定にする。
    教室の共用パソコンに置きっぱなしにしないため */
@@ -1590,13 +1807,15 @@ async function askClaude(prompt, onDelta){
 
 $('t-ask').onclick = async function(){
   var src = $('t-src').value.trim();
-  if(!src){ $('t-msg').className='gate'; $('t-msg').textContent='AIに渡す文が空です。'; return; }
+  if(!src){ $('t-msg').className='gate'; $('t-msg').textContent='送る文が空です。上のフォームを埋めてください。'; return; }
   var btn = $('t-ask'), old = btn.textContent;
   btn.disabled = true; btn.textContent = '聞いています…';
   $('t-msg').className = 'gate'; $('t-msg').textContent = '';
   $('t-ans').value = '';
   try{
     await askClaude(src, function(txt){ $('t-ans').value = txt; });
+    /* 値を入れただけでは input が出ないので、ここで自分で保存する */
+    if(KCUR>=0) kSync();
     $('t-msg').className = 'gate ok';
     $('t-msg').textContent = '答えが出ました。読んで、直してから生徒に渡してください。';
   }catch(e){
@@ -1637,38 +1856,27 @@ $('t-anscopy').onclick = function(){
   tCopy('t-ans','t-msg','答えをコピーしました。');
 };
 $('t-print').onclick = function(){ window.print(); };
-$('t-clear').onclick = function(){
-  if(!confirm('AIに渡す文と答えを消しますか？')) return;
-  $('t-src').value=''; $('t-ans').value=''; TSRC_AUTO='';
-  $('t-msg').textContent='';
-};
 
-function gSelect(){
-  var ta=$('g-prompt');
-  ta.removeAttribute('readonly'); ta.focus(); ta.select();
-  ta.setAttribute('readonly','readonly');
-  $('g-copied').textContent='文を選びました。Ctrl+C（⌘C）でコピーしてください。';
-  $('g-copied').className='gate ok';
-}
+
 $('g-print').onclick=function(){ window.print(); };
 GALL.forEach(function(id){ $(id).addEventListener('input',gSync); });
 
 /* タブ */
 function showTab(name){
-  ['find','ex','step','memo','stuck'].forEach(function(k){
+  ['find','ex','step','memo','stuck','teach'].forEach(function(k){
     var on = k===name;
     $('t-'+k).setAttribute('aria-selected',on?'true':'false');
     $('p-'+k).hidden = !on;
   });
 }
-['find','ex','step','memo','stuck'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
+['find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
 
 /* 検索 */
 $('q').addEventListener('input',function(){ state.q=this.value; renderList(); });
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
-gLoad(); gRender(); gSync(); tRenderPol(); tSyncKey();
+gLoad(); gRender(); gSync(); kRenderKind(); tRenderPol(); tSyncKey(); kRender();
 </script>
 </body>
 </html>
