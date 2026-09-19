@@ -334,5 +334,69 @@ console.log("=== リンクのhrefを実際に見る ===");
      refPages.filter(x => OK_PAGES.indexOf(x) < 0).join(" / "));
 }
 
+console.log("=== 検索の索引と並べ方 ===");
+{
+  const dm = new JSDOM(HTML, { url: "http://localhost/", runScripts: "dangerously", pretendToBeVisual: true,
+    beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
+  const ww = dm.window, dd = ww.document;
+  const find = q => {
+    dd.getElementById("q").value = q;
+    dd.getElementById("q").dispatchEvent(new ww.Event("input"));
+    const cols = []; let cur = null;
+    dd.querySelectorAll("#list > *").forEach(el => {
+      if (el.classList.contains("ghead")) { cur = []; cols.push(cur); }
+      else if (cur) [...el.querySelectorAll(".card h3")].forEach(e => cur.push(e.textContent));
+    });
+    return cols;
+  };
+  const colOf = (cols, name) => cols.find(c => c.some(x => x.indexOf(name) >= 0));
+
+  /* 索引が強さの順に分かれているか */
+  ok("装置名・言いかえ語・カテゴリが別の索引になっている",
+     ww.DEV.every(v => v.nm && v.hi && v.ct && v.all));
+  ok("カテゴリ名は hi に混ざっていない",
+     ww.DEV.filter(v => v.c === "動き・かたむき・音")
+       .every(v => v.n.indexOf("音") >= 0 || v.hi.indexOf("かたむき・音") < 0));
+
+  /* 言いかえ語の重複（「スイッチ」と「すいっち」）で二重に加点されない */
+  ok("言いかえ語に重複がない",
+     ww.DEV.every(v => v.ph.length === new Set(v.ph).size),
+     (ww.DEV.find(v => v.ph.length !== new Set(v.ph).size) || {}).n);
+
+  /* 2026-09-19 の不具合：カテゴリ名を打つと、そのカテゴリ全員が同点になり
+     本人がうもれていた（「音」→ 加速度センサが1位、マイクは3位） */
+  ok("『音』でマイクが計測の列の上位に出る",
+     (colOf(find("音"), "マイク") || []).indexOf("マイク（V2内蔵）") < 2,
+     JSON.stringify(find("音")));
+  ok("『天気』で気圧センサが上位に出る",
+     (colOf(find("天気"), "気圧") || []).findIndex(x => x.indexOf("気圧") >= 0) < 2);
+  ok("『色』でカラーセンサが1位", (find("色")[0] || [])[0].indexOf("カラー") >= 0, find("色")[0]);
+
+  /* 計測と制御を混ぜて順位づけすると、片方が丸ごと消える */
+  const oto = find("音");
+  ok("『音』で計測と制御の両方が出る", oto.length === 2, oto.length);
+  ok("見出しは2種類", [...dd.querySelectorAll("#list .ghead")].length === 2);
+  const mawasu = find("まわす");
+  ok("『まわす』は制御が先に出る",
+     dd.querySelector("#list .ghead").classList.contains("a"),
+     dd.querySelector("#list .ghead").textContent);
+
+  /* 語彙が足りているか（漢字・ひらがな・ふだんの言い方） */
+  [["湿気", "湿度センサ"], ["何時", "年月日・時刻"], ["転んだ", "加速度センサ"],
+   ["しずかに知らせたい", "振動モータ"], ["水を出したい", "水中ポンプ"],
+   ["しゃべらせたい", "音声発生装置"], ["むしあつい", "湿度センサ"],
+   ["たおれたら", "加速度センサ"], ["かぜをおくる", "DCモータ"]].forEach(([q, want]) => {
+    const c = colOf(find(q), want);
+    ok("『" + q + "』→ " + want, !!c && c.findIndex(x => x.indexOf(want) >= 0) === 0,
+       JSON.stringify(find(q)));
+  });
+
+  /* 絞り込みが効いているか */
+  dd.getElementById("clr").click();
+  ok("何も入れなければ51件",
+     [...dd.querySelectorAll("#list .card")].length === 51,
+     [...dd.querySelectorAll("#list .card")].length);
+}
+
 console.log("\n結果: " + pass + " 件 合格 / " + fail + " 件 不合格");
 process.exit(fail ? 1 : 0);
