@@ -270,6 +270,66 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 #eq-memo{font-size:13px;color:#6b4d00}
 @media(max-width:400px){.eq-row{grid-template-columns:minmax(0,1fr) 115px}}
 @media print{#eq-shared,#eq-teacher{display:none!important}}
+
+/* ===== ⓪ もんだいをみつける ===== */
+.tab-btn.find0{color:#0a7d55}
+.tab-btn.find0[aria-selected="true"]{color:#0a7d55;border-bottom-color:#0a7d55}
+#p-find0 h2{border-left-color:#0a7d55;color:#0a6b49}
+.m-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:10px 0 4px}
+.m-mode{display:block;text-align:left;padding:12px 14px;border:2px solid var(--line);border-radius:12px;
+  background:#fff;cursor:pointer;font:inherit;color:inherit}
+.m-mode b{display:block;font-size:15px;margin-bottom:4px}
+.m-mode span{display:block;font-size:12px;color:var(--sub);line-height:1.6}
+.m-mode:hover{border-color:#0a7d55}
+.m-mode.on{border-color:#0a7d55;background:#eefaf4}
+.m-lead{font-size:13px;color:var(--sub);line-height:1.8;margin:12px 0 8px}
+.m-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin:8px 0}
+.m-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+.m-card.hit{border-color:#0a7d55;background:#eefaf4}
+.m-card .m-t{margin:0 0 8px;font-size:14px;line-height:1.6}
+.m-ab{display:flex;flex-wrap:wrap;gap:6px}
+.m-b{font:inherit;font-size:12px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;
+  background:#fff;cursor:pointer;color:var(--sub)}
+.m-b.on{background:#0a7d55;border-color:#0a7d55;color:#fff;font-weight:700}
+.m-take{font:inherit;font-size:12px;font-weight:700;padding:5px 12px;border:1px solid #0a7d55;
+  border-radius:999px;background:#fff;color:#0a7d55;cursor:pointer;margin-left:auto}
+.m-take:hover{background:#0a7d55;color:#fff}
+.m-tally{border:2px solid #0a7d55;border-radius:12px;padding:12px 16px;margin:14px 0;background:#eefaf4}
+.m-tally h3{margin:0 0 6px;font-size:15px;color:#0a6b49}
+.m-tally p{margin:4px 0;font-size:13px}
+.m-tally ul{margin:8px 0 4px;padding-left:20px}
+.m-tally li{font-size:13px;line-height:1.8;margin-bottom:6px}
+.m-q{color:#0a6b49;font-weight:700}
+.m-note{font-size:12px;color:var(--sub)}
+.m-kata-q{font-size:13px;line-height:1.8;color:#0a6b49;margin:6px 0 2px;min-height:1px}
+.m-guess{font-size:13px;line-height:1.8;background:#eefaf4;border-left:4px solid #0a7d55;
+  padding:8px 12px;border-radius:0 8px 8px 0;margin:10px 0}
+.m-wak-out{font-size:13px;line-height:1.8;background:#f5f7fa;border-radius:8px;padding:8px 12px;margin:6px 0}
+.m-muzu{font-size:13px;line-height:1.8;background:#fff6e8;border-left:4px solid #d98324;
+  padding:9px 12px;border-radius:0 8px 8px 0;margin:8px 0}
+.m-ex{font-weight:700;color:#8a4b00}
+.m-opt{font-size:11px;color:var(--sub);font-weight:400;margin-left:6px}
+.m-sentence{margin:16px 0 6px;padding:12px 14px;border:2px solid #0a7d55;border-radius:10px;
+  background:#eefaf4;font-size:15px;line-height:1.9}
+.m-sheet-t{width:100%;border-collapse:collapse;margin-top:10px}
+.m-sheet-t th,.m-sheet-t td{border:1px solid #666;padding:6px 8px;font-size:11pt;text-align:left;vertical-align:top}
+.m-sheet-t th{background:#eee}
+.m-chk{width:2.4em}
+.m-sheet-t td:last-child{height:2.2em}
+@media print{
+  /* 観察シートを刷るときは、画面のものを全部どける。
+     タブの外に置いたものと同じで、自分で消さないと一緒に出てしまう */
+  body.printsheet main > section{display:none!important}
+  body.printsheet #p-find0{display:block!important}
+  body.printsheet #p-find0 > *{display:none!important}
+  body.printsheet #m-sheet{display:block!important}
+  body.printsheet #m-sheet h2{font-size:16pt;margin:0 0 10px}
+  .m-modes,.m-ab,.m-wak-out{display:none!important}
+  .m-sentence{background:#fff;color:#000;border:2px solid #000}
+  .m-muzu,.m-tally,.m-guess{background:#fff;border-color:#666}
+  .m-card{break-inside:avoid}
+}
+
 </style>
 </head>
 <body>
@@ -287,7 +347,8 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 
 <nav class="tabs">
   <div class="wrap" role="tablist">
-    <button class="tab-btn" id="t-find"  role="tab" aria-selected="true"  aria-controls="p-find">① さがす</button>
+    <button class="tab-btn find0" id="t-find0" role="tab" aria-selected="true"  aria-controls="p-find0">⓪ もんだいをみつける</button>
+    <button class="tab-btn" id="t-find"  role="tab" aria-selected="false" aria-controls="p-find">① さがす</button>
     <button class="tab-btn" id="t-ex"    role="tab" aria-selected="false" aria-controls="p-ex">② 授業の例</button>
     <button class="tab-btn" id="t-step"  role="tab" aria-selected="false" aria-controls="p-step">③ 進め方</button>
     <button class="tab-btn" id="t-memo"  role="tab" aria-selected="false" aria-controls="p-memo">④ 設計メモ</button>
@@ -308,7 +369,61 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   <label><input type="checkbox" id="eq-showall">「使えない」装置も検索結果に表示する</label>
   <p>状態は先生が設定します。「使える」は台数や貸出予約を保証するものではありません。</p>
 </aside>
-<section id="p-find" role="tabpanel" aria-labelledby="t-find">
+<section id="p-find0" role="tabpanel" aria-labelledby="t-find0" hidden>
+  <p class="note-bar">ここは、センサやアクション装置より<b>前</b>の話。<b>問題は「思いつく」ものではなく「気づく」もの。</b>
+  だから、ここでは考え出そうとしなくてよい。読んで、当てはまるものに印を付けていくだけでいい。<br>
+  <b>AIは使いません。</b>書いたものはこのパソコンの中だけに残ります。</p>
+
+  <h2>どこから入る？</h2>
+  <div id="m-modes" class="m-modes"></div>
+  <div id="m-work" hidden></div>
+
+  <h2 id="m-build">もんだいの文をつくる</h2>
+  <p class="count">入口はちがっても、行き先は同じ。<b>自分のことばで</b>うめよう。
+  カードの文のままでよいところは、そのままでいい。</p>
+  <div class="builder">
+    <label for="m-dare">だれが こまっている？<span class="req">必須</span></label>
+    <input id="m-dare" placeholder="例：家の人／わたし／祖母／小さい弟／クラスのみんな">
+
+    <label for="m-itsu">いつ・どこで？<span class="req">必須</span></label>
+    <input id="m-itsu" placeholder="例：冬の朝、家を出たあと／夜、2階の階段で">
+
+    <label for="m-komari">何に こまっている？<span class="req">必須</span></label>
+    <textarea id="m-komari" rows="2" placeholder="例：ストーブを消したか分からなくて、気になってしまう"></textarea>
+
+    <p class="glb" id="m-katas-lb">これは、どの型のこまりごと？<span class="req">必須</span></p>
+    <div class="chips" id="m-katas" role="group" aria-labelledby="m-katas-lb"></div>
+    <p class="m-kata-q" id="m-kata-q"></p>
+
+    <label for="m-wakaru">何が分かれば、助かりそう？<span class="req">必須</span></label>
+    <input id="m-wakaru" placeholder="例：ストーブがついたままか／人が来たか／土がかわいたか">
+    <div class="btnrow"><button class="sub" id="m-wak">わからない</button></div>
+    <p class="m-wak-out" id="m-wak-out" hidden></p>
+    <p class="m-muzu" id="m-muzu" hidden></p>
+
+    <p class="glb">いつも同じルールでよい？<span class="m-opt">（えらばなくても進めます）</span></p>
+    <div class="chips" id="m-rule" role="group"></div>
+    <p class="m-muzu" id="m-rule-w" hidden><b>そのつど人が考えて決めることは、機械にはできません。</b><br>
+      「どうなったらそうする」を、だれがやっても同じ言い方にできないか考えてみよう。
+      できなければ、こまりごとを少しずらすと解ける形になることが多い。</p>
+
+    <p class="glb">知らせてほしい？ 動いてほしい？<span class="m-opt">（えらばなくても進めます）</span></p>
+    <div class="chips" id="m-dousa" role="group"></div>
+
+    <p class="m-sentence" id="m-sentence"></p>
+    <p class="gate" id="m-gate" role="status" aria-live="polite"></p>
+    <div class="btnrow">
+      <button class="main" id="m-go-find" disabled>①でこの装置をさがす</button>
+      <button class="sub"  id="m-go-memo" disabled>④のテーマに入れる</button>
+      <button class="sub"  id="m-go-stuck" disabled>⑤で先生に相談する</button>
+      <button class="sub"  id="m-print" disabled>印刷する</button>
+      <button class="sub"  id="m-clear">書いたものを消す</button>
+    </div>
+  </div>
+  <div id="m-sheet" hidden></div>
+</section>
+
+<section id="p-find" role="tabpanel" aria-labelledby="t-find" hidden>
   <p class="note-bar">計測・制御は <b>センサ（気づく）→ プログラム（判断する）→ アクション装置（動かす）</b> の流れ。センサが得た値を、プログラムが条件と比べて判断します。まず「何が分かれば困りごとを解決できるか」を考えよう。</p>
 
   <h2>気づきたい・調べたい（入力・計測）</h2>
@@ -852,7 +967,7 @@ var DEV = [
 {id:'s-kasoku',t:'s',c:'動き・かたむき・音',n:'加速度センサ（内蔵）',b:1,
  d:'micro:bit本体でゆれ・かたむき・ふった動きを検知する。',
  y:['ゆれたら','かたむいたら','ふったら','たおれたら','地震','歩数','ころんだら','ゆさぶられたら'],
- k:['地震','転倒','揺れ','傾き','かそくど','ゆれ','じしん','かたむき','ふる','たおれる','うごき','ほすう','転ぶ','転んだ','ころんだ','ころぶ','たおれた','倒れる','振る','ゆさぶる','うごいた','あるく','しんどう'],
+ k:['地震','転倒','揺れ','傾き','かそくど','ゆれ','じしん','かたむき','ふる','たおれる','うごき','ほすう','転ぶ','転んだ','ころんだ','ころぶ','たおれた','倒れる','振る','ゆさぶる','うごいた','あるく','しんどう','動いた','動く','ゆれた','ゆれている','ふるえ','ふるえた'],
  u:'地震を知らせる、たおれたら止める、歩数を数える。'},
 {id:'s-chijiki',t:'s',c:'動き・かたむき・音',n:'地磁気センサ（内蔵）',b:1,
  d:'方位（東西南北）がわかる。方位磁針のかわりになる。',
@@ -868,7 +983,7 @@ var DEV = [
 {id:'s-jikoku',t:'s',c:'時間',n:'年月日・時刻',
  d:"現在の時刻、または開始からの経過時間を判断に使う。センサとは別の入力情報。",
  y:['決まった時間に','毎日同じ時こくに','タイマー','夜だけ','朝になったら','まいあさ'],
- k:['じかん','じこく','たいまー','まいにち','よやく','ひづけ','あさ','よる','何時','なんじ','時刻','時間','曜日','ようび','日付','ていじ','まいばん','きまったじかん','じかんになったら'],
+ k:['じかん','じこく','たいまー','まいにち','よやく','ひづけ','あさ','よる','何時','なんじ','時刻','時間','曜日','ようび','日付','ていじ','まいばん','きまったじかん','じかんになったら','何分','なんぷん','何秒','なんびょう','たった','経過','けいか','すとっぷうぉっち','時間をはかる','じかんをはかる'],
  u:'朝7時に水やり、夜10時に消灯、のように時間で制御する。',
  w:"「朝7時」と「開始から10秒後」は別。現在時刻を使うには時計やパソコンなどの仕組みが必要。"},
 
@@ -1318,8 +1433,24 @@ function cardHtml(v){
 }
 
 var TLABEL={s:'気づく・調べる（計測＝センサ）',a:'動かす・知らせる（制御＝アクション装置）'};
+/* 生徒は「人が近づいたか」「まどが開いているか」と、文末に「か」を付けて書く。
+   けれど言いかえ語は「近づいたら」「開いたら」の形で登録してあるので、
+   この一文字だけで語句の一致が全部外れ、代わりに説明文へのまぐれ当たりが1位を取る。
+     ・「人が近づいたか」→ 磁気スイッチセンサ（正しくは人感センサ）
+     ・「ペットが動いたか」→ 水位センサ
+     ・「だれもいないのに明るいか」→ 異物検知センサが2位に割りこむ
+   ⑤で踏んだ「活用形で一致しない」と同じ型が、こんどは文末で出たもの。
+   ★削るのは打ちこまれた言葉の側だけ。索引（言いかえ語）からは削らない。★
+   言いかえ語の「か」を削ると「ほか」「なか」「しずか」まで変わってしまう。
+   短い言葉（4文字以下）にも掛けない。「しずか」が「しず」になってマイクが消える。 */
+function qTail(q){
+  var s=String(q||'');
+  if(s.length<5) return s;
+  var t=s.replace(/(かどうか|のか|か)$/,'');
+  return t.length>=2 ? t : s;
+}
 function renderList(){
-  var q=norm(state.q);
+  var q=qTail(norm(state.q));
   var groups=['s','a'].filter(function(t){ return !state.type || state.type===t; })
     .map(function(t){ return {t:t, list:eqOrder(searchType(q,t)), top:topScore(q,t)}; });
   /* 当たりの強いほうを先に見せる（「まわす」ならアクション装置が先） */
@@ -2496,7 +2627,7 @@ var curTab = 'find';
 var EQ_TABS = ['find','memo','stuck'];
 function showTab(name){
   curTab = name;
-  ['find','ex','step','memo','stuck','teach'].forEach(function(k){
+  ['find0','find','ex','step','memo','stuck','teach'].forEach(function(k){
     var on = k===name;
     $('t-'+k).setAttribute('aria-selected',on?'true':'false');
     $('p-'+k).hidden = !on;
@@ -2511,8 +2642,565 @@ function showTab(name){
   $('searchbar').hidden = !findOn;
   $('searchhint').hidden = !findOn;
 }
-['find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
+['find0','find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
 
+
+
+/* =========================================================
+   ⓪ もんだいをみつける ―― センサ・アクション装置より前の話
+   「問題は思いつくものではなく、気づくもの」。
+   ①が「装置名を知らない」を言いかえ語で埋めたのと同じように、
+   ここは「問題という言葉が何を指すのか分からない」を
+   ★困りごとの型★ と ★困りごとの言い方（カードの束）★ で埋める。
+   AIは使わない（⑤と同じ。生徒の書いたものはこの端末から出ない）。
+   ========================================================= */
+
+/* 困りごとの10の型。型はそのままセンサの種類に写る。
+   ここが「センサ以前の話をしているのに、着地点がセンサになる」しかけ。 */
+var KATA = [
+{k:'wasure',  nm:'わすれる',               d:'消し忘れ・しめ忘れ・持ち忘れ。あとになって気になる。',   q:'「〜したかどうか」が分かれば助かる'},
+{k:'mienai',  nm:'見ていないと分からない', d:'行ってみないと、いまどうなっているか分からない。',       q:'「いまどうなっているか」が分かれば助かる'},
+{k:'zutto',   nm:'ずっと見ていられない',   d:'だれかが見張っていないといけない。当番・付きっきり。',   q:'「代わりに見ていてくれる」と助かる'},
+{k:'choudo',  nm:'ちょうどよくできない',   d:'やりすぎたり、足りなかったり。かげんが分からない。',     q:'「どれくらいか」が数で分かれば助かる'},
+{k:'osoi',    nm:'気づくのが遅い',         d:'気づいたときには、もう手おくれになっている。',           q:'「そうなりかけている」うちに分かれば助かる'},
+{k:'todoka',  nm:'手がふさがる・届かない', d:'手がいっぱい、高くて届かない、その場に行けない。',       q:'「手を使わなくてもできる」と助かる'},
+{k:'barabara',nm:'人によってばらつく',     d:'やる人や日によって、やり方や結果が変わる。',             q:'「いつも同じルールでできる」と助かる'},
+{k:'abunai',  nm:'危ない・ぶつかる',       d:'けがをしそう、ぶつかりそう、あぶない。',                 q:'「あぶない状態になった」と分かれば助かる'},
+{k:'kazoe',   nm:'数える・記録が面倒',     d:'手で数えたり、紙に書きうつしたりしている。',             q:'「自動で数える・記録する」と助かる'},
+{k:'tooku',   nm:'遠くのことが分からない', d:'その場にいないと、ようすが分からない。',                 q:'「はなれていても分かる」と助かる'}
+];
+
+/* 場所。ここから引くと「自分の知っている場所の話」になり、書ける生徒が増える */
+var BA = [
+{k:'daidokoro', nm:'台所'},          {k:'furo',      nm:'おふろ'},
+{k:'genkan',    nm:'げんかん'},      {k:'heya',      nm:'自分の部屋'},
+{k:'toilet',    nm:'トイレ・洗面所'},{k:'beranda',   nm:'ベランダ・庭'},
+{k:'kyoushitsu',nm:'教室'},          {k:'rouka',     nm:'ろうか・階段'},
+{k:'taiikukan', nm:'体育館・部活'},  {k:'tsuugaku',  nm:'通学路'},
+{k:'hatake',    nm:'畑・花だん'},    {k:'mise',      nm:'お店・町'},
+{k:'kazoku',    nm:'家ぞく・ペット'},
+/* ここから下は場所ではなく「どんなとき」。北海道ならではの困りごとを、
+   季節や相手からも引けるようにしてある。カードは場所のタグも持っているので、
+   「通学路」からも「冬・雪」からも同じものが出る。 */
+{k:'yuki',      nm:'冬・雪'},        {k:'ikimono',   nm:'動物・生き物'}
+];
+
+/* 困りごとカードの束。★解決策も装置名も書かない。困りごとだけ。★
+   hint（何が分かれば助かるか）は生徒には出さない。
+   2回「わからない」を押したときだけ、例として出す。
+   ここを最初から見せると、課題の設定そのものを肩代わりしてしまう。 */
+var TANE = [
+/* わすれる */
+{id:'t01',t:'ストーブを消したか、家を出てから気になる',              ba:['genkan','heya'],         kt:'wasure',  hint:'ストーブがついたままか'},
+{id:'t02',t:'部屋の電気をつけっぱなしにして出てしまう',              ba:['heya'],                  kt:'wasure',  hint:'人がいるか'},
+{id:'t03',t:'水道を出しっぱなしにしていた',                          ba:['daidokoro','toilet'],    kt:'wasure',  hint:'水が出ているか'},
+{id:'t04',t:'まどのかぎをしめたか、分からなくなる',                  ba:['heya','genkan'],         kt:'wasure',  hint:'まどが開いているか'},
+{id:'t05',t:'冷ぞう庫のとびらが半分開いたままだった',                ba:['daidokoro'],             kt:'wasure',  hint:'とびらが開いたままか'},
+{id:'t06',t:'最後に出る人が、体育館の電気を消し忘れる',              ba:['taiikukan'],             kt:'wasure',  hint:'だれもいないのに明るいか'},
+/* 見ていないと分からない */
+{id:'t07',t:'おふろがわいたか、行ってみないと分からない',            ba:['furo'],                  kt:'mienai',  hint:'お湯の温度'},
+{id:'t08',t:'せんたくが終わったか、何度も見に行っている',            ba:['heya'],                  kt:'mienai',  hint:'ゆれているか'},
+{id:'t09',t:'げんかんに人が来たのに気づかない',                      ba:['genkan'],                kt:'mienai',  hint:'人が来たか'},
+{id:'t10',t:'にもつが届いていたのに、気づかなかった',                ba:['genkan'],                kt:'mienai',  hint:'物が置かれたか'},
+{id:'t11',t:'水そうの水がにごってきたのに気づかない',                ba:['kyoushitsu'],            kt:'mienai',  hint:'水の色'},
+{id:'t12',t:'ねこが外に出ていったか分からない',                      ba:['kazoku'],                kt:'mienai',  hint:'ドアが開いたか'},
+/* ずっと見ていられない */
+{id:'t13',t:'なべがふきこぼれないか、そばをはなれられない',          ba:['daidokoro'],             kt:'zutto',   hint:'お湯の温度'},
+{id:'t14',t:'小さい子がストーブに近づかないか、見ていないといけない',ba:['heya','kazoku'],         kt:'zutto',   hint:'人が近づいたか'},
+{id:'t15',t:'花だんの水やり当番を、毎日だれかがやっている',          ba:['hatake'],                kt:'zutto',   hint:'土がかわいているか'},
+{id:'t16',t:'洗たく物があるので、雨が気になって家をあけられない',    ba:['beranda'],               kt:'zutto',   hint:'雨がふってきたか'},
+{id:'t17',t:'ペットのえさが無くなっていないか、何度も見に行く',      ba:['kazoku'],                kt:'zutto',   hint:'えさの重さ'},
+{id:'t18',t:'実験の温度を、何分かおきに記録するのが大変',            ba:['kyoushitsu'],            kt:'zutto',   hint:'温度'},
+/* ちょうどよくできない */
+{id:'t19',t:'植物に水をやりすぎて、枯らしてしまった',                ba:['hatake','beranda'],      kt:'choudo',  hint:'土のかわき'},
+{id:'t20',t:'部屋が暑すぎたり寒すぎたりする',                        ba:['heya'],                  kt:'choudo',  hint:'部屋の温度'},
+{id:'t21',t:'教室の電気が、明るすぎる日と暗すぎる日がある',          ba:['kyoushitsu'],            kt:'choudo',  hint:'部屋の明るさ'},
+{id:'t22',t:'おふろのお湯が熱すぎた',                                ba:['furo'],                  kt:'choudo',  hint:'お湯の温度'},
+{id:'t23',t:'水そうの水温が、夏に上がりすぎる',                      ba:['kyoushitsu'],            kt:'choudo',  hint:'水の温度'},
+{id:'t24',t:'ヒーターをつける時間が、いつもてきとうになっている',    ba:['heya'],                  kt:'choudo',  hint:'部屋の温度'},
+/* 気づくのが遅い */
+{id:'t25',t:'ほしていた洗たく物を、雨にぬらしてしまった',            ba:['beranda'],               kt:'osoi',    hint:'雨がふってきたか'},
+{id:'t26',t:'なべをこがしてしまった',                                ba:['daidokoro'],             kt:'osoi',    hint:'高い温度になったか'},
+{id:'t27',t:'水そうの水があふれていた',                              ba:['kyoushitsu'],            kt:'osoi',    hint:'水の高さ'},
+{id:'t28',t:'おふろの水を止めるのを忘れて、あふれた',                ba:['furo'],                  kt:'osoi',    hint:'水の高さ'},
+{id:'t29',t:'教室の空気がわるくなっているのに気づかない',            ba:['kyoushitsu'],            kt:'osoi',    hint:'空気がわるくなったか'},
+{id:'t30',t:'くつ箱の中がしめっていて、くさくなっていた',            ba:['genkan'],                kt:'osoi',    hint:'しめっているか'},
+/* 手がふさがる・届かない */
+{id:'t31',t:'手がぬれていて、電気のスイッチをさわりたくない',        ba:['daidokoro','furo'],      kt:'todoka',  hint:'人が近づいたか'},
+{id:'t32',t:'にもつを持っていて、ドアが開けられない',                ba:['genkan','mise'],         kt:'todoka',  hint:'人が近づいたか'},
+{id:'t33',t:'ねてから、エアコンを消しに起きるのがいや',              ba:['heya'],                  kt:'todoka',  hint:'いまの時刻'},
+{id:'t34',t:'車いすの人が、ドアを開けにくそうだった',                ba:['mise'],                  kt:'todoka',  hint:'人が近づいたか'},
+{id:'t35',t:'体育館のまくを、いつも手で開け閉めしている',            ba:['taiikukan'],             kt:'todoka',  hint:'ボタンをおしたか'},
+{id:'t36',t:'高いところにある電気に、手がとどかない',                ba:['heya','rouka'],          kt:'todoka',  hint:'人が近づいたか'},
+/* 人によってばらつく */
+{id:'t37',t:'水やりの量が、やる人によってちがう',                    ba:['hatake'],                kt:'barabara',hint:'土のかわき'},
+{id:'t38',t:'パンを焼く時間がちがって、こげたり生だったりする',      ba:['daidokoro'],             kt:'barabara',hint:'何分たったか'},
+{id:'t39',t:'朝の放送の音が、日によって大きすぎる',                  ba:['kyoushitsu','taiikukan'],kt:'barabara',hint:'音の大きさ'},
+{id:'t40',t:'手あらいの時間が、人によってばらばらで短い',            ba:['toilet'],                kt:'barabara',hint:'何秒たったか'},
+{id:'t41',t:'そうじの終わる時間が、班によってちがう',                ba:['kyoushitsu'],            kt:'barabara',hint:'いまの時刻'},
+{id:'t42',t:'まどを開けるか閉めるかの判断が、人によってちがう',      ba:['kyoushitsu'],            kt:'barabara',hint:'部屋の温度'},
+/* 危ない・ぶつかる */
+{id:'t43',t:'夜、階段が暗くてふみ外しそうになる',                    ba:['rouka'],                 kt:'abunai',  hint:'暗くなったか'},
+{id:'t44',t:'曲がり角で、人とぶつかりそうになる',                    ba:['rouka'],                 kt:'abunai',  hint:'人が近づいたか'},
+{id:'t45',t:'うしろから来る自転車に気づかない',                      ba:['tsuugaku'],              kt:'abunai',  hint:'近づいてきたか'},
+{id:'t46',t:'祖父が夜トイレに行くとき、暗くてあぶない',              ba:['toilet'],                kt:'abunai',  hint:'人が通ったか'},
+{id:'t47',t:'ストーブにさわって、やけどしそうになった',              ba:['heya'],                  kt:'abunai',  hint:'高い温度か'},
+{id:'t48',t:'駐車場から出てくる車が見えにくい',                      ba:['mise','tsuugaku'],       kt:'abunai',  hint:'近づいてきたか'},
+/* 数える・記録が面倒 */
+{id:'t49',t:'体育館に何人入ったか、手で数えている',                  ba:['taiikukan'],             kt:'kazoe',   hint:'人が通った回数'},
+{id:'t50',t:'毎日の気温を、手で書きうつしている',                    ba:['kyoushitsu'],            kt:'kazoe',   hint:'温度'},
+{id:'t51',t:'花だんの土がいつかわいたか、記録していない',              ba:['hatake'],                kt:'kazoe',   hint:'土がかわいた回数'},
+{id:'t52',t:'通学路で、信号を待っている時間を知りたい',              ba:['tsuugaku'],              kt:'kazoe',   hint:'何秒たったか'},
+{id:'t53',t:'持ち物のチェックを、毎朝目で見て数えている',            ba:['genkan'],                kt:'kazoe',   hint:'かばんの重さ'},
+{id:'t54',t:'お店のレジに何人ならんでいるか、分からない',            ba:['mise'],                  kt:'kazoe',   hint:'人が通った回数'},
+/* 遠くのことが分からない */
+{id:'t55',t:'旅行中、家の植木がどうなっているか分からない',          ba:['hatake','heya'],         kt:'tooku',   hint:'土のかわき'},
+{id:'t56',t:'祖父母の家のようすが、はなれていて分からない',          ba:['kazoku'],                kt:'tooku',   hint:'人がいるか'},
+{id:'t57',t:'学校にいる間、家のペットが心配',                        ba:['kazoku'],                kt:'tooku',   hint:'動いたか'},
+{id:'t58',t:'倉庫の中が暑くなっていないか、行かないと分からない',    ba:['mise'],                  kt:'tooku',   hint:'中の温度'},
+{id:'t59',t:'体育館にいる人に、職員室から連絡できない',              ba:['taiikukan'],             kt:'tooku',   hint:'はなれた所に知らせたい'},
+{id:'t60',t:'通学路の危ない場所を、家の人に知らせられない',          ba:['tsuugaku'],              kt:'tooku',   hint:'はなれた所に知らせたい'},
+/* ---- 北海道ならでは：冬・雪 ---- */
+{id:'h01',t:'朝おきたら、玄関の前に雪が積もっていて出られない',      ba:['genkan','yuki'],             kt:'todoka',  hint:'雪がどれくらい積もったか'},
+{id:'h02',t:'水道管がこおって、水が出なくなった',                    ba:['daidokoro','toilet','yuki'], kt:'osoi',    hint:'水道管の温度'},
+{id:'h03',t:'道がこおっていて、つるつるすべって転びそうになる',      ba:['tsuugaku','yuki'],           kt:'abunai',  hint:'地面の温度'},
+{id:'h04',t:'屋根から雪やつららが落ちてきて、あぶない',              ba:['genkan','yuki'],             kt:'abunai',  hint:'気温が上がったか'},
+{id:'h05',t:'灯油がいつ切れるか分からなくて、急に暖房が止まる',      ba:['heya','yuki'],               kt:'mienai',  hint:'灯油の重さ'},
+{id:'h06',t:'まどが結露して、まわりがカビだらけになる',              ba:['heya','yuki'],               kt:'choudo',  hint:'部屋のしめりぐあい'},
+{id:'h07',t:'除雪車が来たかどうか分からず、何度も外を見に行く',      ba:['genkan','tsuugaku','yuki'],  kt:'mienai',  hint:'雪がどれくらい積もったか'},
+{id:'h08',t:'雪の重みで、物置の屋根がつぶれないか心配',              ba:['beranda','yuki'],            kt:'zutto',   hint:'雪の重さ'},
+{id:'h09',t:'雪かきをする日かどうかの見きわめが、人によってちがう',  ba:['genkan','yuki'],             kt:'barabara',hint:'雪がどれくらい積もったか'},
+{id:'h10',t:'冬は しめきったままで、まどを開けるのを忘れてしまう',    ba:['heya','kyoushitsu','yuki'],  kt:'wasure',  hint:'空気がわるくなったか'},
+/* ---- 北海道ならでは：動物・生き物 ---- */
+{id:'h11',t:'通学路にクマが出たと放送があったが、いまどこにいるか分からない', ba:['tsuugaku','ikimono'], kt:'tooku', hint:'そこに何かいるか'},
+{id:'h12',t:'山や林のそばを通るとき、クマに気づかないまま近づいてしまう',     ba:['tsuugaku','ikimono'], kt:'abunai',hint:'近づいてきたか'},
+{id:'h13',t:'畑の作物を、シカやキツネに食べられる',                  ba:['hatake','ikimono'],          kt:'zutto',   hint:'近づいてきたか'},
+{id:'h14',t:'ゴミステーションを、カラスに荒らされる',                ba:['mise','ikimono'],            kt:'zutto',   hint:'近づいてきたか'},
+{id:'h15',t:'電気さくがはずれていないか、行ってみないと分からない',  ba:['hatake','ikimono'],          kt:'tooku',   hint:'さくが開いたか'},
+{id:'h16',t:'犬が庭のもんから出ていってしまう',                      ba:['beranda','kazoku','ikimono'],kt:'mienai',  hint:'もんが開いたか'},
+{id:'h17',t:'牛舎の温度が下がりすぎていないか、夜中も見に行っている',ba:['hatake','ikimono'],          kt:'zutto',   hint:'小屋の中の温度'}
+];
+
+/* 関門1：目や耳で分かる変化があるか。
+   ★止めない。言いかえの道を出す。★ 辞書は必ず外すので、止めると作業が死ぬ。
+   ここが⓪の第二の資産（①の言いかえ語、⑤の活用形に続く3つめ）。 */
+var MUZU = [
+{nm:'やる気',            w:['やる気','やるき','意欲','気合'],
+ ex:'朝おきられない／始めるのがおそくなる／部屋が暑い'},
+{nm:'集中',              w:['集中','しゅうちゅう'],
+ ex:'まわりがうるさい／部屋が暑い／まぶしい'},
+{nm:'〜したくない気持ち',w:['したくない','やりたくない','いやだ','いやになる'],
+ ex:'そのとき何が起きていて いやなのか（暑い・うるさい・くらい・においがする）'},
+{nm:'苦手',              w:['苦手','にがて'],
+ ex:'出しっぱなしに気づかない／時間が分からない／わすれてしまう'},
+{nm:'仲良く',            w:['仲良く','なかよく','仲よく','友だちがほしい'],
+ ex:'話しかけるきっかけがない／だれがいるか分からない'},
+{nm:'成績・点数',        w:['成績','せいせき','点数','てんすう','テストの点'],
+ ex:'勉強した時間が分からない／夜おそくまで起きている'},
+{nm:'おいしい・味',      w:['おいしい','おいしく','うまくなる','味が','あじが'],
+ ex:'なべをこがす／温度がいつもちがう／焼く時間がばらばら'},
+{nm:'きれい',            w:['きれいにしたい','きれいになりたい','きれいにする'],
+ ex:'ゆかに物が出しっぱなし／水がにごる／ごみがたまる'},
+{nm:'楽しい',            w:['楽しい','たのしい','楽しく','たのしく'],
+ ex:'ひとりでいる時間が長い／だれが来たか分からない'},
+{nm:'かっこいい',        w:['かっこいい','かっこよく','かわいくしたい'],
+ ex:'暗いところで目立たない／気づいてもらえない'},
+{nm:'やさしい',          w:['やさしく','やさしい','思いやり'],
+ ex:'こまっている人に気づけない／近づいたのに分からない'},
+{nm:'うまくなりたい',    w:['うまくなりたい','上手になりたい','できるようになりたい','はやく走れる','上達'],
+ ex:'かかった時間をはかりたい／回数を数えたい'},
+{nm:'ねむい',            w:['ねむい','眠い','ねむけ','ねむたい'],
+ ex:'部屋の空気がわるい／部屋が暑い／朝おきられない'},
+{nm:'めんどう',          w:['めんどくさい','めんどう','面倒'],
+ ex:'毎日おなじことをくりかえしている（何を、何回、どれくらいの時間？）'},
+{nm:'しあわせ・気持ち',  w:['しあわせ','幸せ','気持ち','きもち','ストレス','いらいら','元気になりたい'],
+ ex:'そのときまわりがどうなっているか（暑い・うるさい・くらい・ひとりきり）'},
+{nm:'性格・好ききらい',  w:['性格','せいかく','好きになりたい','きらい'],
+ ex:'何をしているときの話か。そのとき、まわりで何が起きているか'}
+];
+
+/* 逆算：作りたい物の言葉 → 困りごとの型。当たらなければ当てない（null）。
+   上から順に見るので、細かい言葉を先に置く。 */
+var GKW = [
+{k:'todoka', w:['自動ドア','じどうドア','自動で開','じどうであ','手をふれ','さわらず','手をつかわ','とどかない','届かない','手がふさが']},
+{k:'zutto',  w:['自動で水','じどうで水','水やり','みずやり','見はり','見張り','監視','かんし','留守','るす','カメラ','当番']},
+{k:'tooku',  w:['スマホ','無線','むせん','はなれた','遠く','えんかく','遠隔','ネット','通知','つうち']},
+{k:'abunai', w:['光る','ひかる','注意','ちゅうい','あぶない','危ない','事故','ぶつから','安全']},
+{k:'osoi',   w:['アラーム','けいほう','警報','ブザー','知らせる','しらせる']},
+{k:'kazoe',  w:['数える','かぞえる','カウント','記録','きろく']},
+{k:'choudo', w:['調節','ちょうせつ','ちょうど','自動でエアコン','温度を']}
+];
+
+/* ---- 引きかた。束はひとつ、入口は3つ ---- */
+function kataOf(k){ return KATA.filter(function(x){ return x.k===k; })[0] || null; }
+function baOf(k){ return BA.filter(function(x){ return x.k===k; })[0] || null; }
+function taneOf(id){ return TANE.filter(function(x){ return x.id===id; })[0] || null; }
+function taneByBa(k){ return TANE.filter(function(t){ return t.ba.indexOf(k)>=0; }); }
+
+/* 関門1。止めずに言いかえの道を出す。先に見つかった1つだけ返す */
+function muzuFind(s){
+  s = String(s||'');
+  if(!s) return null;
+  for(var i=0;i<MUZU.length;i++){
+    for(var j=0;j<MUZU[i].w.length;j++){
+      if(s.indexOf(MUZU[i].w[j])>=0) return MUZU[i];
+    }
+  }
+  return null;
+}
+/* 逆算：作りたい物の言葉から型を当てる。当たらなければ当てない */
+function gyakuKata(s){
+  s = String(s||'');
+  if(!s) return null;
+  for(var i=0;i<GKW.length;i++){
+    for(var j=0;j<GKW[i].w.length;j++){
+      if(s.indexOf(GKW[i].w[j])>=0) return GKW[i].k;
+    }
+  }
+  return null;
+}
+
+/* ---- 状態 ---- */
+var M0KEY = 'keisoku-gyakubiki-mitsukeru';
+var m0 = {mode:'', ba:'', ans:{}, deck:[], shown:12, wak:0,
+          dare:'', itsu:'', komari:'', kt:'', wakaru:'', rule:'', dousa:'',
+          gwhat:'', gdare:'', gima:''};
+
+function m0Save(){
+  try{ localStorage.setItem(M0KEY, JSON.stringify(m0)); }catch(e){}
+}
+function m0Load(){
+  try{
+    var o=JSON.parse(localStorage.getItem(M0KEY));
+    if(o && typeof o==='object'){
+      Object.keys(m0).forEach(function(k){ if(typeof o[k]!=='undefined') m0[k]=o[k]; });
+    }
+  }catch(e){}
+  if(!Array.isArray(m0.deck) || !m0.deck.length) m0NewDeck();
+  if(!m0.ans || typeof m0.ans!=='object') m0.ans={};
+}
+/* ★一覧では出さない。毎回ちがう順で少しずつ配る。
+   全部ならべるとクラス全員が同じテーマを選び、借り物になる。 */
+function m0NewDeck(){
+  var a=TANE.map(function(t){ return t.id; });
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var x=a[i]; a[i]=a[j]; a[j]=x; }
+  m0.deck=a; m0.shown=12; m0.ans={};
+}
+
+/* ---- 入口の出しわけ ---- */
+var M0MODES=[
+ {k:'aruaru', nm:'なんにも思いつかない', d:'カードを見て「ある／ない」を押すだけ。えらぶのは、考えつくよりずっと簡単。'},
+ {k:'basho',  nm:'場所なら言える',       d:'知っている場所をえらぶと、そこで起きがちなことが出る。'},
+ {k:'gyaku',  nm:'作りたい物はある',     d:'「自動ドアを作りたい」から、だれが何に困っているのかへ戻る。'}
+];
+function m0RenderModes(){
+  $('m-modes').innerHTML = M0MODES.map(function(x){
+    return '<button type="button" class="m-mode'+(m0.mode===x.k?' on':'')+'" data-m="'+x.k+'" aria-pressed="'+(m0.mode===x.k)+'">'
+         + '<b>'+esc(x.nm)+'</b><span>'+esc(x.d)+'</span></button>';
+  }).join('');
+  Array.prototype.forEach.call($('m-modes').querySelectorAll('.m-mode'),function(b){
+    b.onclick=function(){ m0.mode=(m0.mode===b.dataset.m)?'':b.dataset.m; m0RenderModes(); m0RenderWork(); m0Save(); };
+  });
+}
+
+/* ---- ① あるある判定 ---- */
+function m0AruaruHtml(){
+  var ids=m0.deck.slice(0, m0.shown);
+  var h='<p class="m-lead">思い当たるものに「ある」を押そう。<b>正解はない。</b>押した型のかたよりから、自分が気づきやすいことが見えてくる。</p>';
+  h+='<div class="m-cards">';
+  ids.forEach(function(id){
+    var t=taneOf(id); if(!t) return;
+    var a=m0.ans[id]||'';
+    h+='<div class="m-card'+(a==='aru'||a==='tama'?' hit':'')+'">'
+     + '<p class="m-t">'+esc(t.t)+'</p>'
+     + '<div class="m-ab">'
+     +   ['aru','tama','nai'].map(function(v){
+           var lb={aru:'ある',tama:'たまに',nai:'ない'}[v];
+           return '<button type="button" class="m-b'+(a===v?' on':'')+'" data-id="'+id+'" data-v="'+v+'">'+lb+'</button>';
+         }).join('')
+     +   ((a==='aru'||a==='tama') ? '<button type="button" class="m-take" data-take="'+id+'">これにする</button>' : '')
+     + '</div></div>';
+  });
+  h+='</div>';
+  if(m0.shown < m0.deck.length) h+='<div class="btnrow"><button class="sub" id="m-more">つぎの12まい</button><button class="sub" id="m-reshuffle">ちがうカードにする</button></div>';
+  else h+='<div class="btnrow"><button class="sub" id="m-reshuffle">はじめからやりなおす</button></div>';
+  h+='<div id="m-tally"></div>';
+  return h;
+}
+function m0Tally(){
+  var c={}, n=0;
+  Object.keys(m0.ans).forEach(function(id){
+    var v=m0.ans[id]; if(v!=='aru'&&v!=='tama') return;
+    var t=taneOf(id); if(!t) return;
+    c[t.kt]=(c[t.kt]||0)+(v==='aru'?2:1); n++;
+  });
+  if(n<3){
+    $('m-tally').innerHTML = n ? '<p class="m-lead">あと'+(3-n)+'つ「ある」があると、かたよりが出ます。</p>' : '';
+    return;
+  }
+  var top=Object.keys(c).sort(function(a,b){ return c[b]-c[a]; }).slice(0,2);
+  var h='<div class="m-tally"><h3>あなたが気づきやすいこと</h3><p>「ある」を押したのは、つぎの型に集まっています。</p><ul>';
+  top.forEach(function(k){
+    var K=kataOf(k); if(!K) return;
+    h+='<li><b>'+esc(K.nm)+'</b> ―― '+esc(K.d)+'<br><span class="m-q">'+esc(K.q)+'</span></li>';
+  });
+  h+='</ul><p class="m-note">どれか1つを「これにする」で選んで、下の欄を自分のことばで うめよう。</p></div>';
+  $('m-tally').innerHTML=h;
+}
+
+/* ---- ② 場所からさがす ---- */
+function m0BashoHtml(){
+  var h='<p class="m-lead">よく知っている<b>場所</b>か、思い当たる<b>とき</b>をえらぼう。そこにいる自分を思いうかべながら読むのがこつ。うしろの2つ（冬・雪／動物・生き物）は<b>北海道ならでは</b>の困りごと。</p>';
+  h+='<div class="chips" id="m-bas">'+BA.map(function(b){
+    return '<button type="button" class="chip'+(m0.ba===b.k?' act':'')+'" data-b="'+b.k+'" aria-pressed="'+(m0.ba===b.k)+'">'+esc(b.nm)+'</button>';
+  }).join('')+'</div>';
+  if(m0.ba){
+    var list=taneByBa(m0.ba), B=baOf(m0.ba);
+    h+='<p class="m-lead"><b>'+esc(B?B.nm:'')+'</b>で、こんなことはない？ 当てはまらなければ、ほかもえらんでみよう。</p>';
+    h+='<div class="m-cards">'+list.map(function(t){
+      return '<div class="m-card"><p class="m-t">'+esc(t.t)+'</p>'
+           + '<div class="m-ab"><button type="button" class="m-take" data-take="'+t.id+'">これにする</button></div></div>';
+    }).join('')+'</div>';
+    h+='<div class="btnrow"><button class="sub" id="m-sheet-go">観察シートを印刷する（家で見てくる用）</button></div>';
+  }
+  return h;
+}
+
+/* ---- ③ 作りたい物から逆算 ---- */
+function m0GyakuHtml(){
+  var k=gyakuKata(m0.gwhat), K=k?kataOf(k):null;
+  var h='<p class="m-lead">作りたい物があるのは強み。でも<b>「何を作るか」は答えで、課題ではない</b>。'
+      + 'だれが、何に困っているから それがほしいのか、へ戻ろう。</p>';
+  h+='<label for="m-gwhat">作りたいと思っているもの</label>'
+   + '<input id="m-gwhat" placeholder="例：自動ドア／見はりカメラ／自動で水をやる機械" value="'+esc(m0.gwhat)+'">';
+  if(K) h+='<p class="m-guess">それは <b>'+esc(K.nm)+'</b> を助ける道具のようです。<br>'+esc(K.q)+'</p>';
+  h+='<label for="m-gdare">それがあると、だれが助かる？</label>'
+   + '<input id="m-gdare" placeholder="例：にもつを持った家の人／車いすの人" value="'+esc(m0.gdare)+'">'
+   + '<label for="m-gima">それが無いいま、何が起きている？</label>'
+   + '<input id="m-gima" placeholder="例：手がふさがっていて、ドアが開けられない" value="'+esc(m0.gima)+'">'
+   + '<div class="btnrow"><button class="main" id="m-gapply">下の欄にうつす</button></div>';
+  return h;
+}
+
+function m0RenderWork(){
+  var w=$('m-work');
+  if(!m0.mode){ w.innerHTML=''; w.hidden=true; return; }
+  w.hidden=false;
+  if(m0.mode==='aruaru'){
+    w.innerHTML=m0AruaruHtml(); m0Tally();
+    Array.prototype.forEach.call(w.querySelectorAll('.m-b'),function(b){
+      b.onclick=function(){
+        m0.ans[b.dataset.id] = (m0.ans[b.dataset.id]===b.dataset.v) ? '' : b.dataset.v;
+        m0Save(); m0RenderWork();
+      };
+    });
+    if($('m-more')) $('m-more').onclick=function(){ m0.shown+=12; m0Save(); m0RenderWork(); };
+    if($('m-reshuffle')) $('m-reshuffle').onclick=function(){ m0NewDeck(); m0Save(); m0RenderWork(); };
+  }else if(m0.mode==='basho'){
+    w.innerHTML=m0BashoHtml();
+    Array.prototype.forEach.call(w.querySelectorAll('#m-bas .chip'),function(b){
+      b.onclick=function(){ m0.ba=(m0.ba===b.dataset.b)?'':b.dataset.b; m0Save(); m0RenderWork(); };
+    });
+    if($('m-sheet-go')) $('m-sheet-go').onclick=m0PrintSheet;
+  }else{
+    w.innerHTML=m0GyakuHtml();
+    ['m-gwhat','m-gdare','m-gima'].forEach(function(id){
+      var el=$(id); if(!el) return;
+      el.addEventListener('input',function(){ m0[id.replace('m-','')]=el.value; m0Save(); });
+      /* 型の見立ては打っている最中に出し入れすると読めないので、
+         入力が終わったところ（change）で一度だけ出しなおす */
+      el.addEventListener('change',function(){ m0RenderWork(); var f=$(id); if(f) f.focus(); });
+    });
+    if($('m-gapply')) $('m-gapply').onclick=function(){
+      m0.dare = m0.gdare || m0.dare;
+      m0.komari = m0.gima || m0.komari;
+      var k=gyakuKata(m0.gwhat); if(k) m0.kt=k;
+      m0Fill(); m0Save(); m0Gate();
+      $('m-komari').focus();
+    };
+  }
+  /* 「これにする」はどの入口にも出る */
+  Array.prototype.forEach.call(w.querySelectorAll('.m-take'),function(b){
+    b.onclick=function(){
+      var t=taneOf(b.dataset.take); if(!t) return;
+      /* 「これにする」は、こまりごとを丸ごと差しかえる操作。
+         「何が分かれば」だけ前のカードの答えのまま残ると、
+         ちがう問題に古い答えが付いたまま①や⑤へ出ていってしまう。
+         （カードを選びなおしたのに「ストーブがついたままか」が残っていた）
+         こまりごとが変わったときだけ消す。自分で書いた文はさわらない。 */
+      if(m0.komari !== t.t){ m0.wakaru=''; m0.wak=0; if($('m-wak-out')) $('m-wak-out').hidden=true; }
+      m0.komari = t.t; m0.kt = t.kt;
+      m0Fill(); m0Save(); m0Gate();
+      $('m-dare').focus();
+      $('m-build').scrollIntoView({behavior:'smooth',block:'start'});
+    };
+  });
+}
+
+/* ---- 組み立て欄（3つの入口の共通の出口） ---- */
+var M0F=[['m-dare','dare'],['m-itsu','itsu'],['m-komari','komari'],['m-wakaru','wakaru']];
+function m0Fill(){
+  M0F.forEach(function(p){ if($(p[0])) $(p[0]).value = m0[p[1]]||''; });
+  m0RenderKata();
+  m0RenderRadios();
+}
+function m0RenderKata(){
+  $('m-katas').innerHTML = KATA.map(function(k){
+    return '<button type="button" class="chip'+(m0.kt===k.k?' act':'')+'" data-k="'+k.k+'" aria-pressed="'+(m0.kt===k.k)+'">'+esc(k.nm)+'</button>';
+  }).join('');
+  Array.prototype.forEach.call($('m-katas').querySelectorAll('.chip'),function(b){
+    b.onclick=function(){ m0.kt=(m0.kt===b.dataset.k)?'':b.dataset.k; m0RenderKata(); m0Save(); m0Gate(); };
+  });
+  var K=kataOf(m0.kt);
+  $('m-kata-q').innerHTML = K ? '<b>'+esc(K.nm)+'</b>：'+esc(K.d)+'<br>'+esc(K.q) : '';
+}
+var M0RULE=[['same','いつも同じルールでよい'],['human','そのつど人が考えて決める必要がある']];
+var M0DOUSA=[['shirase','知らせてくれれば助かる'],['ugoka','かわりに動いてくれると助かる'],['both','どちらも']];
+function m0RenderRadios(){
+  $('m-rule').innerHTML = M0RULE.map(function(r){
+    return '<button type="button" class="chip'+(m0.rule===r[0]?' act':'')+'" data-r="'+r[0]+'" aria-pressed="'+(m0.rule===r[0])+'">'+esc(r[1])+'</button>';
+  }).join('');
+  Array.prototype.forEach.call($('m-rule').querySelectorAll('.chip'),function(b){
+    b.onclick=function(){ m0.rule=(m0.rule===b.dataset.r)?'':b.dataset.r; m0RenderRadios(); m0Save(); m0Gate(); };
+  });
+  $('m-dousa').innerHTML = M0DOUSA.map(function(r){
+    return '<button type="button" class="chip'+(m0.dousa===r[0]?' act':'')+'" data-d="'+r[0]+'" aria-pressed="'+(m0.dousa===r[0])+'">'+esc(r[1])+'</button>';
+  }).join('');
+  Array.prototype.forEach.call($('m-dousa').querySelectorAll('.chip'),function(b){
+    b.onclick=function(){ m0.dousa=(m0.dousa===b.dataset.d)?'':b.dataset.d; m0RenderRadios(); m0Save(); m0Gate(); };
+  });
+}
+function m0Sentence(){
+  var K=kataOf(m0.kt);
+  return (m0.dare||'〔だれ〕')+'が、'+(m0.itsu||'〔いつ・どこで〕')+'、'
+       + (m0.komari||'〔何に〕')+'。'
+       + 'これは「'+(K?K.nm:'〔型〕')+'」なので、'
+       + (m0.wakaru||'〔何〕')+' が分かれば助かるかもしれない。';
+}
+/* 必須がそろうまで出口のボタンは押せない（⑤・おたずね箱と同じ形） */
+var M0REQ=[['dare','だれが'],['itsu','いつ・どこで'],['komari','こまっていること'],['wakaru','何が分かれば']];
+function m0Gate(){
+  var miss=M0REQ.filter(function(p){ return !String(m0[p[0]]||'').trim(); }).map(function(p){ return p[1]; });
+  if(!m0.kt) miss.push('こまりごとの型');
+  var ok = miss.length===0;
+  ['m-go-find','m-go-memo','m-go-stuck','m-print'].forEach(function(id){ if($(id)) $(id).disabled=!ok; });
+  $('m-gate').className='gate'+(ok?' ok':'');
+  $('m-gate').textContent = ok
+    ? 'そろいました。下のボタンが押せます。'
+    : 'あと'+miss.length+'つ ―― '+miss.join(' ／ ')+' をうめると、ボタンが押せます。';
+  $('m-sentence').textContent = m0Sentence();
+
+  /* 関門1：測れない言葉。止めずに、言いかえの道を出す */
+  var mz = muzuFind(m0.komari) || muzuFind(m0.wakaru);
+  if(mz){
+    $('m-muzu').hidden=false;
+    $('m-muzu').innerHTML = '<b>「'+esc(mz.nm)+'」は、目や耳で分かる変化ではないので、センサでは測れません。</b><br>'
+      + 'でも、こう言いかえると測れるようになります ―― <span class="m-ex">'+esc(mz.ex)+'</span><br>'
+      + '<span class="m-note">そのとき まわりで何が起きているか、に書きかえてみよう。</span>';
+  }else{
+    $('m-muzu').hidden=true; $('m-muzu').innerHTML='';
+  }
+  /* 関門2：人が考えて決めることは、機械にはできない */
+  $('m-rule-w').hidden = (m0.rule!=='human');
+  m0Save();
+}
+/* ★答えは先に見せない。2回「わからない」を押したときだけ例を出す。
+   ここを最初から見せると、課題の設定そのものを肩代わりしてしまう。 */
+function m0Wak(){
+  m0.wak=(m0.wak||0)+1; m0Save();
+  var t=null;
+  for(var i=0;i<TANE.length;i++){ if(TANE[i].t===m0.komari){ t=TANE[i]; break; } }
+  if(m0.wak<2){
+    $('m-wak-out').hidden=false;
+    var K=kataOf(m0.kt);
+    $('m-wak-out').innerHTML='まず、こう考えてみよう ―― '
+      + (K ? '<b>'+esc(K.q)+'</b><br>' : '')
+      + '<span class="m-note">「それが起きているとき、目や耳で何がちがうか」を書けばよい。'
+      + 'もう一度おすと、例を出します。</span>';
+  }else{
+    $('m-wak-out').hidden=false;
+    $('m-wak-out').innerHTML = t
+      ? '例：<span class="m-ex">'+esc(t.hint)+'</span><br><span class="m-note">そのまま写さず、自分の場面に合う言い方にしよう。</span>'
+      : '例：<span class="m-ex">「暗くなったか」「人が来たか」「土がかわいたか」「温度」</span><br>'
+        + '<span class="m-note">〈何が〉〈どうなったか〉の形で短く書く。</span>';
+  }
+}
+
+/* ---- 出口。①④⑤へ引きわたす ---- */
+function m0GoFind(){
+  $('q').value = m0.wakaru; state.q = m0.wakaru; state.cat=''; state.type='';
+  renderChips(); renderList(); showTab('find');
+  $('q').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function m0GoMemo(){
+  $('theme').value = m0Sentence();
+  if(typeof renderSentence==='function') renderSentence();
+  showTab('memo');
+  $('theme').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function m0GoStuck(){
+  var K=kataOf(m0.kt);
+  $('g-theme').value = m0Sentence();
+  if(!$('g-mine').value.trim()){
+    $('g-mine').value = '⓪でしらべた。こまりごとの型は「'+(K?K.nm:'')+'」で、'
+      + m0.wakaru + ' が分かればよいと考えた。'
+      + (m0.dousa ? ' '+(M0DOUSA.filter(function(r){return r[0]===m0.dousa;})[0]||['',''])[1]+'と思う。' : '');
+  }
+  gkind = 'idea';
+  gRender(); gSync(); showTab('stuck');
+  $('g-stuck').focus();
+}
+/* 観察シート。数日持ち帰って見てくる用（紙でも通る形にしておく） */
+function m0PrintSheet(){
+  var B=baOf(m0.ba), list=m0.ba?taneByBa(m0.ba):TANE.slice(0,10);
+  var h='<h2>観察シート ―― '+esc(B?B.nm:'いろいろな場所')+'</h2>'
+    + '<p>なまえ（　　　　　　　　　　）　見てきた日（　　月　　日 〜 　　月　　日）</p>'
+    + '<p>下のことが、じっさいに起きたら○を付けて、そのときのようすを書く。'
+    + '<b>あてはまるものが無ければ、いちばん下の空らんに自分で書く。</b></p><table class="m-sheet-t">'
+    + '<tr><th>○</th><th>こんなことはない？</th><th>いつ・どこで・だれが（見てきたこと）</th></tr>';
+  list.forEach(function(t){
+    h+='<tr><td class="m-chk"></td><td>'+esc(t.t)+'</td><td></td></tr>';
+  });
+  h+='<tr><td class="m-chk"></td><td>じぶんで見つけたこと</td><td></td></tr>'
+   + '<tr><td class="m-chk"></td><td>じぶんで見つけたこと</td><td></td></tr></table>';
+  $('m-sheet').innerHTML=h;
+  document.body.classList.add('printsheet');
+  window.print();
+  setTimeout(function(){ document.body.classList.remove('printsheet'); }, 300);
+}
+
+/* この端末で、もう何か書き始めているか。
+   ⓪・④・⑤のどれかに中身があれば「始めている」とみなす。 */
+function m0Started(){
+  if(m0.komari || m0.dare || m0.wakaru || m0.gwhat) return true;
+  try{
+    var memos=JSON.parse(localStorage.getItem(KEY));
+    if(Array.isArray(memos) && memos.length) return true;
+    var st=JSON.parse(localStorage.getItem(GKEY));
+    if(st && (String(st['g-theme']||'').trim() || String(st['g-mine']||'').trim())) return true;
+  }catch(e){}
+  return false;
+}
+
+/* ---- 立ち上げ ---- */
+M0F.forEach(function(p){
+  var el=$(p[0]);
+  el.addEventListener('input',function(){ m0[p[1]]=el.value; m0Gate(); });
+});
+$('m-wak').onclick   = m0Wak;
+$('m-go-find').onclick  = m0GoFind;
+$('m-go-memo').onclick  = m0GoMemo;
+$('m-go-stuck').onclick = m0GoStuck;
+$('m-print').onclick = function(){ window.print(); };
+$('m-clear').onclick = function(){
+  if(!confirm('⓪に書いたものを消しますか？（④の設計メモ・⑤に書いたものは残ります）')) return;
+  m0 = {mode:'', ba:'', ans:{}, deck:[], shown:12, wak:0,
+        dare:'', itsu:'', komari:'', kt:'', wakaru:'', rule:'', dousa:'',
+        gwhat:'', gdare:'', gima:''};
+  m0NewDeck(); m0Save();
+  m0RenderModes(); m0RenderWork(); m0Fill(); m0Gate();
+  $('m-wak-out').hidden=true;
+};
 
 /* =========================================================
    ⑥ 先生用 ―― クラウドで受け取る
@@ -2911,7 +3599,11 @@ waitFb(function(){
 $('q').addEventListener('input',function(){ state.q=this.value; renderList(); });
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
-showTab('find');
+m0Load(); m0RenderModes(); m0RenderWork(); m0Fill(); m0Gate();
+/* まだ何も書いていない生徒には⓪（もんだいをみつける）から見せる。
+   テーマが決まらない生徒は、①を開いても打ちこむ言葉が無くて止まるから。
+   もう書き始めている生徒には、これまでどおり①を出す（毎回⓪だとじゃま）。 */
+showTab(m0Started() ? 'find' : 'find0');
 renderChips(); renderList(); renderSlots(); renderSentence(); renderSaved();
 gLoad(); gRender(); gSync(); kRenderKind(); tRenderPol(); tSyncKey(); kRender();
 tRenderAuth(); tRenderRooms(); tRenderCloud(); cShowBtns(); cLoad(); cSyncSend(); eqRefresh();
