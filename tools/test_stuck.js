@@ -714,20 +714,25 @@ console.log("=== ⑥ 先生用タブ ===");
     ok("模擬の装置は実測できないと一覧に書いてある", /実測できません/.test(pR));
     ok("その断りはCO2に付いている", /CO2センサ（模擬）〔実測できません/.test(pR));
 
-    console.log("=== ③ 検索欄は「さがす」タブだけ ===");
-    /* 直す前は searchbar に id が無いので、null で落ちないようにしておく
-       （落ちると、そのあとの④まで走らない） */
+    console.log("=== ③ 検索欄はどのタブでも出し、打ちこんだら①へ移る ===");
+    /* 2026-09-24 のデザイン刷新で決まりを変えた。前は①以外で隠していた
+       （打っても何も起きず「検索が壊れている」と見えたため）。
+       いまは検索欄をいつも出し、打ちこんだら①へ移る。ヒントは①のパネルの中にある。 */
     const shown = id => { const el = r(id); return el ? el.hidden === false : "要素が無い"; };
+    const seen = id => { let el = r(id); if (!el) return "要素が無い"; for (; el; el = el.parentElement) if (el.hidden) return false; return true; };
     r("t-find").click();
     ok("①では検索欄が出ている", shown("searchbar") === true, String(shown("searchbar")));
-    ok("①では検索のヒントも出ている", shown("searchhint") === true, String(shown("searchhint")));
+    ok("①では検索のヒントも出ている", seen("searchhint") === true, String(seen("searchhint")));
     ["ex","step","memo","stuck","teach"].forEach(k => {
       r("t-" + k).click();
-      ok(k + "では検索欄を出さない", shown("searchbar") === false, String(shown("searchbar")));
-      ok(k + "では検索のヒントも出さない", shown("searchhint") === false, String(shown("searchhint")));
+      ok(k + "でも検索欄は出ている", shown("searchbar") === true, String(shown("searchbar")));
+      ok(k + "では検索のヒントは見えない（①の中にある）", seen("searchhint") === false, String(seen("searchhint")));
+      const q = r("q"); q.value = "くらい"; q.dispatchEvent(new R.win.Event("input"));
+      ok(k + "で打ちこむと①へ移る", seen("p-find") === true && seen("p-" + k) === false);
+      q.value = ""; q.dispatchEvent(new R.win.Event("input"));
     });
     r("t-find").click();
-    ok("①に戻すとまた出る", shown("searchbar") === true && shown("searchhint") === true);
+    ok("①に戻すとヒントがまた見える", shown("searchbar") === true && seen("searchhint") === true);
 
     console.log("=== ③-b 装置パネルも、装置を扱うタブだけ ===");
     /* 検索欄と同じで、タブの外に置いたものは自分で消さないと出たままになる。

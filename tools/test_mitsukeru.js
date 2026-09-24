@@ -59,14 +59,16 @@ ok("⓪のタブボタンがある", !!$("t-find0"));
 ok("⓪のパネルがある", !!$("p-find0"));
 ok("①〜⑥の番号は動いていない",
   ["t-find", "t-ex", "t-step", "t-memo", "t-stuck", "t-teach"].every(i => !!$(i)));
-ok("①のボタンの文字は「① さがす」のまま", (txt("t-find") || "").indexOf("① さがす") >= 0, txt("t-find"));
+ok("①のボタンは番号1の「装置をさがす」", /^1\s*装置をさがす/.test((txt("t-find") || "").trim()), txt("t-find"));
 ok("何も書いていない生徒には⓪を開く", shown($("p-find0")) && !shown($("p-find")));
 ok("m0Started は、まだ何も無ければ false", w.m0Started() === false);
 
 console.log("=== タブの範囲（検索欄・装置パネルで2回踏んだ型） ===");
 $("t-find0").click();
-ok("⓪では検索欄を出さない", !shown($("searchbar")));
-ok("⓪では検索のヒントも出さない", !shown($("searchhint")));
+/* 2026-09-24 のデザイン刷新で、検索欄はどのタブでも出す決まりに変えた（打ちこむと①へ移る）。
+   ヒントは①のパネルの中にあるので、⓪では見えない。 */
+ok("⓪でも検索欄は出ている", shown($("searchbar")));
+ok("⓪では検索のヒントは見えない", !shown($("p-find")) && !!$("p-find").contains($("searchhint")));
 ok("⓪では装置パネルを出さない", !shown($("eq-shared")));
 $("t-find").click();
 ok("①に移ると検索欄が出る", shown($("searchbar")));

@@ -6,6 +6,9 @@
 <title>計測・制御 逆引きシステム</title>
 <meta name="description" content="中学校技術科「計測・制御による問題解決」で、やりたいことからセンサ・アクション装置を逆引きする授業用ページ。北海道教育大学札幌校 石川研究室の授業資料への索引です。">
 <meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f6fa; --card:#fff; --ink:#1b2434; --sub:#5a6a83; --line:#dbe2ec;
@@ -330,58 +333,419 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   .m-card{break-inside:avoid}
 }
 
+
+/* =========================================================
+   デザイン刷新（2026-09）― ここから下が新しい見た目。
+   上の旧スタイルを上書きする。印刷用の指定は上のものを生かす。
+   ========================================================= */
+:root{
+  --bg:#F6F4EF; --card:#fff; --ink:#1C2330; --sub:#56606E; --line:#E3DFD6; --line2:#D6D1C6; --soft:#FAF8F4;
+  --sensor:#1F5FBF; --sensor-bg:#E7EFFB;
+  --action:#A8480C; --action-line:#C4570F; --action-bg:#FBEBDD;
+  --accent:#1C7A56; --accent-bg:#E9F4EE;
+  --teach:#5B45B0; --teach-bg:#F1EEFC;
+  --danger:#A33A1F;
+  --shadow:0 1px 2px rgba(28,35,48,.05),0 6px 20px rgba(28,35,48,.06);
+  --r:14px;
+  --f-body:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --f-head:"Zen Kaku Gothic New","BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic UI",sans-serif;
+}
+body{font-family:var(--f-body);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.75}
+button,input,select,textarea{font-family:inherit}
+::selection{background:#FFE69A}
+
+/* ---- 上部バー ---- */
+header.topbar{background:#fff;color:var(--ink);padding:0;border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1320px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:var(--ink);display:grid;place-items:center}
+.brand-tx{display:flex;flex-direction:column;line-height:1.25}
+header.topbar h1{margin:0;font-family:var(--f-head);font-weight:900;font-size:18px;letter-spacing:.02em}
+header.topbar .lead{font-size:12px;color:var(--sub);opacity:1;margin:0}
+header.topbar .searchbar{flex:1 1 auto;max-width:620px;margin:0;display:flex;align-items:center;gap:8px;
+  height:46px;padding:0 6px 0 14px;background:var(--bg);border:1px solid var(--line2);border-radius:12px;position:relative}
+header.topbar .searchbar:focus-within{border-color:var(--ink);box-shadow:0 0 0 4px #E4E8EF;background:#fff}
+.searchbar .sico{color:var(--sub);flex-shrink:0}
+header.topbar .searchbar input{flex:1;min-width:0;border:0;background:transparent;box-shadow:none;padding:0;font-size:16px;color:var(--ink)}
+header.topbar .searchbar input:focus{outline:none}
+header.topbar .searchbar input::-webkit-search-cancel-button{display:none}
+header.topbar .clr{position:static;transform:none;width:34px;height:34px;border-radius:50%;background:#ECE8E0;color:#3A4250;display:grid;place-items:center;flex-shrink:0}
+.eq-pill{margin-left:auto;flex-shrink:0;height:40px;padding:0 14px;display:flex;align-items:center;gap:8px;border-radius:999px;
+  border:1px solid var(--line2);background:#fff;color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.eq-pill .dot{width:8px;height:8px;border-radius:50%;background:#A7AEB8}
+.eq-pill.on{background:var(--accent-bg);border-color:#B9DCC9;color:#16603F}
+.eq-pill.on .dot{background:var(--accent)}
+
+/* ---- タブ（学習の流れ） ---- */
+nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.tabs-in{max-width:1320px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:thin}
+.tab-btn{flex:0 0 auto;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px 0 8px;border:0;border-radius:10px;
+  background:transparent;color:var(--sub);font-size:14px;font-weight:400;cursor:pointer;border-bottom:0;white-space:nowrap}
+.tab-btn:hover{background:#F3F1EC;color:var(--ink)}
+.tab-btn .no{width:28px;height:28px;border-radius:50%;box-sizing:border-box;border:2px solid #C9C3B6;display:grid;place-items:center;
+  font-size:15px;font-weight:700;line-height:1}
+.tab-btn[aria-selected="true"],.tab-btn.find0[aria-selected="true"]{background:#EEF1F6;color:var(--ink);font-weight:700;border-bottom:0}
+.tab-btn[aria-selected="true"] .no{background:var(--ink);border-color:var(--ink);color:#fff}
+.tab-btn.find0{color:var(--sub)}
+.tab-join{width:22px;height:2px;background:var(--line2);flex-shrink:0}
+.tab-sep{margin-left:auto;padding-left:16px;font-size:12px;color:var(--sub);flex-shrink:0}
+.tab-btn.ref-tab{padding:0 12px;min-height:38px;border:1px solid var(--line);font-size:13px}
+.tab-btn.ref-tab[aria-selected="true"]{border-color:var(--ink)}
+.tab-btn.teach{padding:0 12px;min-height:38px;color:var(--teach);font-size:13px;margin-left:8px}
+.tab-btn.teach[aria-selected="true"]{background:var(--teach-bg);color:var(--teach)}
+
+/* ---- 本体 ---- */
+main{max-width:1320px;padding:24px 24px 72px}
+h2{font-family:var(--f-head);font-size:19px;font-weight:700;margin:28px 0 12px;padding-left:0;border-left:0;color:var(--ink)}
+h2:first-child{margin-top:0}
+#p-find0 h2{color:var(--ink)}
+h2.tstep{color:var(--teach);border-left:0}
+h2.tstep::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--teach);margin-right:10px;vertical-align:2px}
+.note-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:14px;color:#3A4250;margin:0 0 18px;line-height:1.8}
+.note-bar b{color:var(--ink)}
+.count{font-size:14px;color:var(--sub);margin:0 0 12px}
+
+/* ボタン */
+button.main{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:10px;min-height:46px;padding:0 20px;font-size:15px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button.main:hover{background:#2C3547}
+button.main:disabled{background:#C9CED6;border-color:#C9CED6;color:#fff}
+button.sub{background:#fff;color:var(--ink);border:1px solid var(--line2);border-radius:10px;min-height:44px;padding:0 16px;font-size:14px}
+button.sub:hover{background:#F6F4EF}
+button.sub:disabled{color:#A0A7B1;background:#fff;cursor:not-allowed}
+button.sub.danger{border-color:transparent;color:var(--danger);background:transparent}
+button.sub.danger:hover{background:#FBEDE8}
+.btnrow{gap:8px;margin-top:14px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #B97800;outline-offset:2px}
+
+/* 入力欄 */
+.builder{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 28px;box-shadow:none}
+.builder label,.builder .glb,.tin label,.tin .glb{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 6px}
+.builder input,.builder select,.builder textarea,.tin input,.tin select,.tin textarea,#k-newtitle{
+  min-height:46px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+.builder input:focus,.builder textarea:focus,.builder select:focus,.tin input:focus,.tin textarea:focus,#k-newtitle:focus{
+  outline:none;border-color:var(--ink);box-shadow:0 0 0 4px #E4E8EF}
+.req{background:#FBEDE8;color:var(--danger);font-size:11px;padding:1px 8px;vertical-align:2px}
+.m-opt{font-size:12px}
+.gate{font-size:14px}
+.gate.ok{color:var(--accent)}
+
+/* チップ */
+.chips{gap:8px}
+.chip{min-height:40px;padding:0 14px;border:1px solid var(--line2);background:#fff;color:var(--ink);font-size:14px;border-radius:999px}
+.chip:hover{border-color:#A9A294}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.act[aria-pressed="true"]{background:var(--action-line);border-color:var(--action-line)}
+
+/* ---- 左右2段（⓪ と ④） ---- */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start;margin-top:8px}
+.split-side{position:sticky;top:84px;display:flex;flex-direction:column;gap:12px}
+.preview{background:var(--ink);color:#fff;border-radius:16px;padding:22px 24px}
+.preview-k{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.08em;color:#B8C2D1}
+.side-btns{flex-direction:column;align-items:stretch;margin-top:0}
+.side-btns button{width:100%}
+.bhead{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.bhead h2{margin:0}
+.bhead .count{margin:0}
+
+/* ⓪ */
+.hero{padding:8px 0 20px}
+.hero-k{margin:0 0 6px;font-size:13px;color:var(--sub)}
+.hero-t{margin:0 0 10px;font-family:var(--f-head);font-weight:900;font-size:clamp(24px,3.2vw,34px);line-height:1.35}
+.hero-d{margin:0 0 12px;color:#3A4250;max-width:40em}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill-i{font-size:12px;padding:4px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#3A4250}
+.m-modes{gap:12px}
+.m-mode{padding:16px 18px;border:1px solid var(--line);border-radius:14px;min-height:44px}
+.m-mode b{font-size:16px}
+.m-mode span{font-size:13px}
+.m-mode:hover{border-color:#A9A294}
+.m-mode.on{border:2px solid var(--accent);background:#EEF7F2;padding:15px 17px}
+.m-card{border-radius:12px;padding:14px 16px}
+.m-card.hit{border-color:var(--accent);background:#EEF7F2}
+.m-b,.m-take{min-height:36px;padding:0 14px;font-size:13px}
+.m-b.on{background:var(--accent);border-color:var(--accent)}
+.m-take{border-color:var(--accent);color:#16603F}
+.m-take:hover{background:var(--accent)}
+.m-tally{border:1px solid #B9DCC9;background:#EEF7F2}
+.m-guess{border-left:0;border-radius:10px;background:#EEF7F2}
+.m-muzu{border-left:0;border-radius:10px;background:#FFF4E6;border:1px solid #F1D3AE}
+#p-find0 .preview .m-sentence{margin:0;padding:0;border:0;background:transparent;color:#fff;font-size:17px;line-height:2}
+#m-katas .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.m-kata-q{color:#16603F;font-weight:700}
+
+/* ---- ① さがす：3段 ---- */
+.find-grid{display:grid;grid-template-columns:230px minmax(0,1fr) 300px;gap:28px;align-items:start}
+.filters{position:sticky;top:84px;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 100px);overflow:auto;padding-right:4px}
+.fh{margin:6px 0 4px;font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.fh.s{color:var(--sensor)} .fh.a{color:var(--action);margin-top:18px}
+.fh::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.fh.a::before{border-radius:2px}
+.filters .chips{flex-direction:column;flex-wrap:nowrap;gap:2px;margin:0}
+.filters .chip{border:0;background:transparent;border-radius:8px;text-align:left;min-height:38px;padding:0 10px;color:var(--ink)}
+.filters .chip:hover{background:#ECE8E0}
+.filters .chip[aria-pressed="true"]{background:var(--sensor-bg);color:var(--sensor);font-weight:700}
+.filters .chip.act[aria-pressed="true"]{background:var(--action-bg);color:var(--action)}
+.results{min-width:0}
+.results .note-bar{font-size:13px}
+.ghead{font-family:var(--f-head);font-size:15px;border-left:0;padding-left:0;margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.ghead::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--sensor)}
+.ghead.a::before{border-radius:3px;background:var(--action-line)}
+.ghead span{font-family:var(--f-body)}
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
+.card.dev{background:#fff;border:1px solid var(--line);border-top:1px solid var(--line);border-left:1px solid var(--line);border-radius:var(--r);
+  padding:18px;margin:0;box-shadow:0 1px 2px rgba(28,35,48,.04);display:flex;flex-direction:column}
+.card.dev:hover{border-color:#C9C3B6}
+.card.dev.picked{border:2px solid var(--sensor);box-shadow:0 0 0 4px var(--sensor-bg);padding:17px}
+.card.dev.act.picked{border-color:var(--action-line);box-shadow:0 0 0 4px var(--action-bg)}
+.badge{font-size:12px;padding:2px 10px}
+.card.dev h3{font-family:var(--f-head);font-size:20px;margin:10px 0 0;line-height:1.4}
+.card .cat{font-size:12px}
+.card .desc{font-size:14px;margin:8px 0 10px}
+.yy{gap:6px;margin-bottom:10px}
+.yy span{font-size:12px;background:#F3F1EC;color:#3A4250;padding:3px 9px}
+.use,.warn{font-size:13px;border-radius:10px;padding:10px 12px;margin-bottom:10px;line-height:1.7}
+.use{background:var(--soft);border:1px solid #EEEAE2;color:#3A4250}
+.warn{background:#FFF1E6;border:1px solid #F1D3AE;color:#8A3A0A}
+.use b,.warn b{display:block;font-size:11px;letter-spacing:.06em;margin-bottom:2px}
+.use b{color:var(--sub)}
+.gdev .warn{margin:6px 0 0}
+.refbox{margin:0}
+.ref{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 10px;border-radius:8px;font-size:13px;background:transparent;color:var(--sensor);border:1px solid transparent}
+.ref:hover{background:var(--sensor-bg);text-decoration:none}
+.card.act .ref,.gdev.act .ref{background:transparent;color:var(--action)}
+.card.act .ref:hover,.gdev.act .ref:hover{background:var(--action-bg)}
+.ref .ico{flex-shrink:0}
+.ref.none{color:var(--sub)}
+.cfoot{margin-top:auto;padding-top:12px;border-top:1px solid #EEEAE2;display:flex;justify-content:flex-end}
+.card.dev .refbox{margin-top:auto;padding-top:4px}
+.card.dev .refbox + .cfoot{margin-top:8px}
+.pick{min-height:44px;padding:0 18px;border-radius:10px;border:1.5px solid var(--sensor);color:var(--sensor);background:#fff;font-size:14px;font-weight:700}
+.pick.on{background:var(--sensor);color:#fff}
+.card.act .pick,.gdev.act .pick{border-color:var(--action-line);color:var(--action)}
+.card.act .pick.on{background:var(--action-line);color:#fff}
+.card.dev .pick{width:100%}
+.hint{max-width:none;margin:22px 0 0;padding:14px 16px;background:#fff;border:1px dashed var(--line2);border-radius:12px;
+  font-size:13px;color:var(--sub);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hint .hw{min-height:34px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:13px;color:var(--ink);cursor:pointer}
+.hint .hw:hover{border-color:var(--ink)}
+.empty{background:#fff;border:1px solid var(--line);border-radius:14px}
+
+/* わたしの設計（トレイ） */
+.tray{position:sticky;top:84px}
+.tray-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.tray-h{display:flex;align-items:baseline;justify-content:space-between;font-family:var(--f-head);font-weight:700;font-size:16px}
+.tray-n{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--sub)}
+.tslot{padding:12px 14px;border-radius:10px;border:1.5px dashed var(--line2);background:var(--soft);display:flex;flex-direction:column;line-height:1.45}
+.tslot .lb{font-size:12px;font-weight:700}
+.tslot.s .lb{color:var(--sensor)} .tslot.a .lb{color:var(--action)}
+.tslot .val{font-size:14px;color:var(--sub)}
+.tslot.filled .val{font-size:16px;font-weight:700;color:var(--ink)}
+.tslot.s.filled{border:1.5px solid var(--sensor);background:var(--sensor-bg)}
+.tslot.a.filled{border:1.5px solid var(--action-line);background:var(--action-bg)}
+.tjudge{margin:0;padding:0 6px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
+.tray-go{width:100%;margin-top:4px}
+.tray-msg{margin:0;font-size:13px;color:#16603F;min-height:0}
+.tray-msg:empty{display:none}
+
+/* ---- 装置パネル（この授業で使える装置） ---- */
+.eq-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:20px}
+.eq-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.eq-panel h2{margin:0;font-size:15px}
+.eq-toggle{min-height:36px;padding:0 12px;border:1px solid var(--line2);background:#fff;border-radius:8px;font-size:13px;color:var(--ink);cursor:pointer;flex-shrink:0}
+.eq-panel p{font-size:13px;margin:6px 0 0;color:#3A4250}
+#eq-summary{margin-top:4px}
+.eq-connect-wrap,.eq-body{display:none}
+.eq-panel.open .eq-connect-wrap,.eq-panel.open .eq-body{display:block}
+.eq-code-row{margin-top:10px;gap:10px}
+.eq-code-row label{font-size:13px;font-weight:700}
+#eq-code{min-height:44px;font-size:17px;font-weight:700;letter-spacing:.18em;border:1px solid var(--line2);border-radius:10px}
+.eq-chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;min-height:36px}
+.eq-chk input{width:18px;height:18px;accent-color:var(--ink)}
+details.eq-panel>summary{cursor:pointer;font-weight:700;min-height:36px;display:flex;align-items:center}
+details.eq-panel .eq-row select{min-height:40px;border:1px solid var(--line2);border-radius:8px}
+
+/* ---- ④ 設計メモ ---- */
+.flow3{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr) 36px minmax(0,1fr);align-items:stretch;margin-bottom:8px}
+.fcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.farr{display:grid;place-items:center;color:#8C95A3}
+.flow3 .slot{margin:0;flex:1;border-radius:14px;padding:16px 18px;border:1.5px dashed var(--line2);background:#fff}
+.flow3 .slot .lb{font-size:12px;letter-spacing:.04em}
+.flow3 .slot.s .lb{color:var(--sensor)} .flow3 .slot.a .lb{color:var(--action)} .flow3 .slot.j .lb{color:var(--ink)}
+.flow3 .slot .val{font-family:var(--f-head);font-size:20px}
+.flow3 .slot .val.non{font-family:var(--f-body);font-size:14px;color:var(--sub)}
+.flow3 .slot.j{border:1.5px solid var(--ink)}
+.flow3 .slot.j .val{font-family:var(--f-body);font-size:15px;font-weight:400}
+.flow3 .slot.s.filled{border:1.5px solid var(--sensor);background:var(--sensor-bg)}
+.flow3 .slot.a.filled{border:1.5px solid var(--action-line);background:var(--action-bg)}
+.flow3 .choose{margin:0;min-height:40px;font-size:13px;align-self:flex-start}
+#p-memo .split-main label:first-child{margin-top:0}
+.sentence{background:transparent;color:#fff;padding:0;margin:0;font-size:16px;line-height:2;border-radius:0}
+.sentence em{background:#FFD866;color:var(--ink)}
+.saved{border:1px solid var(--line);border-radius:12px;box-shadow:none;padding:16px 18px}
+.saved .th{color:var(--ink);font-size:15px}
+#savedlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:12px}
+#savedlist .saved{margin:0}
+
+/* ---- ②③ ---- */
+#exlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(460px,100%),1fr));gap:16px}
+.ex{border:1px solid var(--line);border-radius:14px;box-shadow:none;padding:18px 20px;margin:0}
+.ex h3{font-family:var(--f-head);font-size:18px;color:var(--ink)}
+.flow b{border-radius:8px}
+.flow b.a{color:var(--action)}
+.step{border:1px solid var(--line);border-radius:14px;box-shadow:none;padding:16px 18px 16px 62px}
+.step .no{left:16px;top:16px;width:32px;height:32px;background:var(--ink)}
+.step h3{font-family:var(--f-head);font-size:16px}
+#steplist,#tips{max-width:860px}
+
+/* ---- ⑤ 行きづまったら・⑥ 先生用 ---- */
+.ghint{border:1px solid var(--line);border-left:1px solid var(--line);box-shadow:none;border-radius:14px;padding:16px 18px;position:relative}
+.ghint::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:4px;border-radius:0 4px 4px 0;background:var(--accent)}
+.ghint.ask::before{background:#D29A17}
+.ghint h3{font-family:var(--f-head)}
+.gdev{border:1px solid var(--line);box-shadow:none;border-radius:12px;padding:14px 16px}
+.gdev.act{border-left-color:var(--line)}
+.gnudge{background:#FFF8E1;border:1px solid #EFD98F;color:#5E4B0F}
+.gnone{background:var(--soft);border:1px solid #EEEAE2}
+.card:not(.dev){border:1px solid var(--line);border-radius:12px;box-shadow:none;padding:14px 16px}
+.card.new{box-shadow:inset 4px 0 0 #D29A17}
+.card.work{box-shadow:inset 4px 0 0 var(--teach)}
+.card.done{box-shadow:inset 4px 0 0 var(--accent)}
+.card.ng{box-shadow:inset 4px 0 0 #B5B9C0}
+.room{border:1px solid var(--line);border-left:1px solid var(--line);box-shadow:inset 4px 0 0 var(--teach);border-radius:12px}
+.room .code{color:var(--teach)}
+.saved.on,.room.on,.card.on{outline-color:var(--teach)}
+#t-set{border-radius:14px;box-shadow:none}
+#t-set>summary{background:var(--teach-bg);color:var(--teach);min-height:48px;display:flex;align-items:center}
+#g-cloud input{min-height:46px;border:1px solid var(--line2);border-radius:10px}
+.gpr{border-radius:10px;border:1px solid var(--line2)}
+
+footer{max-width:1320px;padding:28px 24px 48px;font-size:12px;line-height:1.8}
+
+
+.cbadges{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cbadges .badge{margin:0}
+.cbadges .eq-badge{margin:0 0 0 auto;font-weight:700}
+/* ---- 狭い画面 ---- */
+@media (max-width:1180px){
+  .find-grid{grid-template-columns:200px minmax(0,1fr)}
+  .tray{grid-column:1 / -1;position:sticky;bottom:0;top:auto;z-index:15;order:3}
+  .tray-card{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 14px;border-radius:14px 14px 0 0;gap:8px}
+  .tray-h,.tjudge,.tray-msg{display:none}
+  .tslot{flex:1 1 0;min-width:0;padding:6px 10px}
+  .tslot .lb{font-size:11px}
+  .tray-go{width:auto;margin:0}
+}
+@media (max-width:900px){
+  .topbar-in{flex-wrap:wrap;gap:10px 12px;padding:10px 16px}
+  .brand .lead{display:none}
+  header.topbar .searchbar{order:3;flex-basis:100%;max-width:none}
+  .tabs-in{padding:8px 16px}
+  .tab-sep{margin-left:8px}
+  main{padding:16px 16px 64px}
+  .split{grid-template-columns:1fr}
+  .split-side{position:static}
+  .find-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .filters,.results,.tray{min-width:0}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .filters{position:static;max-height:none;flex-direction:row;flex-wrap:wrap;overflow:visible}
+  .filters .fh{flex-basis:100%;margin:4px 0 0}
+  .filters .chips{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:4px;width:100%}
+  .filters .chip{border:1px solid var(--line2);background:#fff;border-radius:999px;white-space:nowrap;flex-shrink:0}
+  .flow3{grid-template-columns:1fr;gap:8px}
+  .farr{transform:rotate(90deg);height:24px}
+  .builder{padding:18px}
+  .tslot .val{font-size:13px}
+  button.main.tray-go{font-size:0;width:48px;min-width:48px;height:48px;padding:0;flex-shrink:0}
+  .tray-go svg{width:20px;height:20px}
+  .tslot .lb{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tslot .val{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (max-width:520px){
+  .brand-mark{display:none}
+  .brand{min-width:0;flex:1 1 auto}
+  header.topbar h1{font-size:16px;white-space:nowrap}
+  .eq-pill{height:36px;padding:0 10px;font-size:12px}
+  .tab-btn{padding:0 10px 0 6px;font-size:13px}
+  .tab-join{width:10px}
+  .hero-t br{display:none}
+}
+@media print{
+  .topbar,.filters,.tray,.hint,.eq-pill,.split-side .side-btns,.flow3 .choose{display:none!important}
+  .split{display:block}
+  .preview{background:#fff;color:#000;border:2px solid #000}
+  .preview-k{color:#000}
+  #p-find0 .preview .m-sentence{color:#000}
+  .sentence{color:#000}
+  .find-grid{display:block}
+  .flow3 .slot{border:1px solid #000!important;background:#fff!important}
+  body.printsheet .split{display:none!important}
+}
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1>計測・制御 逆引きシステム</h1>
-    <p class="lead">「やりたいこと」から、使うセンサとアクション装置を探そう（中学校技術科・問題解決）</p>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/><path d="M7.5 12h9"/><path d="M13 8.5l3.5 3.5-3.5 3.5"/></svg></span>
+      <span class="brand-tx"><h1>計測・制御 逆引きシステム</h1><span class="lead">やりたいことから、センサとアクション装置をさがす</span></span>
+    </div>
+    <div class="searchbar" id="searchbar">
+      <svg class="sico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" aria-label="やりたいことや装置名で検索" type="search" placeholder="やりたいことで装置をさがす（例：暗くなったら／人が来たら）" autocomplete="off">
+      <button class="clr" id="clr" type="button" title="消す" aria-label="検索をクリア"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <button type="button" class="eq-pill" id="eq-pill" aria-controls="eq-shared"><span class="dot" aria-hidden="true"></span><span id="eq-pill-tx">受付：未接続</span></button>
   </div>
-  <div class="searchbar" id="searchbar">
-    <input id="q" aria-label="やりたいことや装置名で検索" type="search" placeholder="やりたいことを入力（例：暗くなったら／人が来たら／土が乾いたら）" autocomplete="off">
-    <button class="clr" id="clr" title="消す">×</button>
-  </div>
-  <p class="hint" id="searchhint">こんな言葉でさがせます → <b>くらい</b> / <b>ひとがくる</b> / <b>あつい</b> / <b>みず</b> / <b>おと</b> / <b>ドアがあいた</b> / <b>火事</b> / <b>知らせたい</b> / <b>回したい</b></p>
 </header>
 
-<nav class="tabs">
-  <div class="wrap" role="tablist">
-    <button class="tab-btn find0" id="t-find0" role="tab" aria-selected="true"  aria-controls="p-find0">⓪ もんだいをみつける</button>
-    <button class="tab-btn" id="t-find"  role="tab" aria-selected="false" aria-controls="p-find">① さがす</button>
-    <button class="tab-btn" id="t-ex"    role="tab" aria-selected="false" aria-controls="p-ex">② 授業の例</button>
-    <button class="tab-btn" id="t-step"  role="tab" aria-selected="false" aria-controls="p-step">③ 進め方</button>
-    <button class="tab-btn" id="t-memo"  role="tab" aria-selected="false" aria-controls="p-memo">④ 設計メモ</button>
-    <button class="tab-btn" id="t-stuck" role="tab" aria-selected="false" aria-controls="p-stuck">⑤ 行きづまったら</button>
-    <button class="tab-btn teach" id="t-teach" role="tab" aria-selected="false" aria-controls="p-teach">⑥ 先生用</button>
+<nav class="tabs" aria-label="学習の流れ">
+  <div class="tabs-in" role="tablist">
+    <button class="tab-btn fstep find0" id="t-find0" role="tab" aria-selected="true"  aria-controls="p-find0"><span class="no">0</span><span>もんだいをみつける</span></button>
+    <span class="tab-join" aria-hidden="true"></span>
+    <button class="tab-btn fstep" id="t-find"  role="tab" aria-selected="false" aria-controls="p-find"><span class="no">1</span><span>装置をさがす</span></button>
+    <span class="tab-join" aria-hidden="true"></span>
+    <button class="tab-btn fstep" id="t-memo"  role="tab" aria-selected="false" aria-controls="p-memo"><span class="no">4</span><span>設計メモ</span></button>
+    <span class="tab-join" aria-hidden="true"></span>
+    <button class="tab-btn fstep" id="t-stuck" role="tab" aria-selected="false" aria-controls="p-stuck"><span class="no">5</span><span>行きづまったら</span></button>
+    <span class="tab-sep" aria-hidden="true">参考</span>
+    <button class="tab-btn ref-tab" id="t-ex"    role="tab" aria-selected="false" aria-controls="p-ex">② 授業の例</button>
+    <button class="tab-btn ref-tab" id="t-step"  role="tab" aria-selected="false" aria-controls="p-step">③ 進め方</button>
+    <button class="tab-btn teach" id="t-teach" role="tab" aria-selected="false" aria-controls="p-teach"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>⑥ 先生用</button>
   </div>
 </nav>
 
 <main>
 <aside class="eq-panel" id="eq-shared" aria-label="この授業の装置">
-  <h2>この授業で使える装置</h2>
-  <div id="eq-connect" class="eq-code-row">
+  <div class="eq-head"><h2>この授業で使える装置</h2><button type="button" class="eq-toggle" id="eq-toggle" aria-expanded="false" aria-controls="eq-body">受付コード・設定</button></div>
+  <div class="eq-connect-wrap" id="eq-connect-wrap"><div id="eq-connect" class="eq-code-row">
     <label for="eq-code">受付コード</label><input id="eq-code" maxlength="6" autocomplete="off" spellcheck="false" placeholder="例：K7M2QX">
     <button class="sub" id="eq-disconnect">接続を解除</button>
     <p id="eq-connection-status" role="status"></p>
-  </div>
+  </div></div>
   <p id="eq-summary" role="status" aria-live="polite"></p>
-  <label><input type="checkbox" id="eq-showall">「使えない」装置も検索結果に表示する</label>
-  <p>状態は先生が設定します。「使える」は台数や貸出予約を保証するものではありません。</p>
+  <div id="eq-body" class="eq-body">
+  <label class="eq-chk"><input type="checkbox" id="eq-showall">「使えない」装置も検索結果に表示する</label>
+  <p class="eq-note">状態は先生が設定します。「使える」は台数や貸出予約を保証するものではありません。</p>
+  </div>
 </aside>
 <section id="p-find0" role="tabpanel" aria-labelledby="t-find0" hidden>
-  <p class="note-bar">ここは、センサやアクション装置より<b>前</b>の話。<b>問題は「思いつく」ものではなく「気づく」もの。</b>
-  だから、ここでは考え出そうとしなくてよい。読んで、当てはまるものに印を付けていくだけでいい。<br>
-  <b>AIは使いません。</b>書いたものはこのパソコンの中だけに残ります。</p>
+  <div class="hero">
+    <p class="hero-k">センサやアクション装置より<b>前</b>の話</p>
+    <p class="hero-t">問題は「思いつく」ものではなく、<br>「気づく」もの。</p>
+    <p class="hero-d">考え出そうとしなくてよい。読んで、当てはまるものに印を付けていくだけでいい。</p>
+    <div class="pills"><span class="pill-i">AIは使いません</span><span class="pill-i">書いたものはこのパソコンの中だけに残ります</span></div>
+  </div>
 
   <h2>どこから入る？</h2>
   <div id="m-modes" class="m-modes"></div>
   <div id="m-work" hidden></div>
 
-  <h2 id="m-build">もんだいの文をつくる</h2>
+  <div class="split">
+  <div class="builder split-main">
+  <div class="bhead"><h2 id="m-build">もんだいの文をつくる</h2>
   <p class="count">入口はちがっても、行き先は同じ。<b>自分のことばで</b>うめよう。
-  カードの文のままでよいところは、そのままでいい。</p>
-  <div class="builder">
+  カードの文のままでよいところは、そのままでいい。</p></div>
     <label for="m-dare">だれが こまっている？<span class="req">必須</span></label>
     <input id="m-dare" placeholder="例：家の人／わたし／祖母／小さい弟／クラスのみんな">
 
@@ -410,31 +774,52 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <p class="glb">知らせてほしい？ 動いてほしい？<span class="m-opt">（えらばなくても進めます）</span></p>
     <div class="chips" id="m-dousa" role="group"></div>
 
-    <p class="m-sentence" id="m-sentence"></p>
+  </div>
+  <aside class="split-side">
+    <div class="preview">
+      <p class="preview-k">できあがる もんだいの文</p>
+      <p class="m-sentence" id="m-sentence"></p>
+    </div>
     <p class="gate" id="m-gate" role="status" aria-live="polite"></p>
-    <div class="btnrow">
+    <div class="btnrow side-btns">
       <button class="main" id="m-go-find" disabled>①でこの装置をさがす</button>
       <button class="sub"  id="m-go-memo" disabled>④のテーマに入れる</button>
       <button class="sub"  id="m-go-stuck" disabled>⑤で先生に相談する</button>
       <button class="sub"  id="m-print" disabled>印刷する</button>
-      <button class="sub"  id="m-clear">書いたものを消す</button>
+      <button class="sub danger"  id="m-clear">書いたものを消す</button>
     </div>
+  </aside>
   </div>
   <div id="m-sheet" hidden></div>
 </section>
 
 <section id="p-find" role="tabpanel" aria-labelledby="t-find" hidden>
+  <div class="find-grid">
+  <aside class="filters" aria-label="カテゴリでしぼりこむ">
+    <p class="fh s">気づく・調べる（センサ）</p>
+    <div class="chips" id="chips-s"></div>
+    <p class="fh a">動かす・知らせる（アクション）</p>
+    <div class="chips" id="chips-a"></div>
+  </aside>
+  <div class="results">
   <p class="note-bar">計測・制御は <b>センサ（気づく）→ プログラム（判断する）→ アクション装置（動かす）</b> の流れ。センサが得た値を、プログラムが条件と比べて判断します。まず「何が分かれば困りごとを解決できるか」を考えよう。</p>
-
-  <h2>気づきたい・調べたい（入力・計測）</h2>
-  <div class="chips" id="chips-s"></div>
-
-  <h2 style="border-left-color:var(--action)">動かしたい・知らせたい（出力・動作）</h2>
-  <div class="chips" id="chips-a"></div>
-
   <p class="count" id="count" role="status" aria-live="polite"></p>
   <div id="list"></div>
   <div class="empty" id="empty" hidden>見つかりませんでした。ちがう言い方でためしてみよう。<br>（例：「あつい」「さむい」「ひかり」「うごき」「におい」「しらせる」）</div>
+  <p class="hint" id="searchhint">ほかの言い方でもさがせます
+    <button type="button" class="hw">くらい</button><button type="button" class="hw">ひとがくる</button><button type="button" class="hw">あつい</button><button type="button" class="hw">みず</button><button type="button" class="hw">おと</button><button type="button" class="hw">ドアがあいた</button><button type="button" class="hw">火事</button><button type="button" class="hw">知らせたい</button><button type="button" class="hw">回したい</button></p>
+  </div>
+  <aside class="tray" id="tray" aria-label="わたしの設計">
+    <div class="tray-card">
+      <div class="tray-h"><span>わたしの設計</span><span class="tray-n" id="tray-n">0 / 2 えらんだ</span></div>
+      <div class="tslot s" id="tray-s"><span class="lb">気づく（センサ）</span><span class="val">まだ えらんでいません</span></div>
+      <p class="tjudge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M6 14l6 6 6-6"/></svg>判断（プログラム）― 条件は設計メモで決める</p>
+      <div class="tslot a" id="tray-a"><span class="lb">動かす・知らせる（アクション）</span><span class="val">まだ えらんでいません</span></div>
+      <button type="button" class="main tray-go" id="tray-go">④ 設計メモを書く<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <p class="tray-msg" id="tray-msg" role="status" aria-live="polite"></p>
+    </div>
+  </aside>
+  </div>
 </section>
 
 <section id="p-ex" role="tabpanel" aria-labelledby="t-ex" hidden>
@@ -450,12 +835,18 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
 </section>
 
 <section id="p-memo" role="tabpanel" aria-labelledby="t-memo" hidden>
-  <p class="note-bar">①のタブでカードの「これを使う」を押すと、ここに入ります。動かす条件だけでなく、止め方と確かめ方も書こう。保存したメモは読み戻して直せます。</p>
-  <div class="builder">
-    <div class="slot s" id="slot-s"><span class="lb">計測（センサ）</span><span class="val non">①からセンサを選ぼう</span></div>
-    <button class="sub choose" data-choose="s">センサを選び直す</button>
-    <div class="slot a" id="slot-a"><span class="lb">制御（アクション装置）</span><span class="val non">①からアクション装置を選ぼう</span></div>
-    <button class="sub choose" data-choose="a">アクション装置を選び直す</button>
+  <p class="note-bar">①のタブでカードの「設計に入れる」を押すと、ここに入ります。動かす条件だけでなく、止め方と確かめ方も書こう。保存したメモは読み戻して直せます。</p>
+  <div class="flow3" aria-label="しくみの流れ">
+    <div class="fcol"><div class="slot s" id="slot-s"><span class="lb">気づく ― 計測（センサ）</span><span class="val non">①からセンサを選ぼう</span></div>
+    <button class="sub choose" data-choose="s">センサを選び直す</button></div>
+    <span class="farr" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <div class="fcol"><div class="slot j"><span class="lb">判断する ― プログラム</span><span class="val" id="judge-val">（動かす条件を下に書こう）</span></div></div>
+    <span class="farr" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <div class="fcol"><div class="slot a" id="slot-a"><span class="lb">動かす ― 制御（アクション装置）</span><span class="val non">①からアクション装置を選ぼう</span></div>
+    <button class="sub choose" data-choose="a">アクション装置を選び直す</button></div>
+  </div>
+  <div class="split">
+  <div class="builder split-main">
     <label for="theme">解決したい問題・テーマ</label>
     <input id="theme" placeholder="例：植物の水やりを忘れてしまう">
     <label for="cond">どうなったら動かす？（条件）</label>
@@ -469,14 +860,17 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
     <label for="limit">模型で試すこと・まだ確かめられないこと（任意）</label>
     <input id="limit" placeholder="例：ポンプの代わりにLEDで給水の合図を試す">
     <p id="eq-memo" role="status"></p>
-    <div class="sentence" id="sent"></div>
+  </div>
+  <aside class="split-side">
+    <div class="preview"><p class="preview-k">わたしの設計</p><div class="sentence" id="sent"></div></div>
     <p id="save-status" role="status" aria-live="polite"></p>
-    <div class="btnrow">
+    <div class="btnrow side-btns">
       <button class="main" id="save">この設計を保存する</button>
       <button class="sub" id="save-new" hidden>別案として保存する</button>
-      <button class="sub" id="reset">入力をクリア</button>
       <button class="sub" id="print">印刷する</button>
+      <button class="sub danger" id="reset">入力をクリア</button>
     </div>
+  </aside>
   </div>
   <h2>保存した設計</h2>
   <div id="savedlist"></div>
@@ -610,7 +1004,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
       <p class="gate" id="t-polds"></p>
 
       <div class="btnrow">
-        <button class="main" id="t-ask" hidden>🤖 AIに聞く</button>
+        <button class="main" id="t-ask" hidden>AIに聞く</button>
         <button class="sub" id="t-copy">送る文をコピー</button>
       </div>
       <p class="gate" id="t-msg" role="status" aria-live="polite"></p>
@@ -640,7 +1034,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   <details id="t-set">
     <summary>設定（APIキー・モデル）</summary>
     <div class="tin">
-      <p class="count">APIキーは<b>入れなくても使えます</b>。入れると「🤖 AIに聞く」が出て、この画面から直接聞けます（従量課金）。</p>
+      <p class="count">APIキーは<b>入れなくても使えます</b>。入れると「AIに聞く」が出て、この画面から直接聞けます（従量課金）。</p>
       <label for="t-key">Anthropic APIキー（任意）</label>
       <input id="t-key" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
       <p class="warnbox"><b>生徒が使う端末には入れないでください。</b>
@@ -673,7 +1067,7 @@ button.main:disabled{background:#c8d2de;cursor:not-allowed}
   <a href="https://sites.google.com/s.hokkyodai.ac.jp/tech/%E3%81%AF%E3%82%93%E3%81%A0%E4%BB%98%E3%81%91%E3%81%A7%E5%AE%9F%E7%BF%92%E5%9F%BA%E6%9D%BF%E3%82%92%E4%BD%9C%E3%82%8B" target="_blank" rel="noopener">はんだ付けで実習基板を作る</a> ／
   <a href="https://sites.google.com/s.hokkyodai.ac.jp/tech/%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E8%BE%B2%E6%A5%AD" target="_blank" rel="noopener">スマート農業</a> ／
   <a href="https://sites.google.com/s.hokkyodai.ac.jp/tech/%E3%83%9E%E3%82%A4%E3%82%AF%E3%83%AD%E3%83%93%E3%83%83%E3%83%88%E3%81%A7%E7%84%A1%E7%B7%9A%E3%83%AD%E3%83%9C%E3%83%83%E3%83%88%E3%82%AB%E3%83%BC%E3%82%92%E4%BD%9C%E3%82%8B" target="_blank" rel="noopener">マイクロビットで無線ロボットカーを作る</a></p>
-  <p>各カードの <b>📄</b> は、その装置の資料ページへ直接つながります（2026年9月19日に全ページの実在を確認）。
+  <p>各カードの<b>資料リンク</b>は、その装置の資料ページへ直接つながります（2026年9月19日に全ページの実在を確認）。
   <b>資料そのものはこのページに複製していません。</b>いつも研究室サイトの最新版が開きます。
   リンク先の構成が変わった場合は、③の一覧から探してください。</p>
   <p><b>このページは、石川研究室の資料を授業で使いやすくするために、一教員が個人で作った非公式の索引です。</b>
@@ -1226,7 +1620,7 @@ function refHtml(id){
   var r = REF[id];
   if(!r) return '<a class="ref none" href="'+labUrl(LAB_IDX)+'" target="_blank" rel="noopener">'
     + 'この装置だけの資料ページはありません → ③の一覧を見る</a>';
-  return '<a class="ref" href="'+labUrl(r.p)+'" target="_blank" rel="noopener">📄 '+esc(r.f)+'</a>'
+  return '<a class="ref" href="'+labUrl(r.p)+'" target="_blank" rel="noopener"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+esc(r.f)+'</a>'
     + (r.n ? '<span class="refn">'+esc(r.n)+'</span>' : '');
 }
 
@@ -1416,19 +1810,20 @@ function renderChips(){
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function cardHtml(v){
-  var h='<div class="card'+(v.t==='a'?' act':'')+'">';
-  h+='<span class="badge">'+(v.t==='s'?'計測（センサ）':'制御（アクション）')+'</span>';
+  var h='<div class="card dev'+(v.t==='a'?' act':'')+(memo[v.t]===v.n?' picked':'')+'">';
+  h+='<div class="cbadges"><span class="badge">'+(v.t==='s'?'気づく・センサ':'動かす・アクション')+'</span>';
   if(v.b) h+='<span class="badge built">'+(v.id==='s-mic'||v.id==='a-ongaku-b'?'micro:bit V2内蔵':'micro:bit内蔵')+'</span>';
   if(v.sim) h+='<span class="badge sim">模擬実験</span>';
-  h+=eqBadge(v);
+  h+=eqBadge(v)+'</div>';
   h+='<h3>'+esc(v.n)+'</h3><div class="cat">'+esc(v.c)+'</div>';
   h+='<p class="desc">'+esc(v.d)+'</p>';
   if(v.y&&v.y.length) h+='<div class="yy">'+v.y.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>';
-  if(v.u) h+='<div class="use">💡 '+esc(v.u)+'</div>';
+  if(v.u) h+='<div class="use"><b>使いどころ</b>'+esc(v.u)+'</div>';
   if(v.sim) h+='<p class="simnote">この装置では'+esc(v.sim)+'。</p>';
-  if(v.w) h+='<div class="warn">⚠ '+esc(v.w)+'</div>';
+  if(v.w) h+='<div class="warn"><b>注意</b>'+esc(v.w)+'</div>';
   h+='<div class="refbox">'+refHtml(v.id)+'</div>';
-  h+='<button class="pick" data-id="'+v.id+'">これを使う</button>';
+  var picked = memo[v.t]===v.n;
+  h+='<div class="cfoot"><button class="pick'+(picked?' on':'')+'" data-id="'+v.id+'" aria-pressed="'+picked+'">'+(picked?'えらんだ':'設計に入れる')+'</button></div>';
   return h+'</div>';
 }
 
@@ -1480,10 +1875,27 @@ function pick(id){
   if(!v) return;
   memo[v.t]=v.n;
   renderSlots(); renderSentence();
+  if(curTab==='find'){
+    renderList();
+    var other = v.t==='s' ? 'a' : 's';
+    $('tray-msg').textContent = v.n+' を設計に入れました。' + (memo[other] ? '「④ 設計メモを書く」で条件を決めよう。' : (other==='a' ? '次は、動かす・知らせる装置をえらぼう。' : '次は、気づく装置（センサ）をえらぼう。'));
+    return;
+  }
   showTab('memo');
   window.scrollTo(0,0);
 }
+function renderTray(){
+  var n=0;
+  [['s','tray-s'],['a','tray-a']].forEach(function(p){
+    var el=$(p[1]), v=memo[p[0]];
+    if(v) n++;
+    el.className='tslot '+p[0]+(v?' filled':'');
+    el.querySelector('.val').textContent = v || 'まだ えらんでいません';
+  });
+  $('tray-n').textContent = n+' / 2 えらんだ';
+}
 function renderSlots(){
+  renderTray();
   [['s','①からセンサを選ぼう'],['a','①からアクション装置を選ぼう']].forEach(function(p){
     var el=$('slot-'+p[0]), v=memo[p[0]];
     el.className='slot '+p[0]+(v?' filled':'');
@@ -1501,6 +1913,8 @@ function renderSentence(){
   h+=f(memo.a,'アクション装置')+' で '+f(a,'（動作）')+'。';
   ['stop','test','limit'].forEach(function(id,i){if($(id).value.trim()) h+='<br>'+['止め方・戻し方：','確かめ方：','模型の範囲：'][i]+f($(id).value.trim(),'');});
   $('sent').innerHTML=h;
+  $('judge-val').textContent = c || '（動かす条件を下に書こう）';
+  $('judge-val').className = 'val'+(c?'':' non');
 }
 ['theme','cond','act','stop','test','limit'].forEach(function(id){ $(id).addEventListener('input',renderSentence); });
 
@@ -1830,7 +2244,7 @@ function gDevHtml(v){
     +(v.sim?'<span class="badge sim">模擬実験</span>':'')
     +'<p>'+esc(v.d)+'</p>'
     +(v.sim?'<p class="simnote">この装置では'+esc(v.sim)+'。</p>':'')
-    +(v.w?'<p>⚠ '+esc(v.w)+'</p>':'')
+    +(v.w?'<p class="warn"><b>注意</b>'+esc(v.w)+'</p>':'')
     +'<div class="refbox">'+refHtml(v.id)+'</div>'
     +'</div><button class="pick" data-id="'+v.id+'">これを使う</button></div>';
 }
@@ -2252,7 +2666,7 @@ $('t-save').onclick = function(){
   tPut(o); tSyncKey();
   $('t-setmsg').className = 'gate ok';
   $('t-setmsg').textContent = o.key
-    ? ('保存しました（' + (o.store === 'local' ? 'この端末' : 'このタブだけ') + '）。「🤖 AIに聞く」が使えます。')
+    ? ('保存しました（' + (o.store === 'local' ? 'この端末' : 'このタブだけ') + '）。「AIに聞く」が使えます。')
     : 'キーを空にしました。コピー方式だけになります。';
 };
 $('t-forget').onclick = function(){
@@ -2638,9 +3052,7 @@ function showTab(name){
   /* 検索欄はヘッダにあるので、放っておくとどのタブでも出たままになる。
      ②〜⑥では結果の一覧（#list）が隠れているため、打ちこんでも何も起きず、
      「検索が効かない」ように見えていた。①のときだけ出す。 */
-  var findOn = (name==='find');
-  $('searchbar').hidden = !findOn;
-  $('searchhint').hidden = !findOn;
+  /* 検索欄はいつも出しておき、打ちこんだら①へ移る（下の input ハンドラ） */
 }
 ['find0','find','ex','step','memo','stuck','teach'].forEach(function(k){ $('t-'+k).onclick=function(){ showTab(k); }; });
 
@@ -3473,6 +3885,8 @@ function eqRefresh(){
        + '未接続の装置はすべて未確認です。';
   }
   $('eq-summary').textContent=text;
+  $('eq-pill-tx').textContent = room ? ('受付 '+room.id+' ・ 使える装置 '+count.yes+' / '+DEV.length) : '受付：未接続';
+  $('eq-pill').classList.toggle('on',!!room);
   $('eq-connect').hidden=hideConnect;
   $('eq-code').value=$('g-code').value;
   $('eq-showall').checked=eqShowAll;
@@ -3596,7 +4010,23 @@ waitFb(function(){
 });
 
 /* 検索 */
-$('q').addEventListener('input',function(){ state.q=this.value; renderList(); });
+$('q').addEventListener('input',function(){ state.q=this.value; if(curTab!=='find') showTab('find'); renderList(); });
+Array.prototype.forEach.call(document.querySelectorAll('#searchhint .hw'),function(b){
+  b.onclick=function(){ $('q').value=b.textContent; state.q=b.textContent; state.cat=''; state.type=''; renderChips(); renderList(); window.scrollTo(0,0); };
+});
+$('tray-go').onclick=function(){ showTab('memo'); window.scrollTo(0,0); };
+function eqOpen(open){
+  $('eq-shared').classList.toggle('open',open);
+  $('eq-toggle').setAttribute('aria-expanded',open?'true':'false');
+  $('eq-toggle').textContent = open ? '閉じる' : '受付コード・設定';
+}
+$('eq-toggle').onclick=function(){ eqOpen(!$('eq-shared').classList.contains('open')); };
+$('eq-pill').onclick=function(){
+  if($('eq-shared').hidden) showTab('find');
+  eqOpen(true);
+  $('eq-shared').scrollIntoView({behavior:'smooth',block:'start'});
+  if(!$('eq-connect').hidden) setTimeout(function(){ $('eq-code').focus(); },250);
+};
 $('clr').onclick=function(){ $('q').value=''; state.q=''; state.cat=''; state.type=''; renderChips(); renderList(); $('q').focus(); };
 
 m0Load(); m0RenderModes(); m0RenderWork(); m0Fill(); m0Gate();
