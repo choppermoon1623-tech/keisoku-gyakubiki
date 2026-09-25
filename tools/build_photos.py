@@ -55,6 +55,10 @@ NAMES = {
     "フィルムヒータ": "a-heater",
     "ペルチェ素子": "a-peltier",
     "振動モータ": "a-shindou",
+    "水中ポンプ": "a-pump",
+    "超音波加湿器": "a-kashitsu",
+    "音声発生装置": "a-onsei",
+    "スマートプラグ": "a-plug",
     # micro:bit 本体。内蔵機能（DEV で b:1 のもの）すべてにこの写真を出す
     "マイクロビット": "microbit",
 }
