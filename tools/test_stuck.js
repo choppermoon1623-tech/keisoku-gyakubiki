@@ -49,7 +49,7 @@ ok("もう一度押すと解除される",
    d.querySelector('#chips-s .chip[data-cat="' + cat + '"]').getAttribute("aria-pressed") === "false");
 $("q").value = "土がかわいたら";
 $("q").dispatchEvent(new w.Event("input"));
-const firstCard = d.querySelector("#list .card h3");
+const firstCard = d.querySelector("#list h3:not(.ghead)");
 ok("①の検索がまだ効く（土がかわいたら→土壌水分センサ）",
    firstCard && firstCard.textContent.indexOf("土壌水分") >= 0,
    firstCard && firstCard.textContent);
@@ -218,7 +218,7 @@ const d4 = dom4.window.document, w4 = dom4.window;
 cases.forEach(([q, expect]) => {
   d4.getElementById("q").value = q;
   d4.getElementById("q").dispatchEvent(new w4.Event("input"));
-  const top = d4.querySelector("#list .card h3");
+  const top = d4.querySelector("#list h3:not(.ghead)");
   const n = top ? top.textContent : "(なし)";
   console.log("  " + q.padEnd(14) + " → " + n);
   if (expect) ok("検索『" + q + "』→ " + expect, n === expect, n);
@@ -236,6 +236,7 @@ console.log("=== 資料リンク（石川研究室） ===");
     beforeParse(win) { win.HTMLElement.prototype.scrollIntoView = function () {}; } });
   const ww = dm.window, dd = ww.document;
   ok("REFが51件そろっている", ww.DEV.every(v => v.id in ww.REF), "もれあり");
+  ww.setView("list"); // 資料リンクは「くわしく見る」のカードに出る
   const cards = [...dd.querySelectorAll("#list .card")];
   ok("全51枚のカードに資料リンクがある",
      cards.length === 51 && cards.every(c => c.querySelector(".ref")), cards.length);
@@ -380,7 +381,7 @@ console.log("=== 検索の索引と並べ方 ===");
     const cols = []; let cur = null;
     dd.querySelectorAll("#list > *").forEach(el => {
       if (el.classList.contains("ghead")) { cur = []; cols.push(cur); }
-      else if (cur) [...el.querySelectorAll(".card h3")].forEach(e => cur.push(e.textContent));
+      else if (cur) [...el.querySelectorAll("h3")].forEach(e => cur.push(e.textContent));
     });
     return cols;
   };
@@ -429,8 +430,8 @@ console.log("=== 検索の索引と並べ方 ===");
   /* 絞り込みが効いているか */
   dd.getElementById("clr").click();
   ok("何も入れなければ51件",
-     [...dd.querySelectorAll("#list .card")].length === 51,
-     [...dd.querySelectorAll("#list .card")].length);
+     [...dd.querySelectorAll("#list h3:not(.ghead)")].length === 51,
+     [...dd.querySelectorAll("#list h3:not(.ghead)")].length);
 }
 
 const SEL_STORE_SESSION = '#t-store .chip[data-s="session"]';
@@ -687,6 +688,7 @@ console.log("=== ⑥ 先生用タブ ===");
 
     /* 画面に出るか */
     r("t-find").click();
+    R.win.setView("list"); // 模擬の注記は「くわしく見る」のカードに出る
     rType("q", "換気");
     const co2card = rAll("#list .card").filter(c => /CO2/.test(c.textContent))[0];
     ok("①の一覧にCO2が出る", !!co2card);

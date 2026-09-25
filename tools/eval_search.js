@@ -12,7 +12,7 @@ function search(q){
   const cols=[];let cur=null;
   d.querySelectorAll("#list > *").forEach(el=>{
     if(el.classList.contains("ghead")){cur=[];cols.push(cur);}
-    else if(cur) [...el.querySelectorAll(".card h3")].forEach(e=>cur.push(e.textContent));
+    else if(cur) [...el.querySelectorAll("h3")].forEach(e=>cur.push(e.textContent));
   });
   return cols;
 }

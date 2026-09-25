@@ -41,7 +41,7 @@ function search(q) {
   const cols = []; let cur = null;
   d.querySelectorAll("#list > *").forEach(el => {
     if (el.classList.contains("ghead")) { cur = []; cols.push(cur); }
-    else if (cur) [...el.querySelectorAll(".card h3")].forEach(e => cur.push(e.textContent));
+    else if (cur) [...el.querySelectorAll("h3")].forEach(e => cur.push(e.textContent));
   });
   return cols;
 }
@@ -229,9 +229,9 @@ if (!$("m-katas").querySelector(".chip.act")) $("m-katas").querySelector(".chip"
 $("m-go-find").click();
 ok("①でさがす → ①が開く", shown($("p-find")));
 ok("①でさがす → 検索欄に「何が分かれば」が入る", $("q").value === "ストーブがついたままか", $("q").value);
-ok("①でさがす → 結果が出ている", d.querySelectorAll("#list .card").length > 0);
-ok("①でさがす → 炎センサが出る", d.querySelector("#list .card h3").textContent.indexOf("炎センサ") >= 0,
-  d.querySelector("#list .card h3").textContent);
+ok("①でさがす → 結果が出ている", d.querySelectorAll("#list h3:not(.ghead)").length > 0);
+ok("①でさがす → 炎センサが出る", d.querySelector("#list h3:not(.ghead)").textContent.indexOf("炎センサ") >= 0,
+  d.querySelector("#list h3:not(.ghead)").textContent);
 
 $("t-find0").click();
 $("m-go-memo").click();
