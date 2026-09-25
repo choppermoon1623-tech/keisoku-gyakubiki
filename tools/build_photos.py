@@ -12,6 +12,7 @@ index.html は「1ファイルをコピーすれば動く・オフラインで�
 
 写真を足すとき：tools/photos/<装置id>.webp を置いて 2 を実行するだけでよい。
 装置 id は index.html の `var DEV` の id。
+例外は microbit.webp で、micro:bit 内蔵の機能すべてに使う。
 """
 import argparse, base64, io, pathlib, re, sys
 
@@ -47,6 +48,15 @@ NAMES = {
     "障害物センサ": "s-dansa",
     "静電タッチセンサ": "s-touch",
     "非接触型温度センサ": "s-ondo-hi",
+    # アクション装置
+    "ギアドモータ": "a-geared",
+    "サーボモータ": "a-servo",
+    "OLEDディスプレイ": "a-oled",
+    "フィルムヒータ": "a-heater",
+    "ペルチェ素子": "a-peltier",
+    "振動モータ": "a-shindou",
+    # micro:bit 本体。内蔵機能（DEV で b:1 のもの）すべてにこの写真を出す
+    "マイクロビット": "microbit",
 }
 
 

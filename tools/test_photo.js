@@ -29,9 +29,10 @@ console.log("=== 写真のデータ ===");
   const { w } = mk();
   const P = w.eval("PHOTO"), DEV = w.eval("DEV"), AL = w.eval("PHOTO_ALIAS");
   const ids = DEV.map(v => v.id);
-  ok("写真が21枚ある", Object.keys(P).length === 21, Object.keys(P).length);
-  ok("写真のキーはすべて DEV の id", Object.keys(P).every(k => ids.includes(k)),
-     Object.keys(P).filter(k => !ids.includes(k)).join(","));
+  ok("写真が28枚ある（センサ21・アクション6・micro:bit本体1）", Object.keys(P).length === 28, Object.keys(P).length);
+  ok("写真のキーは DEV の id か microbit", Object.keys(P).every(k => ids.includes(k) || k === "microbit"),
+     Object.keys(P).filter(k => !ids.includes(k) && k !== "microbit").join(","));
+  ok("アクション装置の写真がある", ["a-geared","a-servo","a-oled","a-heater","a-peltier","a-shindou"].every(k => P[k]));
   ok("写真はすべて data:image/webp", Object.values(P).every(s => /^data:image\/webp;base64,/.test(s)));
   ok("借りる先の写真が実在する", Object.values(AL).every(a => P[a.id]));
   ok("借りるのはCO2・煙・降雨だけ", Object.keys(AL).sort().join() === "s-co2,s-kemuri,s-kouu");
@@ -40,6 +41,7 @@ console.log("=== 写真のデータ ===");
 console.log("=== はじめは「写真でえらぶ」 ===");
 {
   const { w, d, $ } = mk();
+  const P = w.eval("PHOTO");
   ok("写真のタイルが51枚", d.querySelectorAll("#list .ptile").length === 51, d.querySelectorAll("#list .ptile").length);
   ok("くわしいカードは出ていない", d.querySelectorAll("#list .card").length === 0);
   ok("切りかえボタンは「写真」が押されている",
@@ -48,7 +50,10 @@ console.log("=== はじめは「写真でえらぶ」 ===");
   ok("写真のある装置は img を出す", !!soil.querySelector("img.pimg"));
   ok("写真には装置名の alt", /土壌水分センサ/.test(soil.querySelector("img.pimg").alt));
   const mb = [...d.querySelectorAll("#list .ptile")].find(t => /A・Bボタン/.test(t.textContent));
-  ok("内蔵機能は「micro:bit本体の機能」と文字で出す", /micro:bit本体の機能/.test(mb.querySelector(".nophoto").textContent));
+  ok("内蔵機能はmicro:bit本体の写真を出す", !!mb.querySelector("img.pimg") && mb.querySelector("img.pimg").src === P.microbit);
+  ok("本体の写真だと書く", /写真はmicro:bit本体/.test(mb.textContent));
+  const servo = [...d.querySelectorAll("#list .ptile")].find(t => /サーボ/.test(t.textContent));
+  ok("アクション装置にも写真", !!servo.querySelector("img.pimg") && !/写真は/.test(servo.querySelector(".pnote") ? servo.querySelector(".pnote").textContent : ""));
   const pump = [...d.querySelectorAll("#list .ptile")].find(t => /水中ポンプ/.test(t.textContent));
   ok("写真がないアクション装置は空の枠にしない", !!pump.querySelector(".nophoto") && pump.querySelector(".nophoto").textContent.trim() !== "");
   const co2 = [...d.querySelectorAll("#list .ptile")].find(t => /CO2/.test(t.textContent));
