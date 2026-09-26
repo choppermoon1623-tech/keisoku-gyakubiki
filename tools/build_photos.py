@@ -16,7 +16,7 @@ index.html は「1ファイルをコピーすれば動く・オフラインで�
 """
 import argparse, base64, io, pathlib, re, sys
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools" / "photos"
@@ -55,6 +55,7 @@ NAMES = {
     "フィルムヒータ": "a-heater",
     "ペルチェ素子": "a-peltier",
     "振動モータ": "a-shindou",
+    "DCモータ": "a-dc",
     "水中ポンプ": "a-pump",
     "超音波加湿器": "a-kashitsu",
     "音声発生装置": "a-onsei",
@@ -65,7 +66,7 @@ NAMES = {
 
 
 def shrink(src: pathlib.Path) -> bytes:
-    im = Image.open(src)
+    im = ImageOps.exif_transpose(Image.open(src))  # スマホ写真の向き
     if im.mode in ("RGBA", "LA", "P"):
         im = im.convert("RGBA")
         bg = Image.new("RGB", im.size, "white")

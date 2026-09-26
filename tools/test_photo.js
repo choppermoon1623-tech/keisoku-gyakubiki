@@ -29,10 +29,10 @@ console.log("=== 写真のデータ ===");
   const { w } = mk();
   const P = w.eval("PHOTO"), DEV = w.eval("DEV"), AL = w.eval("PHOTO_ALIAS");
   const ids = DEV.map(v => v.id);
-  ok("写真が32枚ある（センサ21・アクション10・micro:bit本体1）", Object.keys(P).length === 32, Object.keys(P).length);
+  ok("写真が33枚ある（センサ21・アクション11・micro:bit本体1）", Object.keys(P).length === 33, Object.keys(P).length);
   ok("写真のキーは DEV の id か microbit", Object.keys(P).every(k => ids.includes(k) || k === "microbit"),
      Object.keys(P).filter(k => !ids.includes(k) && k !== "microbit").join(","));
-  ok("アクション装置の写真がある", ["a-geared","a-servo","a-oled","a-heater","a-peltier","a-shindou","a-pump","a-kashitsu","a-onsei","a-plug"].every(k => P[k]));
+  ok("アクション装置の写真がある", ["a-geared","a-servo","a-oled","a-heater","a-peltier","a-shindou","a-pump","a-kashitsu","a-onsei","a-plug","a-dc"].every(k => P[k]));
   ok("写真はすべて data:image/webp", Object.values(P).every(s => /^data:image\/webp;base64,/.test(s)));
   ok("借りる先の写真が実在する", Object.values(AL).every(a => P[a.id]));
   ok("借りるのはCO2・煙・降雨・黒線検知だけ", Object.keys(AL).sort().join() === "s-co2,s-kemuri,s-kouu,s-kurosen");
@@ -54,7 +54,7 @@ console.log("=== はじめは「写真でえらぶ」 ===");
   ok("本体の写真だと書く", /写真はmicro:bit本体/.test(mb.textContent));
   const servo = [...d.querySelectorAll("#list .ptile")].find(t => /サーボ/.test(t.textContent));
   ok("アクション装置にも写真", !!servo.querySelector("img.pimg") && !/写真は/.test(servo.querySelector(".pnote") ? servo.querySelector(".pnote").textContent : ""));
-  const pump = [...d.querySelectorAll("#list .ptile")].find(t => /DCモータ/.test(t.textContent));
+  const pump = [...d.querySelectorAll("#list .ptile")].find(t => /電光掲示板/.test(t.textContent));
   ok("写真がないアクション装置は空の枠にしない", !!pump.querySelector(".nophoto") && pump.querySelector(".nophoto").textContent.trim() !== "");
   const co2 = [...d.querySelectorAll("#list .ptile")].find(t => /CO2/.test(t.textContent));
   ok("CO2は借りた写真だと書く", /代わりに使うアルコールセンサ/.test(co2.textContent));
@@ -95,9 +95,9 @@ console.log("=== 写真を押すと、くわしい説明が開く ===");
   const t2 = [...d.querySelectorAll("#list .ptile")].find(t => /土壌水分/.test(t.textContent));
   ok("タイルがえらんだ状態になる", t2.classList.contains("picked") && /えらんだ/.test(t2.querySelector(".pick").textContent));
 
-  const btn = [...d.querySelectorAll("#list .ptile")].find(t => /DCモータ/.test(t.textContent)).querySelector(".pick");
+  const btn = [...d.querySelectorAll("#list .ptile")].find(t => /電光掲示板/.test(t.textContent)).querySelector(".pick");
   btn.click();
-  ok("タイルの「設計に入れる」でも入る", /DCモータ/.test($("tray-a").textContent));
+  ok("タイルの「設計に入れる」でも入る", /電光掲示板/.test($("tray-a").textContent));
   ok("写真がない装置はトレイの写真枠を隠す", $("tray-a").querySelector(".tph").hidden);
 
   [...d.querySelectorAll("#list .ptile")].find(t => /炎センサ/.test(t.textContent)).querySelector(".pshow").click();
