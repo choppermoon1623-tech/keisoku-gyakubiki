@@ -81,7 +81,7 @@ $("t-find0").click();
 ok("⓪に戻れる", shown($("p-find0")));
 
 console.log("=== 入口 ===");
-ok("入口が3つ出ている", $("m-modes").querySelectorAll(".m-mode").length === 3);
+ok("入口が4つ出ている（ジーニーを足した）", $("m-modes").querySelectorAll(".m-mode").length === 4);
 ok("えらぶ前は作業エリアが出ていない", !shown($("m-work")));
 
 console.log("=== ① あるある判定 ===");
