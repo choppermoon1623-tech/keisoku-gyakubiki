@@ -268,7 +268,7 @@ ok("「ほのお」はこれまでどおり", firstIn(search("ほのお"), "炎�
 ok("「夜だけ動かしたい」はこれまでどおり", firstIn(search("夜だけ動かしたい"), "年月日・時刻"));
 
 console.log("=== 束のつくり（データ） ===");
-ok("カードは77枚（もとの60＋北海道17）", w.TANE.length === 77, "枚数=" + w.TANE.length);
+ok("既存77枚を残し、生活・学校の分野を広げた149枚", w.TANE.length === 149 && w.TANE.filter(t => /^[th]/.test(t.id)).length === 77, "枚数=" + w.TANE.length);
 ok("型は10", w.KATA.length === 10);
 const kc = {}; w.TANE.forEach(t => kc[t.kt] = (kc[t.kt] || 0) + 1);
 ok("どの型にも4枚以上ある", w.KATA.every(k => (kc[k.k] || 0) >= 4),

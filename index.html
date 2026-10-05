@@ -789,6 +789,13 @@ footer{max-width:1320px;padding:28px 24px 48px;font-size:12px;line-height:1.8}
   cursor:pointer;min-height:40px;padding:0 2px}
 .gn-link:hover{color:#fff}
 .gn-link:disabled{color:#5E6B7D;text-decoration:none;cursor:default}
+.gn-topics{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.gn-topic{border:1px solid #66768B;border-radius:999px;background:#182438;color:#fff;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer}
+.gn-topic.on{background:#E9C46A;border-color:#E9C46A;color:#1C2330}
+.gn-status{color:#C9D6E3;font-size:13px;line-height:1.7;margin:10px 0 0}
+.gn-evidence{font-size:12px;line-height:1.8;color:#53606E;padding-left:18px;margin:10px 0 0}
+.gn-nc{flex-wrap:wrap}
+.gn-topic:focus-visible,.gn-a:focus-visible,.gn-link:focus-visible{outline:3px solid #4FC3C8;outline-offset:3px}
 .gn-near-h{color:#C9D6E3;margin-top:16px}
 .gn-near{display:grid;gap:8px;margin-top:6px}
 .gn-nc{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);
@@ -798,6 +805,7 @@ footer{max-width:1320px;padding:28px 24px 48px;font-size:12px;line-height:1.8}
 @media (max-width:720px){
   .gn-stage{grid-template-columns:1fr;padding:16px}
   .gn-fig img{max-height:230px;width:auto;margin:0 auto}
+  .gn-stage.gn-active .gn-fig img{max-height:120px}
   .gn-bubble::before{left:50%;top:-12px;transform:translateX(-50%);border:12px solid transparent;border-bottom-color:#fff;border-top:0}
 }
 @media print{.gn-stage{display:none!important}}
@@ -3464,7 +3472,80 @@ var TANE = [
 {id:'h14',t:'ゴミステーションを、カラスに荒らされる',                ba:['mise','ikimono'],            kt:'zutto',   hint:'近づいてきたか'},
 {id:'h15',t:'電気さくがはずれていないか、行ってみないと分からない',  ba:['hatake','ikimono'],          kt:'tooku',   hint:'さくが開いたか'},
 {id:'h16',t:'犬が庭のもんから出ていってしまう',                      ba:['beranda','kazoku','ikimono'],kt:'mienai',  hint:'もんが開いたか'},
-{id:'h17',t:'牛舎の温度が下がりすぎていないか、夜中も見に行っている',ba:['hatake','ikimono'],          kt:'zutto',   hint:'小屋の中の温度'}
+{id:'h17',t:'牛舎の温度が下がりすぎていないか、夜中も見に行っている',ba:['hatake','ikimono'],          kt:'zutto',   hint:'小屋の中の温度'},
+/* 生活・学校・部活動など、分野を広げた困りごと */
+{"id":"n01","t":"机に日が差して、ノートがまぶしくて読みにくい","ba":["heya"],"kt":"choudo","hint":"机の明るさ","topics":["light"],"gn":"A"},
+{"id":"n02","t":"帰宅したとき、暗い玄関でかぎ穴が見つけにくい","ba":["genkan"],"kt":"mienai","hint":"玄関の明るさ","topics":["light"],"gn":"AY"},
+{"id":"n03","t":"夕方に暗くなったのに、干した布団を取りこみそびれる","ba":["beranda"],"kt":"osoi","hint":"外が暗くなったか","topics":["light"],"gn":"AY"},
+{"id":"n04","t":"黒板の一部だけまぶしくて、座る場所によって文字が見えにくい","ba":["kyoushitsu"],"kt":"barabara","hint":"場所ごとの明るさ","topics":["light"],"gn":"A"},
+{"id":"n05","t":"教室の窓ぎわと廊下側で、暑さが大きくちがう","ba":["kyoushitsu"],"kt":"choudo","hint":"場所ごとの温度","topics":["temperature"],"gn":"N"},
+{"id":"n06","t":"パソコンを使っていると、周りが熱くなっているのに気づかない","ba":["heya"],"kt":"osoi","hint":"周りの温度","topics":["temperature"],"gn":"NK"},
+{"id":"n07","t":"外に出るまで、上着がいるほど寒いか分からない","ba":["beranda"],"kt":"mienai","hint":"外の温度","topics":["temperature"],"gn":"N"},
+{"id":"n08","t":"運動を休むかどうか、暑さの感じ方が人によってちがう","ba":["taiikukan"],"kt":"barabara","hint":"気温としめりぐあい","topics":["temperature"],"gn":"NT"},
+{"id":"n09","t":"洗面台の下から水がもれて、床がぬれてから気づく","ba":["toilet"],"kt":"osoi","hint":"床に水があるか","topics":["water"],"gn":"M"},
+{"id":"n10","t":"干した服が乾いたか、何度もさわって確かめている","ba":["beranda"],"kt":"mienai","hint":"服のしめりぐあい","topics":["water"],"gn":"M"},
+{"id":"n11","t":"雨が降ってきたのに、教室の窓を閉め忘れる","ba":["kyoushitsu"],"kt":"wasure","hint":"雨が降ったか、窓が開いているか","topics":["water"],"gn":"MR"},
+{"id":"n12","t":"部屋が乾燥しているが、どのくらいか分からない","ba":["heya"],"kt":"choudo","hint":"部屋のしめりぐあい","topics":["water"],"gn":"M"},
+{"id":"n13","t":"押し入れがじめじめして、しまった服にカビが生える","ba":["heya"],"kt":"osoi","hint":"押し入れのしめりぐあい","topics":["air"],"gn":"M"},
+{"id":"n14","t":"窓を閉めた教室で、空気の入れ替えどきが分からない","ba":["kyoushitsu"],"kt":"mienai","hint":"空気の変化","topics":["air"],"gn":""},
+{"id":"n15","t":"部活の道具をしまう部屋が、むれていないか何度も見に行く","ba":["taiikukan"],"kt":"zutto","hint":"部屋のしめりぐあい","topics":["air"],"gn":"M"},
+{"id":"n16","t":"窓を開けると風が強すぎて、机の紙が飛んでしまう","ba":["heya"],"kt":"choudo","hint":"風の強さ","topics":["air"],"gn":""},
+{"id":"n17","t":"教室がざわざわして、自分の声が相手に届きにくい","ba":["kyoushitsu"],"kt":"choudo","hint":"音の大きさ","topics":["sound"],"gn":"HT"},
+{"id":"n18","t":"夜に音楽を大きな音で流して、家の人に言われてから気づく","ba":["heya"],"kt":"osoi","hint":"音の大きさ","topics":["sound"],"gn":"KYT"},
+{"id":"n19","t":"別の部屋にいると、玄関の呼び出し音に気づけない","ba":["heya"],"kt":"mienai","hint":"呼び出し音が鳴ったか","topics":["sound"],"gn":"HR"},
+{"id":"n20","t":"放送が教室の場所によって聞こえたり聞こえなかったりする","ba":["kyoushitsu"],"kt":"barabara","hint":"場所ごとの音の大きさ","topics":["sound"],"gn":"T"},
+{"id":"n21","t":"朝、かばんに弁当を入れ忘れて学校へ行ってしまう","ba":["genkan"],"kt":"wasure","hint":"弁当が入っているか","topics":["belongings"],"gn":"FY"},
+{"id":"n22","t":"机の横にかけた体操着を、帰るときに忘れる","ba":["kyoushitsu"],"kt":"wasure","hint":"体操着が残っているか","topics":["belongings"],"gn":"R"},
+{"id":"n23","t":"使いたい道具がいつもの置き場所になく、探し回る","ba":["heya"],"kt":"mienai","hint":"道具が置いてあるか","topics":["belongings"],"gn":"K"},
+{"id":"n24","t":"雨の日なのに傘を持たずに家を出てしまう","ba":["genkan"],"kt":"wasure","hint":"雨が降っているか、傘があるか","topics":["belongings"],"gn":"MY"},
+{"id":"n25","t":"朝、目覚ましを止めて二度寝し、出発に遅れる","ba":["heya"],"kt":"wasure","hint":"起きて動いているか","topics":["time"],"gn":"Y"},
+{"id":"n26","t":"ゲームを始めると、予定した時間を過ぎても気づかない","ba":["heya"],"kt":"choudo","hint":"何分たったか","topics":["time"],"gn":"KY"},
+{"id":"n27","t":"部活の交代まで何分残っているか、時計を何度も見に行く","ba":["taiikukan"],"kt":"mienai","hint":"残り時間","topics":["time"],"gn":""},
+{"id":"n28","t":"発表の時間が人によって長すぎたり短すぎたりする","ba":["kyoushitsu"],"kt":"barabara","hint":"何分たったか","topics":["time"],"gn":"T"},
+{"id":"n29","t":"トイレットペーパーがなくなってから、予備もないと気づく","ba":["toilet"],"kt":"osoi","hint":"残りの量","topics":["supplies"],"gn":""},
+{"id":"n30","t":"米があと何日分あるか、袋を開けないと分からない","ba":["daidokoro"],"kt":"mienai","hint":"米の重さ","topics":["supplies"],"gn":"F"},
+{"id":"n31","t":"共有の道具を使ったあと、棚に返すのを忘れる","ba":["kyoushitsu"],"kt":"wasure","hint":"棚に道具が戻ったか","topics":["supplies"],"gn":"K"},
+{"id":"n32","t":"棚の商品がいくつ残っているか、毎回数え直している","ba":["mise"],"kt":"kazoe","hint":"商品の数や重さ","topics":["supplies"],"gn":""},
+{"id":"n33","t":"床がぬれているのに気づかず、ろうかですべりそうになる","ba":["rouka"],"kt":"abunai","hint":"床がぬれているか","topics":["safety"],"gn":"MH"},
+{"id":"n34","t":"机から出たかばんのひもに、足を引っかけそうになる","ba":["kyoushitsu"],"kt":"abunai","hint":"通り道に物が出ているか","topics":["safety"],"gn":"H"},
+{"id":"n35","t":"体育館の扉の向こうに人がいるか分からず、ぶつかりそうになる","ba":["taiikukan"],"kt":"abunai","hint":"扉の向こうに人がいるか","topics":["safety"],"gn":"H"},
+{"id":"n36","t":"棚がぐらついているのに、物が落ちてから気づく","ba":["heya"],"kt":"osoi","hint":"棚の傾きやゆれ","topics":["safety"],"gn":""},
+{"id":"n37","t":"松葉づえを使っていると、荷物を持って扉を開けるのが大変","ba":["genkan"],"kt":"todoka","hint":"入口に人がいるか","topics":["support"],"gn":"HT"},
+{"id":"n38","t":"耳が聞こえにくい家の人が、呼び出し音に気づけない","ba":["heya"],"kt":"mienai","hint":"呼び出し音が鳴ったか","topics":["support"],"gn":"HT"},
+{"id":"n39","t":"手を動かしにくい人が、授業中に助けを呼びにくい","ba":["kyoushitsu"],"kt":"todoka","hint":"合図が出されたか","topics":["support"],"gn":"T"},
+{"id":"n40","t":"階段を使えない人が、遠回りした先の扉が開いているか分からない","ba":["rouka"],"kt":"mienai","hint":"扉が開いているか","topics":["support"],"gn":"TR"},
+{"id":"n41","t":"家族がそれぞれペットにえさをあげて、二重にあげてしまう","ba":["kazoku"],"kt":"wasure","hint":"えさをあげたか","topics":["living"],"gn":"DFT"},
+{"id":"n42","t":"鉢植えを日なたに置いたまま、土が乾きすぎてしまう","ba":["hatake"],"kt":"osoi","hint":"土のかわき","topics":["living"],"gn":"MPA"},
+{"id":"n43","t":"ハムスターが夜どのくらい動いているか分からない","ba":["kazoku"],"kt":"mienai","hint":"動いた回数","topics":["living"],"gn":"DY"},
+{"id":"n44","t":"種をまいた鉢が乾かないように、何度も確かめている","ba":["hatake"],"kt":"zutto","hint":"土のかわき","topics":["living"],"gn":"MP"},
+{"id":"n45","t":"冷蔵庫に入れた飲み物が冷えたか、何度も取り出している","ba":["daidokoro"],"kt":"mienai","hint":"飲み物の温度","topics":["food"],"gn":"NKF"},
+{"id":"n46","t":"家族の料理を取り分ける量が、毎回多すぎたり少なすぎたりする","ba":["daidokoro"],"kt":"choudo","hint":"料理の重さ","topics":["food"],"gn":"FT"},
+{"id":"n47","t":"作った弁当を冷蔵庫に入れたまま、持ち出すのを忘れる","ba":["daidokoro"],"kt":"wasure","hint":"弁当が残っているか","topics":["food"],"gn":"FKR"},
+{"id":"n48","t":"給食を分ける量が人によってちがい、最後の人の分が足りない","ba":["kyoushitsu"],"kt":"barabara","hint":"一人分の重さ","topics":["food"],"gn":"FT"},
+{"id":"n49","t":"ごみ箱がいっぱいになって、床にごみがこぼれる","ba":["kyoushitsu"],"kt":"osoi","hint":"ごみの高さ","topics":["cleaning"],"gn":""},
+{"id":"n50","t":"ごみを出す日なのに、袋を持たずに家を出てしまう","ba":["genkan"],"kt":"wasure","hint":"曜日や時刻、袋があるか","topics":["cleaning"],"gn":"Y"},
+{"id":"n51","t":"料理中に手が汚れていて、ごみ箱のふたを開けにくい","ba":["daidokoro"],"kt":"todoka","hint":"手が近づいたか","topics":["cleaning"],"gn":"FH"},
+{"id":"n52","t":"掃除用具を片づける場所がばらばらで、次に使うとき探す","ba":["kyoushitsu"],"kt":"barabara","hint":"決まった場所に用具があるか","topics":["cleaning"],"gn":"K"},
+{"id":"n53","t":"縄跳びを何回跳んだか、途中で分からなくなる","ba":["taiikukan"],"kt":"kazoe","hint":"跳んだ回数","topics":["sports"],"gn":""},
+{"id":"n54","t":"走る練習のタイムを、毎回人に計ってもらっている","ba":["taiikukan"],"kt":"kazoe","hint":"スタートからゴールまでの時間","topics":["sports"],"gn":"HT"},
+{"id":"n55","t":"練習中の自分の動きが、前回とどう違うか分からない","ba":["taiikukan"],"kt":"mienai","hint":"体の動きや傾き","topics":["sports"],"gn":""},
+{"id":"n56","t":"試合の得点を紙で数えていて、書き忘れてしまう","ba":["taiikukan"],"kt":"kazoe","hint":"得点を入れた回数","topics":["sports"],"gn":""},
+{"id":"n57","t":"楽器の練習で、演奏のテンポがだんだん速くなってしまう","ba":["taiikukan"],"kt":"barabara","hint":"音を出す間隔","topics":["music"],"gn":""},
+{"id":"n58","t":"合奏で自分の音だけ大きすぎるが、演奏中は気づけない","ba":["taiikukan"],"kt":"choudo","hint":"音の大きさ","topics":["music"],"gn":"T"},
+{"id":"n59","t":"楽器の保管場所が湿っていないか、毎回見に行く","ba":["taiikukan"],"kt":"mienai","hint":"保管場所のしめりぐあい","topics":["music"],"gn":"MR"},
+{"id":"n60","t":"部活のあと、楽器庫の扉を閉め忘れる","ba":["taiikukan"],"kt":"wasure","hint":"扉が閉まっているか","topics":["music"],"gn":"R"},
+{"id":"n61","t":"誰もいない教室で、扇風機が動きっぱなしになる","ba":["kyoushitsu"],"kt":"wasure","hint":"人がいるか、動いているか","topics":["energy"],"gn":"KR"},
+{"id":"n62","t":"昼間でも照明を全部つけていて、電気を使いすぎている","ba":["heya"],"kt":"choudo","hint":"部屋の明るさ","topics":["energy"],"gn":"AK"},
+{"id":"n63","t":"水をためる容器がいっぱいなのに、水を流し続けてしまう","ba":["daidokoro"],"kt":"osoi","hint":"水の高さ","topics":["energy"],"gn":"M"},
+{"id":"n64","t":"暖房中に扉が開いたままで、暖かい空気が逃げてしまう","ba":["kyoushitsu"],"kt":"wasure","hint":"扉が開いているか","topics":["energy"],"gn":"NK"},
+{"id":"n65","t":"勉強と休憩の切り替えができず、休憩が長くなる","ba":["heya"],"kt":"choudo","hint":"何分たったか","topics":["study"],"gn":""},
+{"id":"n66","t":"勉強中に机が暗くなっても、気づかず読み続けてしまう","ba":["heya"],"kt":"mienai","hint":"机の明るさ","topics":["study"],"gn":"A"},
+{"id":"n67","t":"実験中の変化を、見るのと記録するのを同時にできない","ba":["kyoushitsu"],"kt":"kazoe","hint":"変化した時刻や回数","topics":["study"],"gn":""},
+{"id":"n68","t":"班の実験で振る強さが人によってちがい、結果を比べにくい","ba":["kyoushitsu"],"kt":"barabara","hint":"ゆれの強さ","topics":["study"],"gn":"T"},
+{"id":"n69","t":"雨が降った日や量を、毎日手でメモしている","ba":["beranda"],"kt":"kazoe","hint":"雨の有無や量","topics":["records"],"gn":"M"},
+{"id":"n70","t":"ボールや道具を貸した数を、毎回紙に書いている","ba":["taiikukan"],"kt":"kazoe","hint":"貸し出した回数","topics":["records"],"gn":"K"},
+{"id":"n71","t":"図書室の席が空いているか、行くまで分からない","ba":["mise"],"kt":"mienai","hint":"席に人がいるか","topics":["records"],"gn":"HR"},
+{"id":"n72","t":"手を挙げた人数を数えている間に、手が下がってしまう","ba":["kyoushitsu"],"kt":"kazoe","hint":"合図が出た数","topics":["records"],"gn":"HT"}
 ];
 
 /* 関門1：目や耳で分かる変化があるか。
@@ -3565,6 +3646,7 @@ function m0Load(){
   if(!Array.isArray(m0.deck) || !m0.deck.length) m0NewDeck();
   if(!m0.ans || typeof m0.ans!=='object') m0.ans={};
   if(!m0.gn || typeof m0.gn!=='object' || !Array.isArray(m0.gn.h)) m0.gn=gnNew();
+  if(!gnTopic(m0.gn.topic)) m0.gn.topic='';
 }
 /* ★一覧では出さない。毎回ちがう順で少しずつ配る。
    全部ならべるとクラス全員が同じテーマを選び、借り物になる。 */
@@ -3576,7 +3658,7 @@ function m0NewDeck(){
 
 /* ---- 入口の出しわけ ---- */
 var M0MODES=[
- {k:'genie',  nm:'ジーニーに当ててもらう', d:'質問に「はい／いいえ」で答えるだけ。あなたの困りごとを当てにくる。'},
+ {k:'genie',  nm:'ジーニーに当ててもらう', d:'いろいろな分野から、質問に答えて困りごとをしぼる。近い候補から選んでもよい。'},
  {k:'aruaru', nm:'なんにも思いつかない', d:'カードを見て「ある／ない」を押すだけ。えらぶのは、考えつくよりずっと簡単。'},
  {k:'basho',  nm:'場所なら言える',       d:'知っている場所をえらぶと、そこで起きがちなことが出る。'},
  {k:'gyaku',  nm:'作りたい物はある',     d:'「自動ドアを作りたい」から、だれが何に困っているのかへ戻る。'}
@@ -3865,7 +3947,7 @@ function m0PrintSheet(){
 /* =========================================================
    ⓪の4つめの入口：ジーニーに当ててもらう（アキネーター風）
    「なんにも思いつかない」生徒でも、聞かれたことに答えるだけなら できる。
-   ★AIではない。★ 77枚の困りごとカード（var TANE）を、
+   ★AIではない。★ 困りごとカード（var TANE）を、
    質問への答えで しぼりこんでいくだけ。通信もしない。
    ★当てたあとは、カードの文を下の欄にうつすだけ（「これにする」と同じ）。★
    hint（何が分かれば）はここでも出さない。課題の設定を肩代わりしないため。
@@ -3895,8 +3977,41 @@ var GN_TAG = {
  h07:'',     h08:'S',   h09:'',    h10:'',    h11:'DS',  h12:'D',
  h13:'DP',   h14:'D',   h15:'DR',  h16:'D',   h17:'DNY'
 };
+TANE.forEach(function(t){ if(t.gn!==undefined) GN_TAG[t.id]=t.gn; });
 function gnTag(t,c){ return String(GN_TAG[t.id]||'').indexOf(c)>=0; }
 function gnBa(t,list){ return t.ba.some(function(b){ return list.indexOf(b)>=0; }); }
+
+var GN_TOPICS = [
+{k:"light",nm:"明るさ・見えにくさ",re:/電気|明る|暗|まぶし/},
+{k:"temperature",nm:"暑さ・寒さ",re:/暑|寒|温度|水温|熱|ストーブ|暖房|ヒーター|こお|結露/},
+{k:"water",nm:"水・雨・湿り気",re:/水|お湯|雨|ぬれ|しめ|洗たく|せんたく|結露/},
+{k:"air",nm:"空気・風・乾燥",re:/空気|まど|窓|カビ|むれ|風|乾燥/},
+{k:"sound",nm:"音・聞こえにくさ",re:/音|放送|聞こ|呼び出し/},
+{k:"belongings",nm:"持ち物・探し物",re:/持ち物|かばん|体操着|傘|置き場所|届いて|にもつ/},
+{k:"time",nm:"時間・生活リズム",re:/時間|時刻|朝|夜|何分|何秒|終わる/},
+{k:"supplies",nm:"残りの量・貸し借り",re:/無く|なくな|残|切れる|持ち物|道具|レジ/},
+{k:"safety",nm:"安全・危険",re:/あぶな|危な|ぶつか|けが|やけど|すべ|転び|クマ|つらら/},
+{k:"support",nm:"人の手助け",re:/祖父|祖母|車いす|小さい子|家の人|聞こえにく|松葉|助け/},
+{k:"living",nm:"植物・生き物",re:/植物|植木|花だん|水やり|畑|土|水そう|ペット|ねこ|犬|牛舎|えさ|シカ|カラス|電気さく|クマ/},
+{k:"food",nm:"料理・食べ物",re:/料理|なべ|パン|冷ぞう|冷蔵|食|弁当|米|飲み物/},
+{k:"cleaning",nm:"ごみ・掃除・片づけ",re:/ごみ|ゴミ|そうじ|掃除|片づ|くさ|カビ|にご/},
+{k:"sports",nm:"運動・スポーツ",re:/縄跳び|走る|試合|得点|ボール|体育館/},
+{k:"music",nm:"音楽・部活動",re:/楽器|合奏|演奏|音楽|部活|放送/},
+{k:"energy",nm:"むだ・省エネ",re:/っぱなし|消し忘|使いすぎ|暖房|ヒーター/},
+{k:"study",nm:"勉強・授業・実験",re:/勉強|実験|ノート|黒板|発表|授業/},
+{k:"records",nm:"数・記録・混雑",re:/数え|記録|書き|何人|ならん|席|得点|チェック/}
+];
+function gnTopic(k){ return GN_TOPICS.filter(function(x){return x.k===k;})[0]||null; }
+function gnInTopic(t,k){
+  var x=gnTopic(k);
+  return !x || (t.topics||[]).indexOf(k)>=0 || x.re.test(t.t);
+}
+function gnScope(k){ return TANE.filter(function(t){return gnInTopic(t,k);}); }
+function gnDomain(t){
+  if(t.topics && t.topics.length) return t.topics[0];
+  var x=GN_TOPICS.filter(function(x){return x.re.test(t.t);})[0];
+  return x?x.k:t.ba[0];
+}
 
 /* 質問。f(カード) が true のカードは「はい」の側。 */
 var GN_Q = [
@@ -3941,31 +4056,74 @@ var GN_Q = [
  {k:'k-kazoe',   q:'手で数えたり、書きうつしたりするのが めんどうなこと？',          f:function(t){ return t.kt==='kazoe'; }},
  {k:'k-tooku',   q:'はなれた場所のようすが分からなくて こまること？',                f:function(t){ return t.kt==='tooku'; }}
 ];
+
+/* 同じ場所・型でも、具体的な場面で区別する質問 */
+var GN_DETAIL = [
+{k:"d-clothes",q:"服・洗たく物・布団に関係する話？",re:/服|体操着|洗たく|せんたく|布団/},
+{k:"d-door",q:"扉・窓・かぎの開け閉めに関係する話？",re:/扉|とびら|ドア|まど|窓|かぎ|もん|さく/},
+{k:"d-bag",q:"かばん・持ち物・忘れ物に関係する話？",re:/かばん|持ち物|体操着|弁当|傘|袋/},
+{k:"d-trash",q:"ごみや、ごみ箱・ごみ袋に関係する話？",re:/ごみ|ゴミ/},
+{k:"d-noise",q:"音が大きい・小さい・聞こえない、という話？",re:/音|放送|聞こ|呼び出し/},
+{k:"d-air",q:"空気・風・換気に関係する話？",re:/空気|風|入れ替え|まどを開|窓を開/},
+{k:"d-stock",q:"なくなる・足りなくなる前に気づきたい話？",re:/無く|なくな|切れる|残り|足りな|予備/},
+{k:"d-clock",q:"時刻や、何分たったかに関係する話？",re:/時間|時刻|何分|遅れる|出発|交代|二度寝|テンポ|休憩/},
+{k:"d-sport",q:"運動や、スポーツの練習・試合の話？",re:/縄跳び|走る|試合|得点|練習中の自分|運動/},
+{k:"d-music",q:"楽器や、合奏・演奏の話？",re:/楽器|合奏|演奏|テンポ/},
+{k:"d-study",q:"勉強や、授業・実験・発表の話？",re:/勉強|実験|授業|発表|黒板|ノート/},
+{k:"d-floor",q:"床や道、歩く場所で起きる話？",re:/床|道が|階段|通り道|足を|曲がり角|通学路|駐車場/},
+{k:"d-search",q:"物が見つからず、探し回ること？",re:/探|見つけ/},
+{k:"d-left",q:"物や道具を、そのまま置いたり動かしたりしてしまう話？",re:/っぱなし|まま|閉め忘|消し忘|返す|残って/},
+{k:"d-spill",q:"水や物が、あふれる・こぼれる・落ちる話？",re:/あふ|こぼ|落ち|飛ん/},
+{k:"d-wet",q:"ぬれる・乾く・カビ・むれることに関係する話？",re:/ぬれ|かわ|乾|湿|しめ|カビ|結露|むれ/},
+{k:"d-rain",q:"雨や、雨の日に関係する話？",re:/雨|傘/},
+{k:"d-morning",q:"朝、起きてから出かけるまでの話？",re:/朝|二度寝|出発/},
+{k:"d-night",q:"夜や、寝るときの話？",re:/夜|ねて|寝/},
+{k:"d-measure",q:"数・量・時間・動きの記録や比較をしたい話？",re:/数え|記録|メモ|タイム|何回|回跳|得点|比べ|違う|分ける|取り分け/},
+{k:"d-ask",q:"人に知らせる・連絡する・助けを呼ぶことに関係する話？",re:/連絡|知らせ|呼び出し|助け|声が/},
+{k:"d-waiting",q:"見に行く・確かめるのを、何度もくり返す話？",re:/何度|毎回|見に行|確かめ|見ないと|行かないと/},
+{k:"d-body",q:"体の動きや、動かしにくさに関係する話？",re:/体の|手を動か|松葉|車いす|跳|走る/},
+{k:"d-pet",q:"家で飼っている生き物の話？",re:/ペット|ねこ|犬|ハムスター/},
+{k:"d-wild",q:"野生の動物や鳥の話？",re:/クマ|シカ|キツネ|カラス/},
+{k:"d-bath",q:"水をためる・お湯を使うことに関係する話？",re:/おふろ|お湯|水そう|容器|なべ/},
+{k:"d-clean",q:"掃除や、道具の片づけに関係する話？",re:/掃除|そうじ|片づ|棚に返|しまう|棚の商品/},
+{k:"d-heat",q:"暖房や、暖める・冷やすことに関係する話？",re:/暖房|ヒーター|ストーブ|エアコン|熱|冷え|冷ぞう|冷蔵|なべ|焼/},
+{k:"d-people",q:"何人いるか、混雑や席の空きに関係する話？",re:/何人|人数|席|ならん/},
+{k:"d-homework",q:"家で自分がしている作業や遊びの話？",re:/勉強|ゲーム|パソコン|ノート|机に日/}
+];
+GN_DETAIL.forEach(function(x){ GN_Q.push({k:x.k,q:x.q,f:function(t){return x.re.test(t.t);}}); });
+/* 表現は日常の分野名。該当する候補が残っているときだけ質問される。 */
+GN_TOPICS.forEach(function(x){ GN_Q.push({k:'topic-'+x.k,q:'「'+x.nm+'」に関係する困りごと？',f:function(t){return gnInTopic(t,x.k);}}); });
+var GN_PROFILE = {};
+TANE.forEach(function(t){
+  var a={}; GN_Q.forEach(function(q){a[q.k]=!!q.f(t);}); GN_PROFILE[t.id]=a;
+});
+
 var GN_ANS = [['yes','はい'],['prob','たぶん そう'],['dk','わからない'],['pnot','たぶん ちがう'],['no','いいえ']];
 /* [はいの側のカードに掛ける, いいえの側のカードに掛ける]。
    0 にしないのは、生徒の答えまちがい・札の付けかたのずれを1回で致命傷にしないため */
 var GN_F = {yes:[1,.1], prob:[1,.4], dk:[1,1], pnot:[.4,1], no:[.1,1]};
-var GN_MAXQ = 20;   /* これだけ聞いたら、当てにいく */
+var GN_MAXQ = 20;   /* 上限では近い候補を並べる */
 var GN_MAXG = 3;    /* 外していいのは3回まで */
-var GN_SURE = .5;   /* 1位がこれだけの重みを持ったら当てにいく */
+var GN_SURE = .65;   /* 1位がこれだけの重みを持ったら当てにいく */
 var GN_MINQ = 4;
 
 function gnQ(k){ return GN_Q.filter(function(x){ return x.k===k; })[0] || null; }
-function gnNew(){ return {h:[], cur:null}; }
+function gnNew(topic){ return {h:[], cur:null, topic:topic||''}; }
 function gnCount(h){
   var n={q:0,g:0};
   h.forEach(function(x){ if(x.q) n.q++; else if(x.g) n.g++; });
   return n;
 }
 /* 答えの履歴から、カードごとの重みを毎回はじめから計算しなおす（「ひとつもどる」を簡単にするため） */
-function gnWeights(h){
+function gnWeights(h,topic){
+  if(topic===undefined) topic=(m0.gn&&m0.gn.topic)||'';
   var w={};
-  TANE.forEach(function(t){ w[t.id]=1; });
+  TANE.forEach(function(t){ w[t.id]=gnInTopic(t,topic)?1:0; });
   h.forEach(function(x){
     if(x.g){ w[x.g]=0; return; }
     var Q=gnQ(x.q), f=GN_F[x.a];
     if(!Q || !f) return;
-    TANE.forEach(function(t){ w[t.id] *= Q.f(t) ? f[0] : f[1]; });
+    TANE.forEach(function(t){ w[t.id] *= GN_PROFILE[t.id][Q.k] ? f[0] : f[1]; });
   });
   return w;
 }
@@ -3975,33 +4133,55 @@ function gnRank(w){
     .sort(function(a,b){ return w[b]-w[a]; });
 }
 /* 次の一手。rnd は検査で決まった並びにするために差しかえられるようにしてある */
-function gnNext(h, rnd){
+function gnNext(h, rnd, topic){
   rnd = rnd || Math.random;
-  var w=gnWeights(h), rank=gnRank(w), n=gnCount(h);
+  var w=gnWeights(h,topic), rank=gnRank(w), n=gnCount(h);
   if(!rank.length || n.g>=GN_MAXG) return {lose:1};
-  var tot=rank.reduce(function(s,id){ return s+w[id]; },0);
-  var share=w[rank[0]]/tot;
-  if(n.q>=GN_MAXQ) return {g:rank[0]};
-  if(n.q>=GN_MINQ && share>=GN_SURE) return {g:rank[0]};
-  /* まだ聞いていない質問のうち、のこりのカードをいちばん半分に近く分けるもの */
-  var asked={}; h.forEach(function(x){ if(x.q) asked[x.q]=1; });
+  var info=h.filter(function(x){return x.q && x.a!=='dk';}).length;
+  var tail=h.slice(-3);
+  /* 答えが分からないまま続けても絞れない。無理に当てず、場面を見て選ぶ。 */
+  if(n.q>=GN_MAXQ || (tail.length===3 && tail.every(function(x){return x.a==='dk';}))) return {list:1};
+  var tot=rank.reduce(function(s,id){return s+w[id];},0), share=w[rank[0]]/tot;
+  if(info>=GN_MINQ && share>=GN_SURE && (!rank[1] || w[rank[0]]>=w[rank[1]]*3)) return {g:rank[0]};
+  var asked={}; h.forEach(function(x){if(x.q) asked[x.q]=1;});
   var sc=[];
   GN_Q.forEach(function(Q){
     if(asked[Q.k]) return;
-    var y=0;
-    rank.forEach(function(id){ if(Q.f(taneOf(id))) y+=w[id]; });
+    var y=0; rank.forEach(function(id){if(GN_PROFILE[id][Q.k]) y+=w[id];});
     var p=y/tot;
     if(p<.03 || p>.97) return;
-    sc.push({k:Q.k, s:Math.min(p,1-p)});
+    sc.push({k:Q.k,s:Math.min(p,1-p)});
   });
-  if(!sc.length) return {g:rank[0]};
-  sc.sort(function(a,b){ return b.s-a.s; });
-  /* いちばん良いものだけだと毎回同じ順で聞くので、ほぼ同じくらい良いものから選ぶ */
-  var top=sc.filter(function(x){ return x.s>=sc[0].s*.85; });
-  return {q:top[Math.floor(rnd()*top.length)].k};
+  if(!sc.length) return info>=GN_MINQ && share>=GN_SURE ? {g:rank[0]} : {list:1};
+  sc.sort(function(a,b){return b.s-a.s;});
+  var top=sc.filter(function(x){return x.s>=sc[0].s*.95;});
+  return {q:top[Math.min(top.length-1,Math.floor(rnd()*top.length))].k};
+}
+/* 表示用候補。同点なら分野と型を散らし、未知の問題でも着想を得やすくする。 */
+function gnNear(h,limit,offset){
+  var w=gnWeights(h), rank=gnRank(w), ordered=[], used={};
+  while(rank.length){
+    var best=w[rank[0]], tie=rank.filter(function(id){return w[id]>=best*.999;});
+    tie.sort(function(a,b){
+      var ta=taneOf(a),tb=taneOf(b);
+      var ka=gnDomain(ta), kb=gnDomain(tb);
+      var diff=((used[ka]||0)+2*(used['k-'+ta.kt]||0))-((used[kb]||0)+2*(used['k-'+tb.kt]||0));
+      return diff || (ta.topics?0:1)-(tb.topics?0:1);
+    });
+    var id=tie[0],t=taneOf(id),k=gnDomain(t);
+    used[k]=(used[k]||0)+1; used['k-'+t.kt]=(used['k-'+t.kt]||0)+1;
+    ordered.push(id); rank.splice(rank.indexOf(id),1);
+  }
+  return ordered.slice(offset||0,(offset||0)+limit);
+}
+function gnEvidence(h,id){
+  return h.filter(function(x){
+    var q=gnQ(x.q); return q && x.a!=='dk' && ((x.a==='yes'||x.a==='prob')===GN_PROFILE[id][q.k]);
+  }).slice(-3).map(function(x){return gnQ(x.q).q.replace(/？$/,'')+' → '+(GN_ANS.filter(function(a){return a[0]===x.a;})[0]||[])[1];});
 }
 /* 外れたときに「型だけ」渡す。答えから、いちばん重みの集まった型 */
 function gnKata(h){
+  if(!h.some(function(x){return x.q && x.a && x.a!=='dk';})) return null;
   var w=gnWeights(h), c={};
   TANE.forEach(function(t){ c[t.kt]=(c[t.kt]||0)+w[t.id]; });
   h.forEach(function(x){
@@ -4012,8 +4192,8 @@ function gnKata(h){
 }
 
 function gnHtml(){
-  var g=m0.gn, c=g.cur, n=gnCount(g.h);
-  var h='<div class="gn-stage">'
+  var g=m0.gn, c=g.cur, n=gnCount(g.h), topic=gnTopic(g.topic);
+  var h='<div class="gn-stage'+(c?' gn-active':'')+'">'
     + '<div class="gn-fig"><img src="'+GENIE_IMG+'" alt="マイクロビットを持った発明ジーニー"></div>'
     + '<div class="gn-talk"><div class="gn-bubble" aria-live="polite">';
   var foot=true;
@@ -4021,25 +4201,32 @@ function gnHtml(){
     h+='<p class="gn-k">マイクロビットの発明ジーニー</p>'
      + '<p class="gn-say">わしは、こまりごとを当てるジーニーじゃ。</p>'
      + '<p class="gn-p">家や学校で「ちょっといやだな」「めんどうだな」と思うことを、<b>1つ 頭に思いうかべる</b>のじゃ。'
-     + 'はっきり決まっていなくてもよい。答えているうちに、近いものが見えてくる。</p></div>'
-     + '<div class="gn-ans"><button type="button" class="gn-a gn-go" id="gn-start">思いうかべた！ はじめる</button></div>';
+     + '決まっていなければ、気になる分野だけ選んでもよい。質問や候補を見ながら、身近な場面を思い出すのじゃ。</p>'
+     + '<p class="gn-p">'+TANE.length+'の困りごと・'+GN_TOPICS.length+'分野から探せます。</p></div>'
+     + '<div class="gn-topics" role="group" aria-label="気になる分野">'
+     + [{k:'',nm:'全部から探す'}].concat(GN_TOPICS).map(function(x){return '<button type="button" class="gn-topic'+(g.topic===x.k?' on':'')+'" data-topic="'+x.k+'" aria-pressed="'+(g.topic===x.k)+'">'+esc(x.nm)+'</button>';}).join('')+'</div>'
+     + '<p class="gn-status">'+esc(topic?topic.nm:'全部の分野')+'・'+gnScope(g.topic).length+'件からスタート</p>'
+     + '<div class="gn-ans"><button type="button" class="gn-a gn-go" id="gn-start">思いうかべた！ はじめる</button><button type="button" class="gn-a" id="gn-browse">まだ思いつかないので、候補を見てみる</button></div>';
     foot=false;
   }else if(c.q){
     var Q=gnQ(c.q);
     var w=gnWeights(g.h), rank=gnRank(w), tot=rank.reduce(function(s,id){ return s+w[id]; },0);
     var hira=rank.length ? Math.round(100*Math.min(1,(w[rank[0]]/tot)/GN_SURE)) : 0;
     h+='<p class="gn-k">しつもん '+(n.q+1)+'</p>'
-     + '<p class="gn-say">'+esc(Q?Q.q:'')+'</p></div>'
+     + '<p class="gn-say">'+esc(Q?Q.q:'')+'</p>'
+     + '<p class="gn-p">自分の場面に合うか答えよう。迷ったら「わからない」で大丈夫。</p></div>'
      + '<div class="gn-ans" role="group" aria-label="答え">'
      + GN_ANS.map(function(a){ return '<button type="button" class="gn-a gn-'+a[0]+'" data-a="'+a[0]+'">'+esc(a[1])+'</button>'; }).join('')
      + '</div>'
-     + '<div class="gn-meter" aria-hidden="true"><span>ひらめき</span><i><b style="width:'+hira+'%"></b></i></div>';
+     + '<div class="gn-meter" aria-hidden="true"><span>ひらめき</span><i><b style="width:'+hira+'%"></b></i></div>'
+     + '<p class="gn-status">'+esc(topic?topic.nm:'全部の分野')+'・有力な候補 '+rank.filter(function(id){return w[id]>=w[rank[0]]*.2;}).length+'件</p>';
   }else if(c.g){
     var t=taneOf(c.g);
     h+='<p class="gn-k">ひらめいたぞ！'+(n.g?'（'+(n.g+1)+'回め）':'')+'</p>'
      + '<p class="gn-p">おぬしが こまっているのは……</p>'
      + '<p class="gn-card">'+esc(t?t.t:'')+'</p>'
-     + '<p class="gn-p">……では ないかな？</p></div>'
+     + '<p class="gn-p">……では ないかな？ 近いところから、自分の場面に書きかえてよいぞ。</p>'
+     + '<ul class="gn-evidence">'+gnEvidence(g.h,c.g).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
      + '<div class="gn-ans gn-ans2"><button type="button" class="gn-a gn-go" id="gn-hit">そう、それ！（近い！）</button>'
      + '<button type="button" class="gn-a" id="gn-miss">ちがう</button></div>';
   }else if(c.hit){
@@ -4049,11 +4236,22 @@ function gnHtml(){
      + '<p class="gn-p">ただし、これは<b>よくある困りごとの形</b>じゃ。ここからは おぬしの言葉で、'
      + '<b>だれが・いつ・どこで</b> こまっているのかを書きかえるのじゃ。</p></div>'
      + '<div class="gn-ans"><button type="button" class="gn-a gn-go m-take" data-take="'+esc(c.hit)+'">この困りごとで、もんだいの文をつくる</button></div>';
+  }else if(c.list){
+    var offset=g.offset||0, ids=gnNear(g.h,6,offset);
+    h+='<p class="gn-k">近い困りごとを見てみよう</p>'
+     + '<p class="gn-say">この中に、思い当たる場面はあるかな？</p>'
+     + '<p class="gn-p">'+(n.q?'答えに近い順に並べたぞ。':'いろいろな場面を並べたぞ。')+'ぴったり同じでなくても、近いものから考えてよい。</p></div>'
+     + '<div class="gn-near">'+ids.map(function(id){var t=taneOf(id);return '<div class="gn-nc"><span>'+esc(t.t)+'</span><button type="button" class="m-take" data-take="'+id+'">これにする</button></div>';}).join('')+'</div>'
+     + '<div class="gn-ans gn-ans2">'
+     + (offset+ids.length<gnRank(gnWeights(g.h)).length?'<button type="button" class="gn-a" id="gn-more">ほかの候補を見る</button>':'')
+     + (offset?'<button type="button" class="gn-a" id="gn-first">最初の候補に戻る</button>':'')
+     + '<button type="button" class="gn-a" id="gn-own">近いものがないので、自分で書く</button></div>';
   }else{
-    var K=gnKata(g.h), wl=gnWeights(g.h), near=gnRank(wl).slice(0,3);
+    var K=gnKata(g.h), near=gnNear(g.h,3);
+
     h+='<p class="gn-k">まいった！</p>'
-     + '<p class="gn-say">わしの知らない困りごとじゃな。</p>'
-     + '<p class="gn-p">それこそ、<b>おぬしだけの課題</b>じゃ。下の欄に、自分の言葉で書いてみよ。</p>'
+     + '<p class="gn-say">今の答えでは、まだ見分けきれなかったぞ。</p>'
+     + '<p class="gn-p">質問の言い方が、おぬしの場面に合わなかったかもしれん。近い候補を選ぶか、下の欄に自分の言葉で書いてみよ。</p>'
      + (K ? '<p class="gn-p">わしの見立てでは<b>「'+esc(K.nm)+'」</b>の型じゃな。'+esc(K.q)+'。</p>' : '')
      + '</div><div class="gn-ans">'
      + (K ? '<button type="button" class="gn-a gn-go" id="gn-kt" data-k="'+K.k+'">型だけもらって、自分で書く</button>' : '')
@@ -4067,8 +4265,9 @@ function gnHtml(){
   }
   if(foot){
     h+='<div class="gn-foot">'
-     + '<button type="button" class="gn-link" id="gn-back"'+(g.h.length?'':' disabled')+'>ひとつもどる</button>'
-     + '<button type="button" class="gn-link" id="gn-reset">はじめから</button></div>';
+     + '<button type="button" class="gn-link" id="gn-back"'+(g.h.length||g.returnCur?'':' disabled')+'>ひとつもどる</button>'
+     + (c.q||c.g?'<button type="button" class="gn-link" id="gn-browse">今の候補を見る</button>':'')
+     + '<button type="button" class="gn-link" id="gn-reset">分野を選びなおす</button></div>';
   }
   h+='</div></div>';
   return h;
@@ -4076,13 +4275,22 @@ function gnHtml(){
 function gnBind(w){
   var g=m0.gn;
   function step(){ g.cur=gnNext(g.h); m0Save(); m0RenderWork(); gnFocus(); }
-  if($('gn-start')) $('gn-start').onclick=function(){ m0.gn=g=gnNew(); step(); };
+  Array.prototype.forEach.call(w.querySelectorAll('.gn-topic'),function(b){
+    b.onclick=function(){ m0.gn=gnNew(b.dataset.topic); m0Save(); m0RenderWork(); var el=w.querySelector('[data-topic="'+b.dataset.topic+'"]'); if(el) el.focus(); };
+  });
+  if($('gn-start')) $('gn-start').onclick=function(){ m0.gn=g=gnNew(g.topic); step(); };
+  if($('gn-browse')) $('gn-browse').onclick=function(){ g.returnCur=g.cur; g.cur={list:1}; g.offset=0; m0Save(); m0RenderWork(); gnFocus(); };
+  if($('gn-more')) $('gn-more').onclick=function(){ g.offset=(g.offset||0)+6; m0Save(); m0RenderWork(); gnFocus(); };
+  if($('gn-first')) $('gn-first').onclick=function(){ g.offset=0; m0Save(); m0RenderWork(); gnFocus(); };
+  if($('gn-own')) $('gn-own').onclick=function(){ $('m-komari').focus(); $('m-build').scrollIntoView({behavior:'smooth',block:'start'}); };
   Array.prototype.forEach.call(w.querySelectorAll('.gn-a[data-a]'),function(b){
     b.onclick=function(){ if(!g.cur||!g.cur.q) return; g.h.push({q:g.cur.q, a:b.dataset.a}); step(); };
   });
   if($('gn-hit'))  $('gn-hit').onclick=function(){ g.cur={hit:g.cur.g}; m0Save(); m0RenderWork(); gnFocus(); };
   if($('gn-miss')) $('gn-miss').onclick=function(){ g.h.push({g:g.cur.g}); step(); };
   if($('gn-back')) $('gn-back').onclick=function(){
+    if(g.returnCur){g.cur=g.returnCur;g.returnCur=null;g.offset=0;m0Save();m0RenderWork();gnFocus();return;}
+    if(g.cur && g.cur.list){ g.offset=0; g.cur=gnNext(g.h); if(!g.cur.list){m0Save();m0RenderWork();gnFocus();return;} }
     var x=g.h.pop(); if(!x) return;
     g.cur = x.q ? {q:x.q} : {g:x.g};
     m0Save(); m0RenderWork(); gnFocus();
@@ -4097,7 +4305,7 @@ function gnBind(w){
 }
 /* 押すたびに描きなおすので、キーボードで答えている人のフォーカスを次の答えに戻す */
 function gnFocus(){
-  var b=document.querySelector('#m-work .gn-ans button');
+  var b=document.querySelector('#m-work .gn-near .m-take, #m-work .gn-ans button');
   if(b){ try{ b.focus({preventScroll:true}); }catch(e){ b.focus(); } }
 }
 
